@@ -60,6 +60,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "theme-color", content: "#0b0f1e" },
       { name: "application-name", content: "RadianForgeLabs" },
       { name: "msapplication-TileColor", content: "#0b0f1e" },
+      { name: "msapplication-TileImage", content: "/favicon.png" },
       { property: "og:title", content: "RFL Studios — Apps, Games, AI & Open Software" },
       { property: "og:description", content: "Creating games and apps." },
       { property: "og:type", content: "website" },
