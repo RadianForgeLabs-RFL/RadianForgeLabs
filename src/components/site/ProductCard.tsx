@@ -32,26 +32,27 @@ export function ProductCard({ p }: { p: Product }) {
     <Link
       to="/products/$slug"
       params={{ slug: p.slug }}
-      className="group block animate-fade-up"
+      className="group block"
     >
-      <Card className={`glass hover:shadow-glow overflow-hidden border-white/5 bg-transparent transition-all duration-300 hover:-translate-y-1 ${KIND_BORDER_COLOR[p.kind] ?? 'hover:border-primary/40'}`}>
+      <Card className={`glass overflow-hidden border-white/5 bg-transparent transition-all duration-300 hover:-translate-y-1 ${KIND_BORDER_COLOR[p.kind] ?? 'hover:border-primary/40'}`}>
         <div className={`relative h-32 overflow-hidden bg-gradient-to-br ${KIND_GRADIENT[p.kind]}`}>
           {p.banner_url && (
             <img
               src={p.banner_url}
               alt=""
-              className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              loading="lazy"
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 md:group-hover:scale-105"
               style={{ opacity: bannerOpacity }}
             />
           )}
           <div className="absolute inset-0 grid-bg opacity-30" />
           <div className="absolute inset-0 flex items-center justify-center">
             {p.icon_url ? (
-              <div className="h-16 w-16 overflow-hidden rounded-2xl border border-white/20 glass-strong shadow-glow">
-                <img src={p.icon_url} alt={p.name} className="h-full w-full object-cover" />
+              <div className="h-16 w-16 overflow-hidden rounded-2xl border border-white/20 glass-strong">
+                <img src={p.icon_url} alt={p.name} loading="lazy" className="h-full w-full object-cover" />
               </div>
             ) : (
-              <div className="grid h-16 w-16 place-items-center rounded-2xl glass-strong text-2xl font-bold text-foreground shadow-glow">
+              <div className="grid h-16 w-16 place-items-center rounded-2xl glass-strong text-2xl font-bold text-foreground">
                 {p.name.slice(0, 2).toUpperCase()}
               </div>
             )}

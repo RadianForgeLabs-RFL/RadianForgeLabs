@@ -36,7 +36,7 @@ function DivisionCard({
 }) {
   return (
     <Link to={to} className="group">
-      <Card className={`relative overflow-hidden border-white/10 bg-gradient-to-br from-white/5 to-transparent transition-all hover:border-${color}-500/40 hover:shadow-xl hover:shadow-${color}-500/20`}>
+      <Card className={`relative overflow-hidden border-white/10 bg-gradient-to-br from-white/5 to-transparent transition-all duration-300 hover:border-${color}-500/40 md:hover:shadow-xl md:hover:shadow-${color}-500/20`}>
         <div className={`absolute inset-0 bg-gradient-to-br from-${color}-500/10 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100`} />
         <div className="relative p-8 md:p-12">
           <div className={`mb-6 inline-flex rounded-2xl border border-${color}-500/30 bg-${color}-500/10 p-4`}>
@@ -54,7 +54,7 @@ function DivisionCard({
             ))}
           </div>
           
-          <Button className={`mt-8 bg-gradient-to-r from-${color}-500 to-${color}-400 text-white hover:opacity-90 transition-all hover:scale-105`}>
+          <Button className={`mt-8 bg-gradient-to-r from-${color}-500 to-${color}-400 text-white hover:opacity-90 transition-all md:hover:scale-105`}>
             Explore <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </div>
