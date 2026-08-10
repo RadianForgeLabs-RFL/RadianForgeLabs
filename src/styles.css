@@ -277,20 +277,132 @@ main {
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.15) !important;
 }
 
-/* Reduce image loading on mobile */
+/* Ultra-optimized mobile experience */
 @media (max-width: 768px) {
-  img {
-    content-visibility: auto;
-  }
-
-  .glass {
+  /* Disable expensive effects */
+  .glass,
+  .glass-strong {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
+    background: var(--card) !important;
   }
 
   .shadow-glow {
     box-shadow: none !important;
   }
+
+  /* Simplify gradients to solid colors */
+  .theme-home body {
+    background-image: none !important;
+    background-color: var(--background) !important;
+  }
+
+  .theme-studios body {
+    background-image: none !important;
+    background-color: var(--background) !important;
+  }
+
+  .theme-entertainment body {
+    background-image: none !important;
+    background-color: var(--background) !important;
+  }
+
+  .theme-common body {
+    background-image: none !important;
+    background-color: var(--background) !important;
+  }
+
+  /* Disable complex animations */
+  * {
+    animation-duration: 0.01s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.1s !important;
+  }
+
+  /* Optimize images */
+  img {
+    content-visibility: auto;
+    contain: layout style paint;
+  }
+
+  /* Simplify card borders */
+  .glass,
+  .glass-strong,
+  .card {
+    border: 1px solid var(--border) !important;
+    background: var(--card) !important;
+  }
+
+  /* Reduce shadow complexity */
+  * {
+    box-shadow: none !important;
+  }
+
+  /* Force GPU acceleration only when needed */
+  .hover\:scale-105:hover {
+    transform: none !important;
+  }
+
+  /* Disable hover effects on touch devices */
+  @media (hover: none) {
+    *:hover {
+      transform: none !important;
+      box-shadow: none !important;
+    }
+  }
+
+  /* Optimize text rendering */
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeSpeed;
+  }
+
+  /* Reduce gradient complexity */
+  .bg-gradient-brand,
+  .bg-gradient-to-r,
+  .bg-gradient-to-br,
+  .bg-gradient-to-b {
+    background: var(--brand) !important;
+  }
+
+  /* Simplify backdrop filters */
+  * {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+/* Performance reduction classes for low-end devices */
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.01s !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.1s !important;
+}
+
+.reduce-effects .glass,
+.reduce-effects .glass-strong {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: var(--card) !important;
+}
+
+.reduce-effects .shadow-glow {
+  box-shadow: none !important;
+}
+
+.reduce-effects .bg-gradient-brand,
+.reduce-effects .bg-gradient-to-r,
+.reduce-effects .bg-gradient-to-br,
+.reduce-effects .bg-gradient-to-b {
+  background: var(--brand) !important;
+}
+
+.reduce-effects body {
+  background-image: none !important;
+  background-color: var(--background) !important;
 }
 
 /* Dynamic page themes based on route */
