@@ -35,7 +35,7 @@ function AdminDashboard() {
   return (
     <div>
       <h1 className="text-3xl font-bold">Dashboard</h1>
-      <p className="text-muted-foreground">Overview of your RADIANFORGELABS portal.</p>
+      <p className="text-muted-foreground">Overview of your RadianForgeLabs portal.</p>
       <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map(([l, v]) => (
           <Card key={l as string} className="glass border-white/5 bg-transparent p-5">
