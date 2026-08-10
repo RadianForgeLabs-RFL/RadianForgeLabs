@@ -352,6 +352,17 @@ function ProductPage() {
 
             <div className="absolute inset-0 bg-gradient-to-t from-background/30 via-background/15 to-transparent" />
 
+            <div className="absolute bottom-4 left-4 right-4 md:bottom-8 md:left-8 md:right-8">
+              <div className="inline-flex items-center gap-2 rounded-lg bg-black/60 px-3 py-1.5 text-xs text-white/80 backdrop-blur-sm md:px-4 md:py-2 md:text-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5 md:h-4 md:w-4">
+                  <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+                  <path d="M12 9v4"/>
+                  <path d="M12 17h.01"/>
+                </svg>
+                <span>This image is for reference only and created by AI models. Real screenshots are shown below.</span>
+              </div>
+            </div>
+
           </div>
 
         ) : (
