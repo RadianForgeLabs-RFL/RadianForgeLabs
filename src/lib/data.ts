@@ -197,20 +197,26 @@ export const homeCountsQuery = () =>
       if (productsError) throw productsError;
       const rows = products ?? [];
       
-      // Get settings for custom counts
+      // Get settings for custom counts (key-value structure)
       const { data: settings, error: settingsError } = await supabase
         .from("settings")
-        .select("user_count, player_count, downloads_count, studios_icon, entertainment_icon")
-        .single();
+        .select("*");
+      if (settingsError) throw settingsError;
+      
+      const userCount = settings?.find((s: any) => s.key === "user_count")?.value ?? "10K+";
+      const playerCount = settings?.find((s: any) => s.key === "player_count")?.value ?? "10K+";
+      const downloadsCount = settings?.find((s: any) => s.key === "downloads_count")?.value ?? "50K+";
+      const studiosIcon = settings?.find((s: any) => s.key === "studios_icon")?.value ?? "Code";
+      const entertainmentIcon = settings?.find((s: any) => s.key === "entertainment_icon")?.value ?? "Gamepad2";
       
       return {
         apps: rows.filter((r: any) => r.kind === "app").length,
         games: rows.filter((r: any) => r.kind === "game").length,
-        userCount: settings?.user_count ?? "10K+",
-        playerCount: settings?.player_count ?? "10K+",
-        downloadsCount: settings?.downloads_count ?? "50K+",
-        studiosIcon: settings?.studios_icon ?? "Code",
-        entertainmentIcon: settings?.entertainment_icon ?? "Gamepad2",
+        userCount,
+        playerCount,
+        downloadsCount,
+        studiosIcon,
+        entertainmentIcon,
       };
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
