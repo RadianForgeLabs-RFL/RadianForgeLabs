@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MessageSquare, ExternalLink, Loader2, AlertCircle, Users, Clock, CheckCircle, X, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useGitHubAuth } from "@/lib/githubAuth";
 
 export const Route = createFileRoute("/community/")({
   head: () => ({
@@ -29,32 +30,23 @@ interface Discussion {
   isAnswered: boolean;
   upvoteCount: number;
   categoryName?: string;
+  categoryId?: string;
 }
 
 function CommunityPage() {
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
+  const [categories, setCategories] = useState<Array<{ id: string; name: string; emoji: string; description: string }>>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showNewDiscussion, setShowNewDiscussion] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newDiscussion, setNewDiscussion] = useState({ title: '', body: '', categoryId: '' });
-  const [user, setUser] = useState<{ login: string } | null>(null);
-
-  const categories = [
-    { id: "1", name: "Announcements", emoji: "📢", description: "Official announcements and updates" },
-    { id: "2", name: "General", emoji: "💬", description: "General discussions" },
-    { id: "3", name: "Games", emoji: "🎮", description: "Game discussions and feedback" },
-    { id: "4", name: "Apps", emoji: "📱", description: "App discussions and support" },
-    { id: "5", name: "Bugs", emoji: "🐛", description: "Bug reports and issues" },
-    { id: "6", name: "Ideas", emoji: "💡", description: "Feature requests and ideas" },
-    { id: "7", name: "Showcase", emoji: "🎨", description: "Share your projects and creations" },
-    { id: "8", name: "Help", emoji: "❓", description: "Get help from the community" },
-  ];
+  const { user: githubUser, login } = useGitHubAuth();
 
   useEffect(() => {
     async function fetchDiscussions() {
       try {
-        // Using GitHub GraphQL API to fetch organization discussions
+        // Using GitHub GraphQL API to fetch organization discussions and categories
         const query = `
           query {
             organization(login: "RadianForgeLabs") {
@@ -76,6 +68,7 @@ function CommunityPage() {
                       category {
                         name
                         id
+                        emoji
                       }
                     }
                   }
@@ -100,22 +93,37 @@ function CommunityPage() {
 
         const data = await response.json();
         
-        // Extract discussions from all repositories
+        // Extract discussions and categories from all repositories
         let allDiscussions: Discussion[] = [];
+        const categoryMap = new Map<string, { id: string; name: string; emoji: string; description: string }>();
+        
         if (data.data?.organization?.repositories?.nodes) {
           data.data.organization.repositories.nodes.forEach((repo: any) => {
             if (repo.discussions?.nodes) {
-              allDiscussions = [...allDiscussions, ...repo.discussions.nodes.map((d: any) => ({
-                id: d.id,
-                number: d.number,
-                title: d.title,
-                author: d.author?.login || 'Unknown',
-                createdAt: d.createdAt,
-                isAnswered: d.answerChosenAt !== null,
-                upvoteCount: d.reactions?.totalCount || 0,
-                categoryName: d.category?.name || 'General',
-                categoryId: d.category?.id || ''
-              }))];
+              repo.discussions.nodes.forEach((d: any) => {
+                // Add to discussions
+                allDiscussions.push({
+                  id: d.id,
+                  number: d.number,
+                  title: d.title,
+                  author: d.author?.login || 'Unknown',
+                  createdAt: d.createdAt,
+                  isAnswered: d.answerChosenAt !== null,
+                  upvoteCount: d.reactions?.totalCount || 0,
+                  categoryName: d.category?.name || 'General',
+                  categoryId: d.category?.id || ''
+                });
+                
+                // Add to categories if not exists
+                if (d.category && !categoryMap.has(d.category.id)) {
+                  categoryMap.set(d.category.id, {
+                    id: d.category.id,
+                    name: d.category.name,
+                    emoji: d.category.emoji || '💬',
+                    description: `${d.category.name} discussions`
+                  });
+                }
+              });
             }
           });
         }
@@ -123,9 +131,38 @@ function CommunityPage() {
         // Sort by date and take top 20
         allDiscussions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         setDiscussions(allDiscussions.slice(0, 20));
+        
+        // Set categories from GitHub
+        setCategories(Array.from(categoryMap.values()));
+        
+        // Fallback categories if none found
+        if (categoryMap.size === 0) {
+          setCategories([
+            { id: "1", name: "Announcements", emoji: "📢", description: "Official announcements and updates" },
+            { id: "2", name: "General", emoji: "💬", description: "General discussions" },
+            { id: "3", name: "Games", emoji: "🎮", description: "Game discussions and feedback" },
+            { id: "4", name: "Apps", emoji: "📱", description: "App discussions and support" },
+            { id: "5", name: "Bugs", emoji: "🐛", description: "Bug reports and issues" },
+            { id: "6", name: "Ideas", emoji: "💡", description: "Feature requests and ideas" },
+            { id: "7", name: "Showcase", emoji: "🎨", description: "Share your projects and creations" },
+            { id: "8", name: "Help", emoji: "❓", description: "Get help from the community" },
+          ]);
+        }
       } catch (err) {
         console.error('Error fetching discussions:', err);
         setError(err instanceof Error ? err.message : 'Failed to load discussions');
+        
+        // Set fallback categories on error
+        setCategories([
+          { id: "1", name: "Announcements", emoji: "📢", description: "Official announcements and updates" },
+          { id: "2", name: "General", emoji: "💬", description: "General discussions" },
+          { id: "3", name: "Games", emoji: "🎮", description: "Game discussions and feedback" },
+          { id: "4", name: "Apps", emoji: "📱", description: "App discussions and support" },
+          { id: "5", name: "Bugs", emoji: "🐛", description: "Bug reports and issues" },
+          { id: "6", name: "Ideas", emoji: "💡", description: "Feature requests and ideas" },
+          { id: "7", name: "Showcase", emoji: "🎨", description: "Share your projects and creations" },
+          { id: "8", name: "Help", emoji: "❓", description: "Get help from the community" },
+        ]);
       } finally {
         setIsLoading(false);
       }
@@ -133,13 +170,6 @@ function CommunityPage() {
 
     fetchDiscussions();
   }, []);
-
-  const handleLogin = () => {
-    // Redirect to GitHub OAuth
-    const clientId = import.meta.env.VITE_GITHUB_CLIENT_ID || 'your-client-id';
-    const redirectUri = window.location.origin;
-    window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=repo`;
-  };
 
   const handleCreateDiscussion = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -230,13 +260,13 @@ function CommunityPage() {
         <div>
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-xl font-semibold">Recent Discussions</h2>
-            {user ? (
+            {githubUser ? (
               <Button size="sm" onClick={() => setShowNewDiscussion(true)}>
                 <Plus className="mr-2 h-4 w-4" />
                 New Discussion
               </Button>
             ) : (
-              <Button size="sm" onClick={handleLogin}>
+              <Button size="sm" onClick={login}>
                 <MessageSquare className="mr-2 h-4 w-4" />
                 Login with GitHub
               </Button>
