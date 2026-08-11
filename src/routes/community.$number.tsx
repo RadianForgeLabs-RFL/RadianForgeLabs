@@ -1,7 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useQuery } from "@tanstack/react-router";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, MessageSquare, CheckCircle, Clock, User } from "lucide-react";
+import { ArrowLeft, MessageSquare, CheckCircle, Clock, User, AlertCircle, Loader2 } from "lucide-react";
+import { communitySettingsQuery } from "@/lib/community";
+import { fetchDiscussion } from "@/lib/community.functions";
 
 export const Route = createFileRoute("/community/$number")({
   head: ({ params }) => ({
@@ -17,30 +19,59 @@ export const Route = createFileRoute("/community/$number")({
 
 function DiscussionPage() {
   const { number } = Route.useParams();
+  const settings = useQuery(communitySettingsQuery());
 
-  // Placeholder data - will be replaced with GitHub API data
-  const discussion = {
-    number: parseInt(number),
-    title: "Welcome to the community!",
-    author: "admin",
-    createdAt: "2024-01-01T10:00:00Z",
-    isAnswered: true,
-    body: "Welcome to the Radian Forge Labs community! This is a place to discuss our projects, share ideas, and get help from other community members.",
-    comments: [
-      {
-        id: "1",
-        author: "user1",
-        createdAt: "2024-01-01T11:00:00Z",
-        body: "Thanks for the welcome! Excited to be here.",
-      },
-      {
-        id: "2",
-        author: "user2",
-        createdAt: "2024-01-01T12:00:00Z",
-        body: "Looking forward to the discussions!",
-      },
-    ],
-  };
+  const discussion = useQuery({
+    queryKey: ["discussion", settings.data?.repo_owner, settings.data?.repo_name, number],
+    queryFn: () => fetchDiscussion({ data: { owner: settings.data?.repo_owner || "", name: settings.data?.repo_name || "", number: parseInt(number) } }),
+    enabled: !!settings.data?.repo_owner && !!settings.data?.repo_name,
+  });
+
+  if (discussion.isLoading) {
+    return (
+      <div className="mx-auto max-w-4xl px-4 py-8">
+        <div className="mb-6">
+          <Link to="/community">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to community
+            </Button>
+          </Link>
+        </div>
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </div>
+    );
+  }
+
+  if (discussion.data?.error || !discussion.data?.discussion) {
+    return (
+      <div className="mx-auto max-w-4xl px-4 py-8">
+        <div className="mb-6">
+          <Link to="/community">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to community
+            </Button>
+          </Link>
+        </div>
+        <Card className="border border-yellow-500/20 bg-yellow-500/5 p-6">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-yellow-500 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-yellow-500">Discussion Not Found</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                {discussion.data?.error || "This discussion could not be loaded. It may have been deleted or you may not have access to it."}
+              </p>
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  const disc = discussion.data.discussion;
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
@@ -60,61 +91,41 @@ function DiscussionPage() {
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
-              <h1 className="text-2xl font-bold">{discussion.title}</h1>
-              {discussion.isAnswered && <CheckCircle className="h-5 w-5 text-green-500" />}
+              <h1 className="text-2xl font-bold">{disc.title}</h1>
+              {disc.isAnswered && <CheckCircle className="h-5 w-5 text-green-500" />}
             </div>
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <span className="flex items-center gap-1">
                 <User className="h-4 w-4" />
-                {discussion.author}
+                {disc.author}
               </span>
               <span className="flex items-center gap-1">
                 <Clock className="h-4 w-4" />
-                {new Date(discussion.createdAt).toLocaleDateString()}
+                {new Date(disc.createdAt).toLocaleDateString()}
               </span>
               <span className="flex items-center gap-1">
                 <MessageSquare className="h-4 w-4" />
-                {discussion.comments.length} comments
+                {disc.upvoteCount} upvotes
               </span>
             </div>
           </div>
         </div>
 
         <div className="prose prose-invert max-w-none mb-6">
-          <p>{discussion.body}</p>
+          <p>{disc.bodyText}</p>
         </div>
 
         <div className="border-t border-white/10 pt-4">
           <p className="text-sm text-muted-foreground mb-4">
             Sign in with GitHub to reply to this discussion.
           </p>
-          <Button variant="outline">
-            Sign in with GitHub
+          <Button variant="outline" asChild>
+            <a href={`https://github.com/${settings.data?.repo_owner}/${settings.data?.repo_name}/discussions/${disc.number}`} target="_blank" rel="noopener noreferrer">
+              View on GitHub
+            </a>
           </Button>
         </div>
       </Card>
-
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Comments</h2>
-        {discussion.comments.map((comment) => (
-          <Card key={comment.id} className="border border-white/5 bg-white/5 p-4">
-            <div className="flex items-start gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500/20 text-blue-500">
-                <User className="h-4 w-4" />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="font-medium">{comment.author}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {new Date(comment.createdAt).toLocaleString()}
-                  </span>
-                </div>
-                <p className="text-sm">{comment.body}</p>
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
 
       {/* Placeholder for Giscus widget */}
       <Card className="border border-white/5 bg-white/5 p-6 mt-6">
