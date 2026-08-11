@@ -71,6 +71,99 @@ export type Database = {
         }
         Relationships: []
       }
+      community_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          emoji: string | null
+          github_category_id: string
+          id: string
+          name: string
+          section: string
+          slug: string
+          sort_order: number
+          visible: boolean
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          emoji?: string | null
+          github_category_id: string
+          id?: string
+          name: string
+          section?: string
+          slug: string
+          sort_order?: number
+          visible?: boolean
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          emoji?: string | null
+          github_category_id?: string
+          id?: string
+          name?: string
+          section?: string
+          slug?: string
+          sort_order?: number
+          visible?: boolean
+        }
+        Relationships: []
+      }
+      community_settings: {
+        Row: {
+          allow_new_discussions: boolean
+          comments_enabled: boolean
+          enabled: boolean
+          id: string
+          input_position: string
+          lazy_load: boolean
+          mapping: string
+          reactions_enabled: boolean
+          repo_id: string | null
+          repo_name: string
+          repo_owner: string
+          show_github_links: boolean
+          theme: string
+          theme_follows_site: boolean
+          updated_at: string
+        }
+        Insert: {
+          allow_new_discussions?: boolean
+          comments_enabled?: boolean
+          enabled?: boolean
+          id?: string
+          input_position?: string
+          lazy_load?: boolean
+          mapping?: string
+          reactions_enabled?: boolean
+          repo_id?: string | null
+          repo_name?: string
+          repo_owner?: string
+          show_github_links?: boolean
+          theme?: string
+          theme_follows_site?: boolean
+          updated_at?: string
+        }
+        Update: {
+          allow_new_discussions?: boolean
+          comments_enabled?: boolean
+          enabled?: boolean
+          id?: string
+          input_position?: string
+          lazy_load?: boolean
+          mapping?: string
+          reactions_enabled?: boolean
+          repo_id?: string | null
+          repo_name?: string
+          repo_owner?: string
+          show_github_links?: boolean
+          theme?: string
+          theme_follows_site?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       developers: {
         Row: {
           bio: string | null
