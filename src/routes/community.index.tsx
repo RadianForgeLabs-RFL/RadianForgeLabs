@@ -1,7 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, ExternalLink, Loader2, AlertCircle, Users, Clock, CheckCircle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { MessageSquare, ExternalLink, Loader2, AlertCircle, Users, Clock, CheckCircle, X, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/community/")({
@@ -31,6 +35,10 @@ function CommunityPage() {
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showNewDiscussion, setShowNewDiscussion] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [newDiscussion, setNewDiscussion] = useState({ title: '', body: '', categoryId: '' });
+  const [user, setUser] = useState<{ login: string } | null>(null);
 
   const categories = [
     { id: "1", name: "Announcements", emoji: "📢", description: "Official announcements and updates" },
@@ -67,6 +75,7 @@ function CommunityPage() {
                       }
                       category {
                         name
+                        id
                       }
                     }
                   }
@@ -104,7 +113,8 @@ function CommunityPage() {
                 createdAt: d.createdAt,
                 isAnswered: d.answerChosenAt !== null,
                 upvoteCount: d.reactions?.totalCount || 0,
-                categoryName: d.category?.name || 'General'
+                categoryName: d.category?.name || 'General',
+                categoryId: d.category?.id || ''
               }))];
             }
           });
@@ -123,6 +133,71 @@ function CommunityPage() {
 
     fetchDiscussions();
   }, []);
+
+  const handleLogin = () => {
+    // Redirect to GitHub OAuth
+    const clientId = import.meta.env.VITE_GITHUB_CLIENT_ID || 'your-client-id';
+    const redirectUri = window.location.origin;
+    window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=repo`;
+  };
+
+  const handleCreateDiscussion = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      // Use GraphQL to create discussion
+      const query = `
+        mutation($repositoryId: ID!, $categoryId: ID!, $title: String!, $body: String!) {
+          createDiscussion(input: {repositoryId: $repositoryId, categoryId: $categoryId, title: $title, body: $body}) {
+            discussion {
+              id
+              number
+              title
+            }
+          }
+        }
+      `;
+
+      // Get the first repository ID from discussions
+      const repoId = discussions[0]?.id?.split('/')[0] || 'R_kgDOGxqJA'; // Default to RFL-Studios repo
+
+      const response = await fetch('https://api.github.com/graphql', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_GITHUB_TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query,
+          variables: {
+            repositoryId: repoId,
+            categoryId: newDiscussion.categoryId,
+            title: newDiscussion.title,
+            body: newDiscussion.body,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create discussion');
+      }
+
+      const data = await response.json();
+      
+      // Refresh discussions
+      setShowNewDiscussion(false);
+      setNewDiscussion({ title: '', body: '', categoryId: '' });
+      
+      // Reload the page to show new discussion
+      window.location.reload();
+    } catch (err) {
+      console.error('Error creating discussion:', err);
+      alert('Failed to create discussion. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
@@ -155,13 +230,77 @@ function CommunityPage() {
         <div>
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-xl font-semibold">Recent Discussions</h2>
-            <Button variant="outline" size="sm" asChild>
-              <a href="https://github.com/orgs/RadianForgeLabs/discussions/new" target="_blank" rel="noopener noreferrer">
-                <MessageSquare className="mr-2 h-4 w-4" />
+            {user ? (
+              <Button size="sm" onClick={() => setShowNewDiscussion(true)}>
+                <Plus className="mr-2 h-4 w-4" />
                 New Discussion
-              </a>
-            </Button>
+              </Button>
+            ) : (
+              <Button size="sm" onClick={handleLogin}>
+                <MessageSquare className="mr-2 h-4 w-4" />
+                Login with GitHub
+              </Button>
+            )}
           </div>
+
+          {showNewDiscussion && (
+            <Card className="border border-white/5 bg-white/5 p-6 mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">Create New Discussion</h3>
+                <Button variant="ghost" size="sm" onClick={() => setShowNewDiscussion(false)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <form onSubmit={handleCreateDiscussion}>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="title">Title</Label>
+                    <Input
+                      id="title"
+                      value={newDiscussion.title}
+                      onChange={(e) => setNewDiscussion({ ...newDiscussion, title: e.target.value })}
+                      placeholder="What's on your mind?"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="category">Category</Label>
+                    <Select value={newDiscussion.categoryId} onValueChange={(value) => setNewDiscussion({ ...newDiscussion, categoryId: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((cat) => (
+                          <SelectItem key={cat.id} value={cat.id}>
+                            {cat.emoji} {cat.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="body">Content</Label>
+                    <Textarea
+                      id="body"
+                      value={newDiscussion.body}
+                      onChange={(e) => setNewDiscussion({ ...newDiscussion, body: e.target.value })}
+                      placeholder="Describe your discussion in detail..."
+                      rows={6}
+                      required
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button type="button" variant="outline" onClick={() => setShowNewDiscussion(false)}>
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={isSubmitting}>
+                      {isSubmitting ? 'Creating...' : 'Create Discussion'}
+                    </Button>
+                  </div>
+                </div>
+              </form>
+            </Card>
+          )}
 
           {error && (
             <Card className="mb-6 border border-yellow-500/20 bg-yellow-500/5 p-4">
