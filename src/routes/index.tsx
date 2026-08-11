@@ -77,8 +77,8 @@ function Home() {
 
   // Dynamic icon mapping
   const iconMap: Record<string, any> = { Code, Gamepad2, Building2, Users, Download, Zap, Github, Mail };
-  const StudiosIcon = iconMap[c.studiosIcon] || Code;
-  const EntertainmentIcon = iconMap[c.entertainmentIcon] || Gamepad2;
+  const StudiosIcon = iconMap[String(c.studiosIcon)] || Code;
+  const EntertainmentIcon = iconMap[String(c.entertainmentIcon)] || Gamepad2;
 
   return (
     <div>
@@ -118,7 +118,7 @@ function Home() {
             color="blue"
             stats={[
               { label: "Applications", value: c.apps },
-              { label: "Users", value: c.userCount },
+              { label: "Users", value: String(c.userCount) },
             ]}
           />
           <DivisionCard
@@ -130,7 +130,7 @@ function Home() {
             color="rose"
             stats={[
               { label: "Games", value: c.games },
-              { label: "Players", value: c.playerCount },
+              { label: "Players", value: String(c.playerCount) },
             ]}
           />
         </div>
@@ -141,17 +141,17 @@ function Home() {
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
           <Card className="border border-rose-500/20 bg-gradient-to-br from-rose-500/5 to-transparent p-6 text-center">
             <Users className="mx-auto h-8 w-8 text-rose-500" />
-            <div className="mt-4 text-3xl font-bold text-rose-500">{c.playerCount}</div>
+            <div className="mt-4 text-3xl font-bold text-rose-500">{String(c.playerCount)}</div>
             <div className="mt-2 text-sm text-muted-foreground">Players</div>
           </Card>
           <Card className="border border-purple-500/20 bg-gradient-to-br from-purple-500/5 to-transparent p-6 text-center">
             <Download className="mx-auto h-8 w-8 text-purple-500" />
-            <div className="mt-4 text-3xl font-bold text-purple-500">{c.downloadsCount}</div>
+            <div className="mt-4 text-3xl font-bold text-purple-500">{String(c.downloadsCount)}</div>
             <div className="mt-2 text-sm text-muted-foreground">Downloads</div>
           </Card>
           <Card className="border border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-transparent p-6 text-center">
             <Building2 className="mx-auto h-8 w-8 text-blue-500" />
-            <div className="mt-4 text-3xl font-bold text-blue-500">{c.userCount}</div>
+            <div className="mt-4 text-3xl font-bold text-blue-500">{String(c.userCount)}</div>
             <div className="mt-2 text-sm text-muted-foreground">Users</div>
           </Card>
         </div>
