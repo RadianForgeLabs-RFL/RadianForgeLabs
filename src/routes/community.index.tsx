@@ -47,8 +47,8 @@ function CommunityPage() {
   useEffect(() => {
     async function fetchDiscussions() {
       try {
-        // Using GitHub REST API for discussions (public access)
-        const response = await fetch('https://api.github.com/repos/RadianForgeLabs-RFL/RFL-Studios/discussions?per_page=20', {
+        // Using GitHub REST API for organization discussions (public access)
+        const response = await fetch('https://api.github.com/orgs/RadianForgeLabs/discussions?per_page=20', {
           headers: {
             'Accept': 'application/vnd.github+json',
             'X-GitHub-Api-Version': '2022-11-28'
@@ -94,7 +94,7 @@ function CommunityPage() {
 
       <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
         {/* Sidebar - Categories */}
-        <aside className="glass sticky top-24 h-fit rounded-xl border border-white/5 p-4">
+        <aside className="glass lg:sticky lg:top-24 h-fit rounded-xl border border-white/5 p-4">
           <h2 className="mb-4 text-lg font-semibold">Categories</h2>
           <nav className="flex flex-col gap-2">
             {categories.map((cat) => (
@@ -117,7 +117,7 @@ function CommunityPage() {
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-xl font-semibold">Recent Discussions</h2>
             <Button variant="outline" size="sm" asChild>
-              <a href="https://github.com/RadianForgeLabs-RFL/RFL-Studios/discussions/new" target="_blank" rel="noopener noreferrer">
+              <a href="https://github.com/orgs/RadianForgeLabs/discussions/new" target="_blank" rel="noopener noreferrer">
                 <MessageSquare className="mr-2 h-4 w-4" />
                 New Discussion
               </a>
@@ -148,7 +148,7 @@ function CommunityPage() {
                 Be the first to start a conversation in the community.
               </p>
               <Button variant="outline" asChild>
-                <a href="https://github.com/RadianForgeLabs-RFL/RFL-Studios/discussions/new" target="_blank" rel="noopener noreferrer">
+                <a href="https://github.com/orgs/RadianForgeLabs/discussions/new" target="_blank" rel="noopener noreferrer">
                   Start a Discussion
                 </a>
               </Button>
@@ -157,7 +157,7 @@ function CommunityPage() {
             <div className="space-y-3">
               {discussions.map((disc) => (
                 <Card key={disc.id} className="border border-white/5 bg-white/5 p-4 hover:bg-white/10 transition-colors">
-                  <a href={`https://github.com/RadianForgeLabs-RFL/RFL-Studios/discussions/${disc.number}`} target="_blank" rel="noopener noreferrer">
+                  <a href={`https://github.com/orgs/RadianForgeLabs/discussions/${disc.number}`} target="_blank" rel="noopener noreferrer">
                     <div className="flex items-start gap-4">
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-500/20 text-purple-500">
                         <MessageSquare className="h-5 w-5" />
@@ -197,7 +197,7 @@ function CommunityPage() {
               Sign in with GitHub to participate in discussions.
             </p>
             <Button variant="outline" asChild>
-              <a href="https://github.com/RadianForgeLabs-RFL/RFL-Studios/discussions" target="_blank" rel="noopener noreferrer">
+              <a href="https://github.com/orgs/RadianForgeLabs/discussions" target="_blank" rel="noopener noreferrer">
                 <ExternalLink className="mr-2 h-4 w-4" />
                 View All on GitHub
               </a>
