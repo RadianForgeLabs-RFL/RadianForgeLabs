@@ -122,10 +122,39 @@ function CommunityPage() {
                 
                 // Add to categories if not exists
                 if (d.category && !categoryMap.has(d.category.id)) {
+                  // Convert emoji shortcode to actual emoji if needed
+                  let displayEmoji = d.category.emoji || '💬';
+                  // GitHub returns emoji shortcodes like :video_game:, convert to actual emoji
+                  const emojiMap: Record<string, string> = {
+                    ':video_game:': '🎮',
+                    ':speech_balloon:': '💬',
+                    ':mega:': '📢',
+                    ':bug:': '🐛',
+                    ':bulb:': '💡',
+                    ':art:': '🎨',
+                    ':question:': '❓',
+                    ':iphone:': '📱',
+                    ':rocket:': '🚀',
+                    ':book:': '📚',
+                    ':star:': '⭐',
+                    ':heart:': '❤️',
+                    ':fire:': '🔥',
+                    ':chart_with_upwards_trend:': '📈',
+                    ':wrench:': '🔧',
+                    ':globe:': '🌍',
+                    ':computer:': '💻',
+                    ':game_die:': '🎲',
+                    ':musical_note:': '🎵',
+                    ':film:': '🎬',
+                  };
+                  if (displayEmoji.startsWith(':') && displayEmoji.endsWith(':')) {
+                    displayEmoji = emojiMap[displayEmoji] || '💬';
+                  }
+                  
                   categoryMap.set(d.category.id, {
                     id: d.category.id,
                     name: d.category.name,
-                    emoji: d.category.emoji || '💬',
+                    emoji: displayEmoji,
                     description: `${d.category.name} discussions`
                   });
                 }
@@ -269,10 +298,7 @@ function CommunityPage() {
           <h2 className="mb-4 text-lg font-semibold">Categories</h2>
           <nav className="flex flex-col gap-2">
             {categories.map((cat) => (
-              <button
-                key={cat.id}
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-muted-foreground hover:bg-white/5 hover:text-foreground transition-colors"
-              >
+              <button key={cat.id} className="flex items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-muted-foreground hover:bg-white/5 hover:text-foreground transition-colors">
                 <span className="text-xl">{cat.emoji}</span>
                 <div className="flex-1">
                   <div className="font-medium">{cat.name}</div>
@@ -426,7 +452,7 @@ function CommunityPage() {
             <div className="space-y-3">
               {discussions.map((disc) => (
                 <Card key={disc.id} className="border border-white/5 bg-white/5 p-4 hover:bg-white/10 transition-colors">
-                  <a href={`https://github.com/orgs/RadianForgeLabs/discussions/${disc.number}`} target="_blank" rel="noopener noreferrer">
+                  <a href={`/community/${disc.number}`}>
                     <div className="flex items-start gap-4">
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-500/20 text-purple-500">
                         <MessageSquare className="h-5 w-5" />
