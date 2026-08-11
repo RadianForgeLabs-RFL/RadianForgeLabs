@@ -29,6 +29,7 @@ import { Route as CommunityIndexRouteImport } from './routes/community.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as SitemapXmlRouteImport } from './routes/sitemap.xml'
 import { Route as ProductsSlugRouteImport } from './routes/products.$slug'
+import { Route as CommunityNumberRouteImport } from './routes/community.$number'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminNewsRouteImport } from './routes/admin.news'
@@ -133,6 +134,11 @@ const ProductsSlugRoute = ProductsSlugRouteImport.update({
   path: '/products/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CommunityNumberRoute = CommunityNumberRouteImport.update({
+  id: '/community/$number',
+  path: '/community/$number',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -174,6 +180,7 @@ export interface FileRoutesByFullPath {
   '/admin/news': typeof AdminNewsRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/community/$number': typeof CommunityNumberRoute
   '/products/$slug': typeof ProductsSlugRoute
   '/sitemap/xml': typeof SitemapXmlRoute
   '/admin/': typeof AdminIndexRoute
@@ -198,6 +205,7 @@ export interface FileRoutesByTo {
   '/admin/news': typeof AdminNewsRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/community/$number': typeof CommunityNumberRoute
   '/products/$slug': typeof ProductsSlugRoute
   '/sitemap/xml': typeof SitemapXmlRoute
   '/admin': typeof AdminIndexRoute
@@ -225,6 +233,7 @@ export interface FileRoutesById {
   '/admin/news': typeof AdminNewsRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/community/$number': typeof CommunityNumberRoute
   '/products/$slug': typeof ProductsSlugRoute
   '/sitemap/xml': typeof SitemapXmlRoute
   '/admin/': typeof AdminIndexRoute
@@ -252,6 +261,7 @@ export interface FileRouteTypes {
     | '/admin/news'
     | '/admin/products'
     | '/admin/settings'
+    | '/community/$number'
     | '/products/$slug'
     | '/sitemap/xml'
     | '/admin/'
@@ -276,6 +286,7 @@ export interface FileRouteTypes {
     | '/admin/news'
     | '/admin/products'
     | '/admin/settings'
+    | '/community/$number'
     | '/products/$slug'
     | '/sitemap/xml'
     | '/admin'
@@ -302,6 +313,7 @@ export interface FileRouteTypes {
     | '/admin/news'
     | '/admin/products'
     | '/admin/settings'
+    | '/community/$number'
     | '/products/$slug'
     | '/sitemap/xml'
     | '/admin/'
@@ -325,6 +337,7 @@ export interface RootRouteChildren {
   StudiosRoute: typeof StudiosRoute
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
+  CommunityNumberRoute: typeof CommunityNumberRoute
   ProductsSlugRoute: typeof ProductsSlugRoute
   SitemapXmlRoute: typeof SitemapXmlRoute
   CommunityIndexRoute: typeof CommunityIndexRoute
@@ -472,6 +485,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/community/$number': {
+      id: '/community/$number'
+      path: '/community/$number'
+      fullPath: '/community/$number'
+      preLoaderRoute: typeof CommunityNumberRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/settings': {
       id: '/admin/settings'
       path: '/settings'
@@ -548,6 +568,7 @@ const rootRouteChildren: RootRouteChildren = {
   StudiosRoute: StudiosRoute,
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
+  CommunityNumberRoute: CommunityNumberRoute,
   ProductsSlugRoute: ProductsSlugRoute,
   SitemapXmlRoute: SitemapXmlRoute,
   CommunityIndexRoute: CommunityIndexRoute,
