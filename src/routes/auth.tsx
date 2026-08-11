@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { Github } from "lucide-react";
 
 const authSchema = z.object({
   email: z.string().trim().email().max(255),
@@ -55,6 +56,15 @@ function AuthPage() {
     const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
     if (result.error) toast.error(result.error.message);
   };
+  const github = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'github',
+      options: {
+        redirectTo: window.location.origin + '/auth/callback'
+      }
+    });
+    if (error) toast.error(error.message);
+  };
   const reset = async () => {
     if (!email) return toast.error("Enter your email first");
     const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + "/reset-password" });
@@ -88,10 +98,16 @@ function AuthPage() {
         </Tabs>
 
         <div className="my-4 flex items-center gap-3 text-xs text-muted-foreground"><span className="h-px flex-1 bg-white/10" />or<span className="h-px flex-1 bg-white/10" /></div>
-        <Button onClick={google} variant="outline" className="w-full border-white/10 glass">
-          <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24"><path fill="currentColor" d="M21.35 11.1H12v3.2h5.35c-.23 1.5-1.66 4.4-5.35 4.4-3.22 0-5.85-2.66-5.85-5.95S8.78 6.8 12 6.8c1.83 0 3.06.78 3.76 1.45l2.57-2.48C16.6 4.14 14.5 3.2 12 3.2 6.98 3.2 2.9 7.28 2.9 12.3S6.98 21.4 12 21.4c6.94 0 8.55-6.09 8.55-9.22 0-.63-.06-1.11-.2-1.08z"/></svg>
-          Continue with Google
-        </Button>
+        <div className="space-y-2">
+          <Button onClick={google} variant="outline" className="w-full border-white/10 glass">
+            <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24"><path fill="currentColor" d="M21.35 11.1H12v3.2h5.35c-.23 1.5-1.66 4.4-5.35 4.4-3.22 0-5.85-2.66-5.85-5.95S8.78 6.8 12 6.8c1.83 0 3.06.78 3.76 1.45l2.57-2.48C16.6 4.14 14.5 3.2 12 3.2 6.98 3.2 2.9 7.28 2.9 12.3S6.98 21.4 12 21.4c6.94 0 8.55-6.09 8.55-9.22 0-.63-.06-1.11-.2-1.08z"/></svg>
+            Continue with Google
+          </Button>
+          <Button onClick={github} variant="outline" className="w-full border-white/10 glass">
+            <Github className="mr-2 h-4 w-4" />
+            Continue with GitHub
+          </Button>
+        </div>
       </Card>
     </div>
   );

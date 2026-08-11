@@ -1,13 +1,14 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MessageSquare, ExternalLink, Loader2, AlertCircle, Users, Clock, CheckCircle, X, Plus } from "lucide-react";
+import { MessageSquare, ExternalLink, Loader2, AlertCircle, Users, Clock, CheckCircle, X, Plus, Github } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useGitHubAuth } from "@/lib/githubAuth";
+import { useAuth } from "@/lib/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/community/")({
   head: () => ({
@@ -41,7 +42,12 @@ function CommunityPage() {
   const [showNewDiscussion, setShowNewDiscussion] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newDiscussion, setNewDiscussion] = useState({ title: '', body: '', categoryId: '' });
-  const { user: githubUser, login } = useGitHubAuth();
+  const [showLinkGithub, setShowLinkGithub] = useState(false);
+  const { user } = useAuth();
+  const router = useRouter();
+
+  // Check if user has GitHub identity linked
+  const hasGithubIdentity = user?.identities?.some((identity: any) => identity.provider === 'github');
 
   useEffect(() => {
     async function fetchDiscussions() {
@@ -173,6 +179,13 @@ function CommunityPage() {
 
   const handleCreateDiscussion = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Check if user has GitHub identity linked
+    if (!hasGithubIdentity) {
+      setShowLinkGithub(true);
+      return;
+    }
+    
     setIsSubmitting(true);
 
     try {
@@ -229,6 +242,20 @@ function CommunityPage() {
     }
   };
 
+  const handleLinkGithub = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'github',
+      options: {
+        redirectTo: window.location.origin + '/auth/callback',
+        scopes: 'read:user user:email'
+      }
+    });
+    if (error) {
+      console.error('Error linking GitHub:', error);
+      alert('Failed to link GitHub account');
+    }
+  };
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
       <div className="mb-8">
@@ -260,15 +287,17 @@ function CommunityPage() {
         <div>
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-xl font-semibold">Recent Discussions</h2>
-            {githubUser ? (
+            {user ? (
               <Button size="sm" onClick={() => setShowNewDiscussion(true)}>
                 <Plus className="mr-2 h-4 w-4" />
                 New Discussion
               </Button>
             ) : (
-              <Button size="sm" onClick={login}>
-                <MessageSquare className="mr-2 h-4 w-4" />
-                Login with GitHub
+              <Button asChild size="sm">
+                <a href="/auth">
+                  <MessageSquare className="mr-2 h-4 w-4" />
+                  Login
+                </a>
               </Button>
             )}
           </div>
@@ -329,6 +358,38 @@ function CommunityPage() {
                   </div>
                 </div>
               </form>
+            </Card>
+          )}
+
+          {showLinkGithub && (
+            <Card className="border border-white/5 bg-white/5 p-6 mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">Link GitHub Account Required</h3>
+                <Button variant="ghost" size="sm" onClick={() => setShowLinkGithub(false)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  To create discussions, you need to link your GitHub account. This allows us to post discussions on your behalf to the RadianForgeLabs GitHub repository.
+                </p>
+                <div className="flex items-center gap-3 p-4 rounded-lg border border-white/5 bg-white/5">
+                  <Github className="h-8 w-8 text-purple-500" />
+                  <div>
+                    <p className="font-medium">GitHub Account Linking</p>
+                    <p className="text-xs text-muted-foreground">Required for creating discussions</p>
+                  </div>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => setShowLinkGithub(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleLinkGithub}>
+                    <Github className="mr-2 h-4 w-4" />
+                    Link GitHub Account
+                  </Button>
+                </div>
+              </div>
             </Card>
           )}
 

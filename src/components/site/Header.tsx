@@ -1,7 +1,7 @@
 import { Link, useRouter } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { useAuth, useIsAdmin } from "@/lib/useAuth";
-import { useGitHubAuth } from "@/lib/githubAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LogOut, ShieldCheck, User as UserIcon, Menu, Coffee, Github } from "lucide-react";
@@ -23,7 +23,6 @@ const NAV = [
 export function Header() {
   const { user } = useAuth();
   const { isAdmin } = useIsAdmin(user?.id);
-  const { user: githubUser, login, logout } = useGitHubAuth();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const currentPath = router.state.location.pathname;
@@ -34,8 +33,9 @@ export function Header() {
     return "Support RadianForgeLabs";
   };
 
-  const signOut = () => {
-    logout();
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    router.navigate({ to: "/" });
   };
 
   return (
@@ -80,19 +80,19 @@ export function Header() {
             }
           />
           <ThemeToggle />
-          {githubUser ? (
+          {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="gap-2">
                   <Avatar className="h-7 w-7">
-                    <AvatarImage src={githubUser.avatar} />
-                    <AvatarFallback className="bg-gradient-brand text-xs text-brand-foreground">{githubUser.login.slice(0,2).toUpperCase()}</AvatarFallback>
+                    <AvatarImage src={user.user_metadata?.avatar_url} />
+                    <AvatarFallback className="bg-gradient-brand text-xs text-brand-foreground">{(user.email ?? "?").slice(0,2).toUpperCase()}</AvatarFallback>
                   </Avatar>
-                  <span className="hidden max-w-[140px] truncate sm:inline">{githubUser.login}</span>
+                  <span className="hidden max-w-[140px] truncate sm:inline">{user.user_metadata?.username || user.email}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="glass-strong w-56 text-foreground">
-                <DropdownMenuLabel className="truncate text-foreground">{githubUser.name || githubUser.login}</DropdownMenuLabel>
+                <DropdownMenuLabel className="truncate text-foreground">{user.user_metadata?.full_name || user.email}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild className="text-foreground focus:text-foreground"><Link to="/account"><UserIcon className="mr-2 h-4 w-4" />Account</Link></DropdownMenuItem>
                 {isAdmin && <DropdownMenuItem asChild className="text-foreground focus:text-foreground"><Link to="/admin"><ShieldCheck className="mr-2 h-4 w-4" />Admin</Link></DropdownMenuItem>}
@@ -101,8 +101,8 @@ export function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button size="sm" className="bg-gradient-brand text-brand-foreground shadow-glow hover:opacity-90" onClick={login}>
-              Login with GitHub
+            <Button asChild size="sm" className="bg-gradient-brand text-brand-foreground shadow-glow hover:opacity-90">
+              <Link to="/auth" search={{ redirect: undefined }}>Login</Link>
             </Button>
           )}
 

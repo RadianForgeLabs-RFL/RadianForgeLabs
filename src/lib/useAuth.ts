@@ -1,39 +1,24 @@
 import { useEffect, useState } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { useGitHubAuth } from "./githubAuth";
 
 export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const { user: githubUser, loading: githubLoading } = useGitHubAuth();
 
   useEffect(() => {
-    // Use GitHub OAuth as primary auth
-    if (!githubLoading) {
-      if (githubUser) {
-        // Create a mock user object for compatibility with existing code
-        setUser({
-          id: githubUser.githubId,
-          email: githubUser.email,
-          user_metadata: {
-            username: githubUser.login,
-            avatar_url: githubUser.avatar,
-            full_name: githubUser.name,
-          },
-          app_metadata: {},
-          aud: 'authenticated',
-          created_at: new Date().toISOString(),
-        } as unknown as User);
-        setSession({ user: { id: githubUser.githubId } } as unknown as Session);
-      } else {
-        setUser(null);
-        setSession(null);
-      }
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
+      setSession(s);
+      setUser(s?.user ?? null);
+    });
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+      setUser(data.session?.user ?? null);
       setLoading(false);
-    }
-  }, [githubUser, githubLoading]);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
 
   return { session, user, loading };
 }
