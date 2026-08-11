@@ -8,7 +8,7 @@ export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
       GET: async () => {
-        const staticPaths = ["/", "/apps", "/games", "/projects", "/downloads", "/about", "/support"];
+        const staticPaths = ["/", "/apps", "/games", "/projects", "/downloads", "/about", "/community", "/support"];
         const { data } = await supabase.from("products").select("slug, updated_at").eq("published", true);
         const dynamic = (data ?? []).map((p) => ({ path: `/products/${p.slug}`, lastmod: (p as any).updated_at as string }));
         const entries = [
