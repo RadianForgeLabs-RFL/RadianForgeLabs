@@ -33,7 +33,6 @@ import { Route as CommunityNumberRouteImport } from './routes/community.$number'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminNewsRouteImport } from './routes/admin.news'
-import { Route as AdminCommunityRouteImport } from './routes/admin.community'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
 
 const TermsRoute = TermsRouteImport.update({
@@ -155,11 +154,6 @@ const AdminNewsRoute = AdminNewsRouteImport.update({
   path: '/news',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminCommunityRoute = AdminCommunityRouteImport.update({
-  id: '/community',
-  path: '/community',
-  getParentRoute: () => AdminRoute,
-} as any)
 const AuthenticatedAccountRoute = AuthenticatedAccountRouteImport.update({
   id: '/account',
   path: '/account',
@@ -183,7 +177,6 @@ export interface FileRoutesByFullPath {
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/account': typeof AuthenticatedAccountRoute
-  '/admin/community': typeof AdminCommunityRoute
   '/admin/news': typeof AdminNewsRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -209,7 +202,6 @@ export interface FileRoutesByTo {
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/account': typeof AuthenticatedAccountRoute
-  '/admin/community': typeof AdminCommunityRoute
   '/admin/news': typeof AdminNewsRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -238,7 +230,6 @@ export interface FileRoutesById {
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/_authenticated/account': typeof AuthenticatedAccountRoute
-  '/admin/community': typeof AdminCommunityRoute
   '/admin/news': typeof AdminNewsRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -267,7 +258,6 @@ export interface FileRouteTypes {
     | '/support'
     | '/terms'
     | '/account'
-    | '/admin/community'
     | '/admin/news'
     | '/admin/products'
     | '/admin/settings'
@@ -293,7 +283,6 @@ export interface FileRouteTypes {
     | '/support'
     | '/terms'
     | '/account'
-    | '/admin/community'
     | '/admin/news'
     | '/admin/products'
     | '/admin/settings'
@@ -321,7 +310,6 @@ export interface FileRouteTypes {
     | '/support'
     | '/terms'
     | '/_authenticated/account'
-    | '/admin/community'
     | '/admin/news'
     | '/admin/products'
     | '/admin/settings'
@@ -525,13 +513,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminNewsRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/community': {
-      id: '/admin/community'
-      path: '/community'
-      fullPath: '/admin/community'
-      preLoaderRoute: typeof AdminCommunityRouteImport
-      parentRoute: typeof AdminRoute
-    }
     '/_authenticated/account': {
       id: '/_authenticated/account'
       path: '/account'
@@ -555,7 +536,6 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 )
 
 interface AdminRouteChildren {
-  AdminCommunityRoute: typeof AdminCommunityRoute
   AdminNewsRoute: typeof AdminNewsRoute
   AdminProductsRoute: typeof AdminProductsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
@@ -563,7 +543,6 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
-  AdminCommunityRoute: AdminCommunityRoute,
   AdminNewsRoute: AdminNewsRoute,
   AdminProductsRoute: AdminProductsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
@@ -597,3 +576,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
