@@ -308,6 +308,47 @@ main {
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
   }
+
+  /* Optimize text rendering */
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeSpeed;
+  }
+
+  /* Reduce GPU compositing */
+  .glass,
+  .glass-strong,
+  .card {
+    transform: translateZ(0);
+  }
+
+  /* Optimize touch targets */
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Reduce animations on mobile */
+  * {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0.01ms !important;
+  }
+
+  /* Keep essential transitions */
+  .group-hover\:opacity-100,
+  .hover\:scale-105,
+  .hover\:border-,
+  .hover\:shadow- {
+    animation-duration: 0.3s !important;
+    transition-duration: 0.3s !important;
+  }
 }
 
 /* Dynamic page themes based on route */
