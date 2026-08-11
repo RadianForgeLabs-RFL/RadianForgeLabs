@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import { Trash2 } from "lucide-react";
+import { ImageUpload } from "@/components/admin/MediaUpload";
 
 export const Route = createFileRoute("/admin/settings")({
   component: AdminSettings,
@@ -22,6 +23,8 @@ function AdminSettings() {
   const [downloadsCount, setDownloadsCount] = useState("50K+");
   const [studiosIcon, setStudiosIcon] = useState("Code");
   const [entertainmentIcon, setEntertainmentIcon] = useState("Gamepad2");
+  const [studiosIconUrl, setStudiosIconUrl] = useState<string | null>(null);
+  const [entertainmentIconUrl, setEntertainmentIconUrl] = useState<string | null>(null);
 
   const ann = useQuery({ queryKey: ["ann-all"], queryFn: async () => (await supabase.from("announcements").select("*").order("created_at", { ascending: false })).data ?? [] });
   const set = useQuery({ queryKey: ["settings-all"], queryFn: async () => (await supabase.from("settings").select("*")).data ?? [] });
@@ -35,12 +38,16 @@ function AdminSettings() {
     const dc = set.data?.find((s: any) => s.key === "downloads_count");
     const si = set.data?.find((s: any) => s.key === "studios_icon");
     const ei = set.data?.find((s: any) => s.key === "entertainment_icon");
+    const siu = set.data?.find((s: any) => s.key === "studios_icon_url");
+    const eiu = set.data?.find((s: any) => s.key === "entertainment_icon_url");
     
     if (uc) setUserCount(String(uc.value ?? ''));
     if (pc) setPlayerCount(String(pc.value ?? ''));
     if (dc) setDownloadsCount(String(dc.value ?? ''));
     if (si) setStudiosIcon(String(si.value ?? ''));
     if (ei) setEntertainmentIcon(String(ei.value ?? ''));
+    if (siu) setStudiosIconUrl(siu.value ? String(siu.value) : null);
+    if (eiu) setEntertainmentIconUrl(eiu.value ? String(eiu.value) : null);
   }, [set.data]);
 
   const addAnn = useMutation({
@@ -67,6 +74,8 @@ function AdminSettings() {
         { key: "downloads_count", value: downloadsCount },
         { key: "studios_icon", value: studiosIcon },
         { key: "entertainment_icon", value: entertainmentIcon },
+        { key: "studios_icon_url", value: studiosIconUrl },
+        { key: "entertainment_icon_url", value: entertainmentIconUrl },
       ]);
       if (error) throw error;
     },
@@ -133,8 +142,16 @@ function AdminSettings() {
             <Input value={studiosIcon} onChange={(e) => setStudiosIcon(e.target.value)} placeholder="Code" />
           </div>
           <div>
+            <Label>RFL Studios Icon Image</Label>
+            <ImageUpload value={studiosIconUrl} onChange={setStudiosIconUrl} folder="icons" label="Studios Icon" useCase="icon" />
+          </div>
+          <div>
             <Label>RFL Entertainment Icon (Lucide icon name)</Label>
             <Input value={entertainmentIcon} onChange={(e) => setEntertainmentIcon(e.target.value)} placeholder="Gamepad2" />
+          </div>
+          <div>
+            <Label>RFL Entertainment Icon Image</Label>
+            <ImageUpload value={entertainmentIconUrl} onChange={setEntertainmentIconUrl} folder="icons" label="Entertainment Icon" useCase="icon" />
           </div>
           <Button onClick={() => updateStats.mutate()} className="bg-gradient-brand text-brand-foreground shadow-glow">Update Stats</Button>
         </div>

@@ -208,6 +208,8 @@ export const homeCountsQuery = () =>
       const downloadsCount = settings?.find((s: any) => s.key === "downloads_count")?.value ?? "50K+";
       const studiosIcon = settings?.find((s: any) => s.key === "studios_icon")?.value ?? "Code";
       const entertainmentIcon = settings?.find((s: any) => s.key === "entertainment_icon")?.value ?? "Gamepad2";
+      const studiosIconUrl = settings?.find((s: any) => s.key === "studios_icon_url")?.value ?? null;
+      const entertainmentIconUrl = settings?.find((s: any) => s.key === "entertainment_icon_url")?.value ?? null;
       
       return {
         apps: rows.filter((r: any) => r.kind === "app").length,
@@ -217,6 +219,8 @@ export const homeCountsQuery = () =>
         downloadsCount,
         studiosIcon,
         entertainmentIcon,
+        studiosIconUrl,
+        entertainmentIconUrl,
       };
     },
     staleTime: 5 * 60 * 1000, // 5 minutes

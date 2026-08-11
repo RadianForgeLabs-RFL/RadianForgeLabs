@@ -23,6 +23,7 @@ function DivisionCard({
   title, 
   description, 
   icon: Icon, 
+  iconUrl,
   to, 
   color, 
   stats 
@@ -30,6 +31,7 @@ function DivisionCard({
   title: string; 
   description: string; 
   icon: any; 
+  iconUrl?: string | null;
   to: string; 
   color: string;
   stats: { label: string; value: string | number }[];
@@ -40,7 +42,11 @@ function DivisionCard({
         <div className={`absolute inset-0 bg-gradient-to-br from-${color}-500/10 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100`} />
         <div className="relative p-8 md:p-12">
           <div className={`mb-6 inline-flex rounded-2xl border border-${color}-500/30 bg-${color}-500/10 p-4`}>
-            <Icon className={`h-12 w-12 text-${color}-500`} />
+            {iconUrl ? (
+              <img src={iconUrl} alt={title} className="h-12 w-12 object-cover" />
+            ) : (
+              <Icon className={`h-12 w-12 text-${color}-500`} />
+            )}
           </div>
           <h2 className="text-3xl font-bold md:text-4xl">{title}</h2>
           <p className="mt-4 max-w-md text-lg text-muted-foreground">{description}</p>
@@ -67,7 +73,7 @@ function Home() {
   const counts = useQuery(homeCountsQuery());
   const latestApps = useQuery(allProductsQuery("app"));
   const latestGames = useQuery(allProductsQuery("game"));
-  const c = counts.data ?? { apps: 0, games: 0, userCount: "10K+", playerCount: "10K+", downloadsCount: "50K+", studiosIcon: "Code", entertainmentIcon: "Gamepad2" };
+  const c = counts.data ?? { apps: 0, games: 0, userCount: "10K+", playerCount: "10K+", downloadsCount: "50K+", studiosIcon: "Code", entertainmentIcon: "Gamepad2", studiosIconUrl: null, entertainmentIconUrl: null };
 
   // Dynamic icon mapping
   const iconMap: Record<string, any> = { Code, Gamepad2, Building2, Users, Download, Zap, Github, Mail };
@@ -107,6 +113,7 @@ function Home() {
             title="RFL Studios"
             description="Professional Windows and Android applications, utilities, and developer software."
             icon={StudiosIcon}
+            iconUrl={c.studiosIconUrl ? String(c.studiosIconUrl) : null}
             to="/studios"
             color="blue"
             stats={[
@@ -118,6 +125,7 @@ function Home() {
             title="RFL Entertainment"
             description="Immersive PC and Android games, from casual play to epic adventures."
             icon={EntertainmentIcon}
+            iconUrl={c.entertainmentIconUrl ? String(c.entertainmentIconUrl) : null}
             to="/entertainment"
             color="rose"
             stats={[
@@ -131,19 +139,19 @@ function Home() {
       {/* COMPANY STATS */}
       <section className="mx-auto max-w-7xl px-4 py-16">
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-          <Card className="border border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-transparent p-6 text-center">
-            <Building2 className="mx-auto h-8 w-8 text-blue-500" />
-            <div className="mt-4 text-3xl font-bold text-blue-500">2</div>
-            <div className="mt-2 text-sm text-muted-foreground">Divisions</div>
+          <Card className="border border-rose-500/20 bg-gradient-to-br from-rose-500/5 to-transparent p-6 text-center">
+            <Users className="mx-auto h-8 w-8 text-rose-500" />
+            <div className="mt-4 text-3xl font-bold text-rose-500">{c.playerCount}</div>
+            <div className="mt-2 text-sm text-muted-foreground">Players</div>
           </Card>
           <Card className="border border-purple-500/20 bg-gradient-to-br from-purple-500/5 to-transparent p-6 text-center">
             <Download className="mx-auto h-8 w-8 text-purple-500" />
             <div className="mt-4 text-3xl font-bold text-purple-500">{c.downloadsCount}</div>
             <div className="mt-2 text-sm text-muted-foreground">Downloads</div>
           </Card>
-          <Card className="border border-rose-500/20 bg-gradient-to-br from-rose-500/5 to-transparent p-6 text-center">
-            <Users className="mx-auto h-8 w-8 text-rose-500" />
-            <div className="mt-4 text-3xl font-bold text-rose-500">{c.userCount}</div>
+          <Card className="border border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-transparent p-6 text-center">
+            <Building2 className="mx-auto h-8 w-8 text-blue-500" />
+            <div className="mt-4 text-3xl font-bold text-blue-500">{c.userCount}</div>
             <div className="mt-2 text-sm text-muted-foreground">Users</div>
           </Card>
         </div>

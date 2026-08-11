@@ -102,7 +102,7 @@ function Entertainment() {
             <div className="mt-2 text-sm text-muted-foreground">Games</div>
           </Card>
           <Card className="border border-rose-500/20 bg-gradient-to-br from-rose-500/5 to-transparent p-6 text-center">
-            <div className="text-4xl font-bold text-rose-500">10K+</div>
+            <div className="text-4xl font-bold text-rose-500">{String(counts.data?.playerCount ?? "10K+")}</div>
             <div className="mt-2 text-sm text-muted-foreground">Players</div>
           </Card>
           <Card className="border border-rose-500/20 bg-gradient-to-br from-rose-500/5 to-transparent p-6 text-center">
