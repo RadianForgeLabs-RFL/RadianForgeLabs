@@ -35,7 +35,7 @@ function AdminLayout() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
       <div className="grid gap-6 lg:grid-cols-[220px_1fr]">
-        <aside className="glass sticky top-24 h-fit rounded-xl border border-white/5 p-3">
+        <aside className="glass sticky top-24 h-fit rounded-xl border border-white/5 p-3 lg:block hidden">
           <div className="mb-2 px-2 text-xs uppercase tracking-widest text-muted-foreground">Admin</div>
           <nav className="flex flex-col">
             {LINKS.map((l) => (
@@ -47,7 +47,18 @@ function AdminLayout() {
             ))}
           </nav>
         </aside>
-        <div><Outlet /></div>
+        <div className="lg:hidden">
+          <nav className="glass mb-6 flex flex-wrap gap-2 rounded-xl border border-white/5 p-3">
+            {LINKS.map((l) => (
+              <Link key={l.to} to={l.to as any} activeOptions={{ exact: l.exact }}
+                className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-white/5 hover:text-foreground"
+                activeProps={{ className: "flex items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground bg-white/5" }}>
+                <l.icon className="h-4 w-4" />{l.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
+        <div className="lg:col-span-1"><Outlet /></div>
       </div>
     </div>
   );
