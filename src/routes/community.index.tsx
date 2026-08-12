@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MessageSquare, ExternalLink, Loader2, AlertCircle, Users, Clock, CheckCircle, X, Plus, Github, Eye, Smile } from "lucide-react";
+import { MessageSquare, ExternalLink, Loader2, AlertCircle, Users, Clock, CheckCircle, X, Plus, Github, Eye, Smile, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -49,6 +49,7 @@ function CommunityPage() {
   const [showLinkGithub, setShowLinkGithub] = useState(false);
   const [showMarkdownPreview, setShowMarkdownPreview] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { user } = useAuth();
   const router = useRouter();
 
@@ -303,6 +304,139 @@ function CommunityPage() {
 
   const emojis = ['👍', '👎', '😄', '🎉', '❤️', '🔥', '🚀', '💡', '👀', '✅'];
 
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      // Using GitHub GraphQL API to fetch organization discussions and categories
+      const query = `
+        query {
+          organization(login: "RadianForgeLabs") {
+            repositories(first: 10) {
+              nodes {
+                discussions(first: 20, orderBy: {field: CREATED_AT, direction: DESC}) {
+                  nodes {
+                    id
+                    number
+                    title
+                    createdAt
+                    author {
+                      login
+                    }
+                    answerChosenAt
+                    reactions {
+                      totalCount
+                    }
+                    category {
+                      name
+                      id
+                      emoji
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      `;
+
+      const response = await fetch('https://api.github.com/graphql', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_GITHUB_TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`GitHub GraphQL API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      // Extract discussions and categories from all repositories
+      let allDiscussions: Discussion[] = [];
+      const categoryMap = new Map<string, { id: string; name: string; emoji: string; description: string }>();
+      
+      if (data.data?.organization?.repositories?.nodes) {
+        data.data.organization.repositories.nodes.forEach((repo: any) => {
+          if (repo.discussions?.nodes) {
+            repo.discussions.nodes.forEach((d: any) => {
+              // Add to discussions
+              allDiscussions.push({
+                id: d.id,
+                number: d.number,
+                title: d.title,
+                author: d.author?.login || 'Unknown',
+                createdAt: d.createdAt,
+                isAnswered: d.answerChosenAt !== null,
+                upvoteCount: d.reactions?.totalCount || 0,
+                categoryName: d.category?.name || 'General',
+                categoryId: d.category?.id || ''
+              });
+              
+              // Add to categories if not exists
+              if (d.category && !categoryMap.has(d.category.id)) {
+                let displayEmoji = d.category.emoji || '💬';
+                const emojiMap: Record<string, string> = {
+                  ':video_game:': '🎮',
+                  ':speech_balloon:': '💬',
+                  ':mega:': '📢',
+                  ':bug:': '🐛',
+                  ':bulb:': '💡',
+                  ':art:': '🎨',
+                  ':question:': '❓',
+                  ':iphone:': '📱',
+                  ':rocket:': '🚀',
+                  ':book:': '📚',
+                  ':star:': '⭐',
+                  ':heart:': '❤️',
+                  ':fire:': '🔥',
+                  ':chart_with_upwards_trend:': '📈',
+                  ':wrench:': '🔧',
+                  ':globe:': '🌍',
+                  ':computer:': '💻',
+                  ':game_die:': '🎲',
+                  ':musical_note:': '🎵',
+                  ':film:': '🎬',
+                };
+                if (displayEmoji.startsWith(':') && displayEmoji.endsWith(':')) {
+                  displayEmoji = emojiMap[displayEmoji] || '💬';
+                }
+                
+                categoryMap.set(d.category.id, {
+                  id: d.category.id,
+                  name: d.category.name,
+                  emoji: displayEmoji,
+                  description: `${d.category.name} discussions`
+                });
+              }
+            });
+          }
+        });
+      }
+
+      // Sort by date and take top 20
+      allDiscussions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      setAllDiscussions(allDiscussions.slice(0, 20));
+      
+      // Apply current filter
+      if (selectedCategory === null) {
+        setDiscussions(allDiscussions.slice(0, 20));
+      } else {
+        setDiscussions(allDiscussions.filter(d => d.categoryId === selectedCategory));
+      }
+      
+      // Update categories
+      setCategories(Array.from(categoryMap.values()));
+    } catch (err) {
+      console.error('Error refreshing discussions:', err);
+      alert('Failed to refresh discussions');
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
       <div className="mb-8">
@@ -313,7 +447,18 @@ function CommunityPage() {
       <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
         {/* Sidebar - Categories */}
         <aside className="glass lg:sticky lg:top-24 h-fit rounded-xl border border-white/5 p-4">
-          <h2 className="mb-4 text-lg font-semibold">Categories</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">Categories</h2>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              title="Refresh categories and discussions"
+            >
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </Button>
+          </div>
           <nav className="flex flex-col gap-2">
             <button 
               key="all"

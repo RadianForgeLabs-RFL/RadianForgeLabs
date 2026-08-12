@@ -234,11 +234,23 @@ function DiscussionPage() {
 
       const data = await response.json();
       
-      // Refresh comments
-      setReplyText('');
+      // Add new comment to local state
+      if (data.data?.addDiscussionComment?.comment) {
+        const newComment = data.data.addDiscussionComment.comment;
+        setComments([
+          {
+            id: newComment.id,
+            author: newComment.author?.login || user?.user_metadata?.user_name || 'Unknown',
+            avatar: newComment.author?.avatarUrl || user?.user_metadata?.avatar_url || '',
+            body: newComment.body,
+            createdAt: newComment.createdAt,
+            upvoteCount: 0,
+          },
+          ...comments
+        ]);
+      }
       
-      // Reload the page to show new comment
-      window.location.reload();
+      setReplyText('');
     } catch (err) {
       console.error('Error posting comment:', err);
       alert('Failed to post comment. Please try again.');
@@ -293,7 +305,12 @@ function DiscussionPage() {
         }),
       });
 
-      window.location.reload();
+      // Update local state instead of reloading
+      setComments(comments.map(c => 
+        c.id === commentId 
+          ? { ...c, upvoteCount: c.upvoteCount + 1 }
+          : c
+      ));
     } catch (err) {
       console.error('Error adding reaction:', err);
       alert('Failed to add reaction');
@@ -335,9 +352,14 @@ function DiscussionPage() {
         }),
       });
 
+      // Update local state instead of reloading
+      setComments(comments.map(c => 
+        c.id === commentId 
+          ? { ...c, body: editText }
+          : c
+      ));
       setEditingCommentId(null);
       setEditText('');
-      window.location.reload();
     } catch (err) {
       console.error('Error editing comment:', err);
       alert('Failed to edit comment');
@@ -375,7 +397,8 @@ function DiscussionPage() {
         }),
       });
 
-      window.location.reload();
+      // Update local state instead of reloading
+      setComments(comments.filter(c => c.id !== commentId));
     } catch (err) {
       console.error('Error deleting comment:', err);
       alert('Failed to delete comment');
