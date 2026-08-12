@@ -86,6 +86,7 @@ function CommunityPage() {
                         name
                         id
                         emoji
+                        description
                       }
                     }
                   }
@@ -154,14 +155,15 @@ function CommunityPage() {
                     ':fire:': '🔥',
                     ':chart_with_upwards_trend:': '📈',
                     ':wrench:': '🔧',
+                    ':hammer_and_wrench:': '🛠️',
+                    ':hammer:': '🔨',
+                    ':construction:': '🚧',
                     ':globe:': '🌍',
                     ':computer:': '💻',
                     ':game_die:': '🎲',
                     ':musical_note:': '🎵',
                     ':film:': '🎬',
                     ':pencil2:': '✏️',
-                    ':hammer:': '🔨',
-                    ':construction:': '🚧',
                     ':warning:': '⚠️',
                     ':checkered_flag:': '🏁',
                     ':trophy:': '🏆',
@@ -421,7 +423,7 @@ function CommunityPage() {
                     id: d.category.id,
                     name: d.category.name,
                     emoji: displayEmoji,
-                    description: `${d.category.name} discussions`
+                    description: d.category.description || `${d.category.name} discussions`
                   });
                 }
               });
