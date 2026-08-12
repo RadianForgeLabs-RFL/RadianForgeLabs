@@ -72,8 +72,6 @@ function AdminSettings() {
         { key: "user_count", value: userCount },
         { key: "player_count", value: playerCount },
         { key: "downloads_count", value: downloadsCount },
-        { key: "studios_icon", value: studiosIcon },
-        { key: "entertainment_icon", value: entertainmentIcon },
         { key: "studios_icon_url", value: studiosIconUrl },
         { key: "entertainment_icon_url", value: entertainmentIconUrl },
       ]);
@@ -138,16 +136,8 @@ function AdminSettings() {
             <Input value={downloadsCount} onChange={(e) => setDownloadsCount(e.target.value)} placeholder="50K+" />
           </div>
           <div>
-            <Label>RFL Studios Icon (Lucide icon name)</Label>
-            <Input value={studiosIcon} onChange={(e) => setStudiosIcon(e.target.value)} placeholder="Code" />
-          </div>
-          <div>
             <Label>RFL Studios Icon Image</Label>
             <ImageUpload value={studiosIconUrl} onChange={setStudiosIconUrl} folder="icons" label="Studios Icon" useCase="icon" />
-          </div>
-          <div>
-            <Label>RFL Entertainment Icon (Lucide icon name)</Label>
-            <Input value={entertainmentIcon} onChange={(e) => setEntertainmentIcon(e.target.value)} placeholder="Gamepad2" />
           </div>
           <div>
             <Label>RFL Entertainment Icon Image</Label>
