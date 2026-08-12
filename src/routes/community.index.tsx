@@ -79,6 +79,9 @@ function CommunityPage() {
                       reactions {
                         totalCount
                       }
+                      comments(first: 0) {
+                        totalCount
+                      }
                       category {
                         name
                         id
@@ -124,7 +127,7 @@ function CommunityPage() {
                   createdAt: d.createdAt,
                   isAnswered: d.answerChosenAt !== null,
                   upvoteCount: d.reactions?.totalCount || 0,
-                  commentCount: 0, // Will be updated when we fetch comments
+                  commentCount: d.comments?.totalCount || 0,
                   categoryName: d.category?.name || 'General',
                   categoryId: d.category?.id || ''
                 });
@@ -326,6 +329,9 @@ function CommunityPage() {
                     }
                     answerChosenAt
                     reactions {
+                      totalCount
+                    }
+                    comments(first: 0) {
                       totalCount
                     }
                     category {
