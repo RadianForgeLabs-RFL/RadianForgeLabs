@@ -5,10 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MessageSquare, ExternalLink, Loader2, AlertCircle, Users, Clock, CheckCircle, X, Plus, Github } from "lucide-react";
+import { MessageSquare, ExternalLink, Loader2, AlertCircle, Users, Clock, CheckCircle, X, Plus, Github, Eye, Smile } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 export const Route = createFileRoute("/community/")({
   head: () => ({
@@ -36,13 +38,17 @@ interface Discussion {
 
 function CommunityPage() {
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
+  const [allDiscussions, setAllDiscussions] = useState<Discussion[]>([]);
   const [categories, setCategories] = useState<Array<{ id: string; name: string; emoji: string; description: string }>>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showNewDiscussion, setShowNewDiscussion] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newDiscussion, setNewDiscussion] = useState({ title: '', body: '', categoryId: '' });
   const [showLinkGithub, setShowLinkGithub] = useState(false);
+  const [showMarkdownPreview, setShowMarkdownPreview] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const { user } = useAuth();
   const router = useRouter();
 
@@ -165,6 +171,7 @@ function CommunityPage() {
 
         // Sort by date and take top 20
         allDiscussions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        setAllDiscussions(allDiscussions.slice(0, 20));
         setDiscussions(allDiscussions.slice(0, 20));
         
         // Set categories from GitHub
@@ -285,6 +292,17 @@ function CommunityPage() {
     }
   };
 
+  const handleCategoryFilter = (categoryId: string | null) => {
+    setSelectedCategory(categoryId);
+    if (categoryId === null) {
+      setDiscussions(allDiscussions);
+    } else {
+      setDiscussions(allDiscussions.filter(d => d.categoryId === categoryId));
+    }
+  };
+
+  const emojis = ['👍', '👎', '😄', '🎉', '❤️', '🔥', '🚀', '💡', '👀', '✅'];
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
       <div className="mb-8">
@@ -297,8 +315,31 @@ function CommunityPage() {
         <aside className="glass lg:sticky lg:top-24 h-fit rounded-xl border border-white/5 p-4">
           <h2 className="mb-4 text-lg font-semibold">Categories</h2>
           <nav className="flex flex-col gap-2">
+            <button 
+              key="all"
+              onClick={() => handleCategoryFilter(null)}
+              className={`flex items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors ${
+                selectedCategory === null 
+                  ? 'bg-purple-500/20 text-purple-400' 
+                  : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'
+              }`}
+            >
+              <span className="text-xl">📋</span>
+              <div className="flex-1">
+                <div className="font-medium">All Discussions</div>
+                <div className="text-xs opacity-70">View all discussions</div>
+              </div>
+            </button>
             {categories.map((cat) => (
-              <button key={cat.id} className="flex items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-muted-foreground hover:bg-white/5 hover:text-foreground transition-colors">
+              <button 
+                key={cat.id} 
+                onClick={() => handleCategoryFilter(cat.id)}
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors ${
+                  selectedCategory === cat.id 
+                    ? 'bg-purple-500/20 text-purple-400' 
+                    : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'
+                }`}
+              >
                 <span className="text-xl">{cat.emoji}</span>
                 <div className="flex-1">
                   <div className="font-medium">{cat.name}</div>
@@ -364,15 +405,63 @@ function CommunityPage() {
                     </Select>
                   </div>
                   <div>
-                    <Label htmlFor="body">Content</Label>
-                    <Textarea
-                      id="body"
-                      value={newDiscussion.body}
-                      onChange={(e) => setNewDiscussion({ ...newDiscussion, body: e.target.value })}
-                      placeholder="Describe your discussion in detail..."
-                      rows={6}
-                      required
-                    />
+                    <div className="flex items-center justify-between mb-2">
+                      <Label htmlFor="body">Content</Label>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowMarkdownPreview(!showMarkdownPreview)}
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          Preview
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                        >
+                          <Smile className="h-4 w-4 mr-1" />
+                          Emoji
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {showEmojiPicker && (
+                      <div className="flex flex-wrap gap-2 p-3 border border-white/10 rounded-lg bg-white/5 mb-3">
+                        {emojis.map((emoji) => (
+                          <button
+                            key={emoji}
+                            type="button"
+                            onClick={() => setNewDiscussion({ ...newDiscussion, body: newDiscussion.body + emoji })}
+                            className="text-2xl hover:scale-125 transition-transform"
+                          >
+                            {emoji}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {showMarkdownPreview ? (
+                      <div className="prose prose-invert max-w-none p-4 border border-white/10 rounded-lg bg-white/5 min-h-[150px]">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{newDiscussion.body || '*Preview will appear here*'}</ReactMarkdown>
+                      </div>
+                    ) : (
+                      <Textarea
+                        id="body"
+                        value={newDiscussion.body}
+                        onChange={(e) => setNewDiscussion({ ...newDiscussion, body: e.target.value })}
+                        placeholder="Describe your discussion in detail... (Markdown supported)"
+                        rows={6}
+                        required
+                      />
+                    )}
+                    
+                    <div className="text-xs text-muted-foreground mt-2">
+                      Supports: **bold**, *italic*, `code`, [links](url), and more
+                    </div>
                   </div>
                   <div className="flex justify-end gap-2">
                     <Button type="button" variant="outline" onClick={() => setShowNewDiscussion(false)}>

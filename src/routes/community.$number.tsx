@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, MessageSquare, ExternalLink, Loader2, AlertCircle, Send, ThumbsUp, CheckCircle, Clock, User } from "lucide-react";
+import { ArrowLeft, MessageSquare, ExternalLink, Loader2, AlertCircle, Send, ThumbsUp, CheckCircle, Clock, User, Edit2, Eye, EyeOff, Smile, Paperclip } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface Comment {
   id: string;
@@ -55,6 +57,10 @@ function DiscussionPage() {
   const [replyText, setReplyText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showLinkGithub, setShowLinkGithub] = useState(false);
+  const [showMarkdownPreview, setShowMarkdownPreview] = useState(false);
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [editText, setEditText] = useState('');
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   // Check if user has GitHub identity linked
   const hasGithubIdentity = user?.identities?.some((identity: any) => identity.provider === 'github');
@@ -255,6 +261,129 @@ function DiscussionPage() {
     }
   };
 
+  const handleAddReaction = async (commentId: string, content: string) => {
+    if (!hasGithubIdentity) {
+      setShowLinkGithub(true);
+      return;
+    }
+
+    try {
+      const mutation = `
+        mutation($subjectId: ID!, $content: ReactionContent!) {
+          addReaction(input: {subjectId: $subjectId, content: $content}) {
+            reaction {
+              content
+            }
+          }
+        }
+      `;
+
+      await fetch('https://api.github.com/graphql', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_GITHUB_TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: mutation,
+          variables: {
+            subjectId: commentId,
+            content: content.toUpperCase(),
+          },
+        }),
+      });
+
+      window.location.reload();
+    } catch (err) {
+      console.error('Error adding reaction:', err);
+      alert('Failed to add reaction');
+    }
+  };
+
+  const handleEditComment = async (commentId: string) => {
+    if (!hasGithubIdentity) {
+      setShowLinkGithub(true);
+      return;
+    }
+
+    if (!editText.trim()) return;
+
+    try {
+      const mutation = `
+        mutation($commentId: ID!, $body: String!) {
+          updateDiscussionComment(input: {commentId: $commentId, body: $body}) {
+            comment {
+              id
+              body
+            }
+          }
+        }
+      `;
+
+      await fetch('https://api.github.com/graphql', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_GITHUB_TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: mutation,
+          variables: {
+            commentId: commentId,
+            body: editText,
+          },
+        }),
+      });
+
+      setEditingCommentId(null);
+      setEditText('');
+      window.location.reload();
+    } catch (err) {
+      console.error('Error editing comment:', err);
+      alert('Failed to edit comment');
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    if (!hasGithubIdentity) {
+      setShowLinkGithub(true);
+      return;
+    }
+
+    if (!confirm('Are you sure you want to delete this comment?')) return;
+
+    try {
+      const mutation = `
+        mutation($commentId: ID!) {
+          deleteDiscussionComment(input: {commentId: $commentId}) {
+            clientMutationId
+          }
+        }
+      `;
+
+      await fetch('https://api.github.com/graphql', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_GITHUB_TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: mutation,
+          variables: {
+            commentId: commentId,
+          },
+        }),
+      });
+
+      window.location.reload();
+    } catch (err) {
+      console.error('Error deleting comment:', err);
+      alert('Failed to delete comment');
+    }
+  };
+
+  const emojis = ['👍', '👎', '😄', '🎉', '❤️', '🔥', '🚀', '💡', '👀', '✅'];
+
   if (isLoading) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-8">
@@ -323,7 +452,7 @@ function DiscussionPage() {
         </div>
         
         <div className="prose prose-invert max-w-none mb-4">
-          <div className="whitespace-pre-wrap">{discussion.body}</div>
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{discussion.body}</ReactMarkdown>
         </div>
 
         <div className="flex items-center gap-4 pt-4 border-t border-white/5">
@@ -352,18 +481,64 @@ function DiscussionPage() {
         <Card className="border border-white/5 bg-white/5 p-4 mb-6">
           <form onSubmit={handleReply}>
             <div className="space-y-4">
-              <div>
+              <div className="flex items-center justify-between">
                 <Label htmlFor="reply">Your reply</Label>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowMarkdownPreview(!showMarkdownPreview)}
+                  >
+                    <Eye className="h-4 w-4 mr-1" />
+                    Preview
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                  >
+                    <Smile className="h-4 w-4 mr-1" />
+                    Emoji
+                  </Button>
+                </div>
+              </div>
+              
+              {showEmojiPicker && (
+                <div className="flex flex-wrap gap-2 p-3 border border-white/10 rounded-lg bg-white/5">
+                  {emojis.map((emoji) => (
+                    <button
+                      key={emoji}
+                      type="button"
+                      onClick={() => setReplyText(replyText + emoji)}
+                      className="text-2xl hover:scale-125 transition-transform"
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {showMarkdownPreview ? (
+                <div className="prose prose-invert max-w-none p-4 border border-white/10 rounded-lg bg-white/5 min-h-[100px]">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{replyText || '*Preview will appear here*'}</ReactMarkdown>
+                </div>
+              ) : (
                 <Textarea
                   id="reply"
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
-                  placeholder="Write your reply..."
+                  placeholder="Write your reply... (Markdown supported)"
                   rows={4}
                   required
                 />
-              </div>
-              <div className="flex justify-end">
+              )}
+              
+              <div className="flex justify-between items-center">
+                <div className="text-xs text-muted-foreground">
+                  Supports: **bold**, *italic*, `code`, [links](url), and more
+                </div>
                 <Button type="submit" disabled={isSubmitting || !replyText.trim()}>
                   {isSubmitting ? (
                     <>
@@ -428,15 +603,71 @@ function DiscussionPage() {
                       </span>
                     )}
                   </div>
-                  <div className="prose prose-invert max-w-none text-sm">
-                    <div className="whitespace-pre-wrap">{comment.body}</div>
-                  </div>
-                  <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <ThumbsUp className="h-3 w-3" />
-                      <span>{comment.upvoteCount}</span>
+                  
+                  {editingCommentId === comment.id ? (
+                    <div className="space-y-3">
+                      <Textarea
+                        value={editText}
+                        onChange={(e) => setEditText(e.target.value)}
+                        rows={4}
+                        className="mb-2"
+                      />
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={() => handleEditComment(comment.id)}>
+                          Save
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => { setEditingCommentId(null); setEditText(''); }}>
+                          Cancel
+                        </Button>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <>
+                      <div className="prose prose-invert max-w-none text-sm mb-3">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{comment.body}</ReactMarkdown>
+                      </div>
+                      <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <ThumbsUp className="h-3 w-3" />
+                          <span>{comment.upvoteCount}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {emojis.slice(0, 5).map((emoji) => (
+                            <button
+                              key={emoji}
+                              onClick={() => handleAddReaction(comment.id, emoji)}
+                              className="hover:scale-125 transition-transform"
+                              title={`React with ${emoji}`}
+                            >
+                              {emoji}
+                            </button>
+                          ))}
+                        </div>
+                        {hasGithubIdentity && (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 text-xs"
+                              onClick={() => { setEditingCommentId(comment.id); setEditText(comment.body); }}
+                            >
+                              <Edit2 className="h-3 w-3 mr-1" />
+                              Edit
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 text-xs text-red-500 hover:text-red-400"
+                              onClick={() => handleDeleteComment(comment.id)}
+                            >
+                              <EyeOff className="h-3 w-3 mr-1" />
+                              Delete
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </Card>
