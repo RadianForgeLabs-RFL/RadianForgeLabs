@@ -546,7 +546,7 @@ function DiscussionPage() {
               React
             </Button>
             {showDiscussionEmojiPicker && (
-              <div className="absolute right-0 top-full mt-2 flex flex-wrap gap-2 p-3 border border-white/10 rounded-lg bg-white/5 z-10 w-48">
+              <div className="absolute right-0 top-full mt-2 flex flex-wrap gap-2 p-3 border border-white/10 rounded-lg bg-black/80 backdrop-blur-sm z-10 w-48 shadow-xl">
                 {emojis.map((emoji) => (
                   <button
                     key={emoji}
@@ -628,7 +628,7 @@ function DiscussionPage() {
               </div>
               
               {showEmojiPicker && (
-                <div className="flex flex-wrap gap-2 p-3 border border-white/10 rounded-lg bg-white/5">
+                <div className="flex flex-wrap gap-2 p-3 border border-white/10 rounded-lg bg-black/80 backdrop-blur-sm shadow-xl">
                   {emojis.map((emoji) => (
                     <button
                       key={emoji}

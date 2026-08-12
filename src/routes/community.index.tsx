@@ -624,7 +624,7 @@ function CommunityPage() {
                     </div>
                     
                     {showEmojiPicker && (
-                      <div className="flex flex-wrap gap-2 p-3 border border-white/10 rounded-lg bg-white/5 mb-3">
+                      <div className="flex flex-wrap gap-2 p-3 border border-white/10 rounded-lg bg-black/80 backdrop-blur-sm shadow-xl">
                         {emojis.map((emoji) => (
                           <button
                             key={emoji}
