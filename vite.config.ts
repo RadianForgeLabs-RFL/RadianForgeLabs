@@ -35,6 +35,12 @@ export default defineConfig({
             if (id.includes('date-fns') || id.includes('react-day-picker')) {
               return 'date';
             }
+            if (id.includes('react-markdown') || id.includes('remark')) {
+              return 'markdown';
+            }
+            if (id.includes('@supabase')) {
+              return 'supabase';
+            }
           },
         },
       },
@@ -44,7 +50,7 @@ export default defineConfig({
       sourcemap: false,
     },
     optimizeDeps: {
-      include: ['react', 'react-dom', '@tanstack/react-query', '@tanstack/react-router'],
+      include: ['react', 'react-dom', '@tanstack/react-query', '@tanstack/react-router', 'react-markdown'],
       exclude: ['@lovable.dev/cloud-auth-js'],
     },
     server: {
