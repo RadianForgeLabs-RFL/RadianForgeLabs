@@ -81,7 +81,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", type: "image/png", sizes: "512x512", href: "/favicon.png" },
       { rel: "apple-touch-icon", sizes: "180x180", href: "/favicon.png" },
       { rel: "manifest", href: "/manifest.json" },
-      { rel: "preconnect", href: "https://vblulnytbpvdeziushxw.supabase.co" },
+      { rel: "preconnect", href: "https://zndizxgtyigkjrqmpsqe.supabase.co" },
     ],
   }),
   shellComponent: RootShell,
