@@ -23,6 +23,16 @@ function AuthCallback() {
         }
 
         if (data.session) {
+          // Check if user signed in with GitHub
+          const provider = data.session.user.app_metadata.provider;
+          if (provider === 'github') {
+            // Update profiles table to set link_with_github to true
+            await supabase
+              .from('profiles')
+              .update({ link_with_github: true })
+              .eq('id', data.session.user.id);
+          }
+          
           // Successfully authenticated
           nav({ to: '/' });
         } else {

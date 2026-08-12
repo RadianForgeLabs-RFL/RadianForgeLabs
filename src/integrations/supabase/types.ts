@@ -522,6 +522,7 @@ export type Database = {
           created_at: string
           display_name: string | null
           id: string
+          link_with_github: boolean | null
           updated_at: string
           username: string | null
         }
@@ -531,6 +532,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id: string
+          link_with_github?: boolean | null
           updated_at?: string
           username?: string | null
         }
@@ -540,6 +542,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          link_with_github?: boolean | null
           updated_at?: string
           username?: string | null
         }

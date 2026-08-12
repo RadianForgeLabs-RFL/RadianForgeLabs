@@ -30,6 +30,16 @@ function AdminProducts() {
 
   const del = useMutation({
     mutationFn: async (id: string) => {
+      // Delete related records first due to foreign key constraints
+      await supabase.from("screenshots").delete().eq("product_id", id);
+      await supabase.from("downloads").delete().eq("product_id", id);
+      await supabase.from("versions").delete().eq("product_id", id);
+      await supabase.from("product_tags").delete().eq("product_id", id);
+      await supabase.from("favorites").delete().eq("product_id", id);
+      await supabase.from("preorders").delete().eq("product_id", id);
+      await supabase.from("requests").delete().eq("product_id", id);
+      
+      // Finally delete the product
       const { error } = await supabase.from("products").delete().eq("id", id);
       if (error) throw error;
     },
