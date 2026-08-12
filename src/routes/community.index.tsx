@@ -154,6 +154,8 @@ function CommunityPage() {
                     ':heart:': '❤️',
                     ':fire:': '🔥',
                     ':chart_with_upwards_trend:': '📈',
+                    ':bar_chart:': '📊',
+                    ':test_tube:': '🧪',
                     ':wrench:': '🔧',
                     ':hammer_and_wrench:': '🛠️',
                     ':hammer:': '🔨',
