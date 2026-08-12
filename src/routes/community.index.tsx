@@ -96,10 +96,9 @@ function CommunityPage() {
           }
         `;
 
-        const response = await fetch('https://api.github.com/graphql', {
+        const response = await fetch('/api/github-graphql', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${import.meta.env.VITE_GITHUB_TOKEN}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ query }),
@@ -505,10 +504,9 @@ function CommunityPage() {
       // Get the first repository ID from discussions
       const repoId = discussions[0]?.id?.split('/')[0] || 'R_kgDOGxqJA'; // Default to RFL-Studios repo
 
-      const response = await fetch('https://api.github.com/graphql', {
+      const response = await fetch('/api/github-graphql', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_GITHUB_TOKEN}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -605,10 +603,9 @@ function CommunityPage() {
         }
       `;
 
-      const response = await fetch('https://api.github.com/graphql', {
+      const response = await fetch('/api/github-graphql', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_GITHUB_TOKEN}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ query }),

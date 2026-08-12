@@ -45,10 +45,9 @@ function CommunityAdmin() {
         }
       `;
 
-      const response = await fetch('https://api.github.com/graphql', {
+      const response = await fetch('/api/github-graphql', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_GITHUB_TOKEN}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ query }),

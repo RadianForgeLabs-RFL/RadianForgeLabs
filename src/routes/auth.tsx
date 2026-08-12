@@ -2,7 +2,6 @@ import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-r
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/lib/useAuth";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -39,9 +38,23 @@ function AuthPage() {
       authSchema.parse({ email, password });
       setBusy(true);
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
+      if (error) {
+        if (error.message.includes('Invalid login credentials')) {
+          throw new Error('Invalid email or password');
+        }
+        if (error.message.includes('Email not confirmed')) {
+          throw new Error('Please verify your email before signing in');
+        }
+        throw error;
+      }
       toast.success("Welcome back");
-    } catch (e: any) { toast.error(e.message); } finally { setBusy(false); }
+    } catch (e: any) {
+      if (e.name === 'ZodError') {
+        toast.error('Please enter a valid email and password (min 8 characters)');
+      } else {
+        toast.error(e.message || 'Failed to sign in');
+      }
+    } finally { setBusy(false); }
   };
   const signUp = async () => {
     try {
@@ -54,29 +67,76 @@ function AuthPage() {
           emailRedirectTo: window.location.origin + '/auth/callback'
         }
       });
-      if (error) throw error;
+      if (error) {
+        if (error.message.includes('User already registered')) {
+          throw new Error('An account with this email already exists');
+        }
+        if (error.message.includes('Password should be')) {
+          throw new Error('Password must be at least 8 characters');
+        }
+        throw error;
+      }
       toast.success("Account created — check your email to verify.");
-    } catch (e: any) { toast.error(e.message); } finally { setBusy(false); }
+    } catch (e: any) {
+      if (e.name === 'ZodError') {
+        toast.error('Please enter a valid email and password (min 8 characters)');
+      } else {
+        toast.error(e.message || 'Failed to create account');
+      }
+    } finally { setBusy(false); }
   };
   const google = async () => {
-    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
-    if (result.error) toast.error(result.error.message);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin + '/auth/callback'
+        }
+      });
+      if (error) {
+        if (error.message.includes('Provider is not enabled')) {
+          throw new Error('Google login is not configured. Please contact support.');
+        }
+        throw error;
+      }
+    } catch (e: any) {
+      toast.error(e.message || 'Failed to sign in with Google');
+    }
   };
   const github = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'github',
-      options: {
-        redirectTo: 'https://zndizxgtyigkjrqmpsqe.supabase.co/auth/v1/callback'
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'github',
+        options: {
+          redirectTo: window.location.origin + '/auth/callback'
+        }
+      });
+      if (error) {
+        if (error.message.includes('Provider is not enabled')) {
+          throw new Error('GitHub login is not configured. Please contact support.');
+        }
+        throw error;
       }
-    });
-    if (error) toast.error(error.message);
+    } catch (e: any) {
+      toast.error(e.message || 'Failed to sign in with GitHub');
+    }
   };
   const reset = async () => {
     if (!email) return toast.error("Enter your email first");
-    const { error } = await supabase.auth.resetPasswordForEmail(email, { 
-      redirectTo: window.location.origin + "/reset-password" 
-    });
-    if (error) toast.error(error.message); else toast.success("Password reset email sent");
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, { 
+        redirectTo: window.location.origin + "/reset-password" 
+      });
+      if (error) {
+        if (error.message.includes('Unable to validate email address')) {
+          throw new Error('Please enter a valid email address');
+        }
+        throw error;
+      }
+      toast.success("Password reset email sent");
+    } catch (e: any) {
+      toast.error(e.message || 'Failed to send reset email');
+    }
   };
 
   return (
