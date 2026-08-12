@@ -61,15 +61,70 @@ function CommunityAdmin() {
       const data = await response.json();
       const categoryMap = new Map<string, { id: string; name: string; emoji: string; description: string }>();
       
+      // Emoji mapping for GitHub category shortcodes
+      const emojiMap: Record<string, string> = {
+        ':video_game:': '🎮',
+        ':speech_balloon:': '💬',
+        ':mega:': '📢',
+        ':bug:': '🐛',
+        ':bulb:': '💡',
+        ':art:': '🎨',
+        ':question:': '❓',
+        ':iphone:': '📱',
+        ':rocket:': '🚀',
+        ':book:': '📚',
+        ':star:': '⭐',
+        ':heart:': '❤️',
+        ':fire:': '🔥',
+        ':chart_with_upwards_trend:': '📈',
+        ':bar_chart:': '📊',
+        ':test_tube:': '🧪',
+        ':wrench:': '🔧',
+        ':hammer_and_wrench:': '🛠️',
+        ':hammer:': '🔨',
+        ':construction:': '🚧',
+        ':globe:': '🌍',
+        ':computer:': '💻',
+        ':game_die:': '🎲',
+        ':musical_note:': '🎵',
+        ':film:': '🎬',
+        ':pencil2:': '✏️',
+        ':warning:': '⚠️',
+        ':checkered_flag:': '🏁',
+        ':trophy:': '🏆',
+        ':gift:': '🎁',
+        ':tada:': '🎊',
+        ':sparkles:': '✨',
+        ':zap:': '⚡',
+        ':seedling:': '🌱',
+        ':deciduous_tree:': '🌳',
+        ':cloud:': '☁️',
+        ':snowflake:': '❄️',
+        ':ocean:': '🌊',
+        ':mountain:': '⛰️',
+        ':house:': '🏠',
+        ':office:': '🏢',
+        ':desktop_computer:': '🖥️',
+        ':keyboard:': '⌨️',
+        ':mouse:': '🖱️',
+      };
+      
       if (data.data?.organization?.repositories?.nodes) {
         data.data.organization.repositories.nodes.forEach((repo: any) => {
           if (repo.discussionCategories?.nodes) {
             repo.discussionCategories.nodes.forEach((cat: any) => {
               if (!categoryMap.has(cat.id)) {
+                let displayEmoji = cat.emoji || '💬';
+                
+                // Convert GitHub emoji shortcodes to actual emojis
+                if (displayEmoji.startsWith(':') && displayEmoji.endsWith(':')) {
+                  displayEmoji = emojiMap[displayEmoji] || displayEmoji;
+                }
+                
                 categoryMap.set(cat.id, {
                   id: cat.id,
                   name: cat.name,
-                  emoji: cat.emoji || '💬',
+                  emoji: displayEmoji,
                   description: cat.description || `${cat.name} discussions`
                 });
               }
