@@ -139,20 +139,20 @@ function Home() {
       {/* COMPANY STATS */}
       <section className="mx-auto max-w-7xl px-4 py-16">
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-          <Card className="border border-rose-500/20 bg-gradient-to-br from-rose-500/5 to-transparent p-6 text-center">
-            <Users className="mx-auto h-8 w-8 text-rose-500" />
-            <div className="mt-4 text-3xl font-bold text-rose-500">{String(c.playerCount)}</div>
-            <div className="mt-2 text-sm text-muted-foreground">Players</div>
+          <Card className="border border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-transparent p-6 text-center">
+            <Building2 className="mx-auto h-8 w-8 text-blue-500" />
+            <div className="mt-4 text-3xl font-bold text-blue-500">{String(c.userCount)}</div>
+            <div className="mt-2 text-sm text-muted-foreground">Users</div>
           </Card>
           <Card className="border border-purple-500/20 bg-gradient-to-br from-purple-500/5 to-transparent p-6 text-center">
             <Download className="mx-auto h-8 w-8 text-purple-500" />
             <div className="mt-4 text-3xl font-bold text-purple-500">{String(c.downloadsCount)}</div>
             <div className="mt-2 text-sm text-muted-foreground">Downloads</div>
           </Card>
-          <Card className="border border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-transparent p-6 text-center">
-            <Building2 className="mx-auto h-8 w-8 text-blue-500" />
-            <div className="mt-4 text-3xl font-bold text-blue-500">{String(c.userCount)}</div>
-            <div className="mt-2 text-sm text-muted-foreground">Users</div>
+          <Card className="border border-rose-500/20 bg-gradient-to-br from-rose-500/5 to-transparent p-6 text-center">
+            <Users className="mx-auto h-8 w-8 text-rose-500" />
+            <div className="mt-4 text-3xl font-bold text-rose-500">{String(c.playerCount)}</div>
+            <div className="mt-2 text-sm text-muted-foreground">Players</div>
           </Card>
         </div>
       </section>

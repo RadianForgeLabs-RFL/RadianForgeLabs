@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export function ScreenshotGallery({ screenshots }: { screenshots: { id?: string; url: string; caption?: string | null }[] }) {
@@ -39,6 +39,7 @@ export function ScreenshotGallery({ screenshots }: { screenshots: { id?: string;
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-6xl border-white/5 bg-background/95 p-2 sm:p-3">
+          <DialogTitle className="sr-only">Screenshot Gallery</DialogTitle>
           <div className="relative">
             <img src={screenshots[idx]?.url} alt="" className="max-h-[80vh] w-full rounded-md object-contain" />
             {screenshots.length > 1 && (
