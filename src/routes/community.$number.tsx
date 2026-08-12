@@ -538,10 +538,10 @@ function DiscussionPage() {
           <div className="flex-1" />
           <div className="relative">
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={() => setShowDiscussionEmojiPicker(!showDiscussionEmojiPicker)}
-              className="border-purple-500/30 text-purple-400 hover:bg-purple-500/10"
+              className="text-muted-foreground hover:text-foreground"
             >
               <Smile className="h-4 w-4 mr-1" />
               React
