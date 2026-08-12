@@ -62,6 +62,7 @@ function DiscussionPage() {
   const [editText, setEditText] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [uploadingFile, setUploadingFile] = useState(false);
+  const [showDiscussionEmojiPicker, setShowDiscussionEmojiPicker] = useState(false);
 
   // Check if user has GitHub identity linked
   const hasGithubIdentity = user?.identities?.some((identity: any) => identity.provider === 'github');
@@ -306,12 +307,16 @@ function DiscussionPage() {
         }),
       });
 
-      // Update local state instead of reloading
-      setComments(comments.map(c => 
-        c.id === commentId 
-          ? { ...c, upvoteCount: c.upvoteCount + 1 }
-          : c
-      ));
+      // Check if this is the main discussion or a comment
+      if (commentId === discussion?.id) {
+        setDiscussion({ ...discussion, upvoteCount: discussion.upvoteCount + 1 });
+      } else {
+        setComments(comments.map(c => 
+          c.id === commentId 
+            ? { ...c, upvoteCount: c.upvoteCount + 1 }
+            : c
+        ));
+      }
     } catch (err) {
       console.error('Error adding reaction:', err);
       alert('Failed to add reaction');
@@ -530,6 +535,34 @@ function DiscussionPage() {
               <span>Answered</span>
             </div>
           )}
+          <div className="flex-1" />
+          <div className="relative">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowDiscussionEmojiPicker(!showDiscussionEmojiPicker)}
+            >
+              <Smile className="h-4 w-4 mr-1" />
+              React
+            </Button>
+            {showDiscussionEmojiPicker && (
+              <div className="absolute right-0 top-full mt-2 flex flex-wrap gap-2 p-3 border border-white/10 rounded-lg bg-white/5 z-10 w-48">
+                {emojis.map((emoji) => (
+                  <button
+                    key={emoji}
+                    onClick={() => {
+                      handleAddReaction(discussion.id, emoji);
+                      setShowDiscussionEmojiPicker(false);
+                    }}
+                    className="text-2xl hover:scale-125 transition-transform"
+                    title={`React with ${emoji}`}
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </Card>
 
