@@ -26,3 +26,41 @@ INSERT INTO public.products (id, slug, name, tagline, description, features, req
 -- product_tags: no rows
 -- downloads: no rows
 -- versions: no rows
+
+-- screenshots (1 rows)
+INSERT INTO public.screenshots (id, product_id, url, caption, sort_order) VALUES ('4ae2fabc-35a7-4533-bdca-3b4e09bed835', '1f8e0a4b-a623-42c7-88cf-20c50babeda5', 'https://vblulnytbpvdeziushxw.supabase.co/storage/v1/object/sign/product-media/screenshots/4d1d74b5-c4f5-45a2-8fe5-25c829529e4d.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV83ZjY3ODkwZi1lZjBhLTRmOTUtOTUzMy1lMmFiMzZlNDRkNGIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJwcm9kdWN0LW1lZGlhL3NjcmVlbnNob3RzLzRkMWQ3NGI1LWM0ZjUtNDVhMi04ZmU1LTI1YzgyOTUyOWU0ZC5wbmciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzg0ODY3ODY2LCJleHAiOjQ5Mzg0Njc4NjZ9.ugykWpPfuU1MX27H2sJpt4dzGT1gIy5a1HiDI-U_dA8', NULL, '0') ON CONFLICT DO NOTHING;
+-- news: no rows
+
+-- settings (7 rows)
+INSERT INTO public.settings (key, value, updated_at, user_count, player_count, downloads_count, studios_icon, entertainment_icon) VALUES ('stats', '{"users": 9800, "downloads": 142000, "apps_published": 24, "games_published": 8, "community_members": 15400, "open_source_projects": 31}', '2026-07-16 15:04:39.24662+00', '10K+', '10K+', '50K+', 'Code', 'Gamepad2') ON CONFLICT DO NOTHING;
+INSERT INTO public.settings (key, value, updated_at, user_count, player_count, downloads_count, studios_icon, entertainment_icon) VALUES ('maintenance_mode', 'false', '2026-07-16 15:04:39.24662+00', '10K+', '10K+', '50K+', 'Code', 'Gamepad2') ON CONFLICT DO NOTHING;
+INSERT INTO public.settings (key, value, updated_at, user_count, player_count, downloads_count, studios_icon, entertainment_icon) VALUES ('user_count', '"10+"', '2026-08-01 10:20:49.454669+00', '10K+', '10K+', '50K+', 'Code', 'Gamepad2') ON CONFLICT DO NOTHING;
+INSERT INTO public.settings (key, value, updated_at, user_count, player_count, downloads_count, studios_icon, entertainment_icon) VALUES ('player_count', '"1+"', '2026-08-01 10:20:49.454669+00', '10K+', '10K+', '50K+', 'Code', 'Gamepad2') ON CONFLICT DO NOTHING;
+INSERT INTO public.settings (key, value, updated_at, user_count, player_count, downloads_count, studios_icon, entertainment_icon) VALUES ('downloads_count', '"0"', '2026-08-01 10:20:49.454669+00', '10K+', '10K+', '50K+', 'Code', 'Gamepad2') ON CONFLICT DO NOTHING;
+INSERT INTO public.settings (key, value, updated_at, user_count, player_count, downloads_count, studios_icon, entertainment_icon) VALUES ('studios_icon', '"Code"', '2026-08-01 10:20:49.454669+00', '10K+', '10K+', '50K+', 'Code', 'Gamepad2') ON CONFLICT DO NOTHING;
+INSERT INTO public.settings (key, value, updated_at, user_count, player_count, downloads_count, studios_icon, entertainment_icon) VALUES ('entertainment_icon', '"Gamepad2"', '2026-08-01 10:20:49.454669+00', '10K+', '10K+', '50K+', 'Code', 'Gamepad2') ON CONFLICT DO NOTHING;
+
+-- announcements (1 rows)
+INSERT INTO public.announcements (id, message, variant, active, created_at) VALUES ('3c2c5655-01fa-4bda-ab9f-d79fa09dd94a', 'Welcome to RFL --- Rise Your Voice Against Google To Keep Android Open (Visit : keepandroidopen.org', 'info', 'true', '2026-08-01 04:15:34.00588+00') ON CONFLICT DO NOTHING;
+
+-- community_settings (1 rows)
+INSERT INTO public.community_settings (id, enabled, repo_owner, repo_name, repo_id, mapping, theme_follows_site, theme, reactions_enabled, input_position, lazy_load, allow_new_discussions, comments_enabled, show_github_links, updated_at) VALUES ('default', 'true', 'RadianForgeLabs', 'Community', NULL, 'number', 'true', 'dark', 'true', 'bottom', 'true', 'true', 'true', 'true', '2026-08-11 10:16:23.585189+00') ON CONFLICT DO NOTHING;
+-- community_categories: no rows
+
+-- profiles (2 rows)
+INSERT INTO public.profiles (id, username, display_name, avatar_url, bio, created_at, updated_at) VALUES ('776e8ca9-7e17-4ce2-9e99-60ee685e3ff1', NULL, 'krishnaramalesh8838', NULL, NULL, '2026-07-16 15:20:57.587947+00', '2026-07-16 15:20:57.587947+00') ON CONFLICT DO NOTHING;
+INSERT INTO public.profiles (id, username, display_name, avatar_url, bio, created_at, updated_at) VALUES ('ab467693-6717-40fc-be4d-772606b51779', NULL, 'radianforgelabs', NULL, NULL, '2026-07-21 08:41:01.605202+00', '2026-07-21 08:41:01.605202+00') ON CONFLICT DO NOTHING;
+
+-- user_roles (3 rows)
+INSERT INTO public.user_roles (id, user_id, role, created_at) VALUES ('8e787576-f258-4019-af86-fcd3f8a46f6e', '776e8ca9-7e17-4ce2-9e99-60ee685e3ff1', 'user', '2026-07-16 15:20:57.587947+00') ON CONFLICT DO NOTHING;
+INSERT INTO public.user_roles (id, user_id, role, created_at) VALUES ('33cd41af-be91-4c74-827f-8ea6d01478a9', '776e8ca9-7e17-4ce2-9e99-60ee685e3ff1', 'admin', '2026-07-16 15:20:57.587947+00') ON CONFLICT DO NOTHING;
+INSERT INTO public.user_roles (id, user_id, role, created_at) VALUES ('5e26162f-ef1d-44fd-a238-89555da62100', 'ab467693-6717-40fc-be4d-772606b51779', 'admin', '2026-07-21 08:41:01.605202+00') ON CONFLICT DO NOTHING;
+
+-- favorites (2 rows)
+INSERT INTO public.favorites (user_id, product_id, created_at) VALUES ('776e8ca9-7e17-4ce2-9e99-60ee685e3ff1', '1f8e0a4b-a623-42c7-88cf-20c50babeda5', '2026-07-22 10:53:22.23568+00') ON CONFLICT DO NOTHING;
+INSERT INTO public.favorites (user_id, product_id, created_at) VALUES ('ab467693-6717-40fc-be4d-772606b51779', '1f8e0a4b-a623-42c7-88cf-20c50babeda5', '2026-08-01 04:32:37.205396+00') ON CONFLICT DO NOTHING;
+-- preorders: no rows
+-- requests: no rows
+-- reviews: no rows
+
+SET session_replication_role = DEFAULT;
