@@ -22,6 +22,66 @@ function CommunityAdmin() {
 
   const set = useQuery({ queryKey: ["community-settings"], queryFn: async () => (await supabase.from("settings").select("*")).data ?? [] });
 
+  const categories = useQuery({
+    queryKey: ["github-categories"],
+    queryFn: async () => {
+      const query = `
+        query {
+          organization(login: "RadianForgeLabs") {
+            repositories(first: 10) {
+              nodes {
+                name
+                discussionCategories(first: 20) {
+                  nodes {
+                    id
+                    name
+                    emoji
+                    description
+                  }
+                }
+              }
+            }
+          }
+        }
+      `;
+
+      const response = await fetch('https://api.github.com/graphql', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_GITHUB_TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`GitHub GraphQL API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const categoryMap = new Map<string, { id: string; name: string; emoji: string; description: string }>();
+      
+      if (data.data?.organization?.repositories?.nodes) {
+        data.data.organization.repositories.nodes.forEach((repo: any) => {
+          if (repo.discussionCategories?.nodes) {
+            repo.discussionCategories.nodes.forEach((cat: any) => {
+              if (!categoryMap.has(cat.id)) {
+                categoryMap.set(cat.id, {
+                  id: cat.id,
+                  name: cat.name,
+                  emoji: cat.emoji || '💬',
+                  description: cat.description || `${cat.name} discussions`
+                });
+              }
+            });
+          }
+        });
+      }
+
+      return Array.from(categoryMap.values());
+    },
+  });
+
   const toggleCommunity = useMutation({
     mutationFn: async (v: boolean) => { const { error } = await supabase.from("settings").upsert({ key: "community_enabled", value: v as any }); if (error) throw error; },
     onSuccess: () => { toast.success("Saved"); qc.invalidateQueries({ queryKey: ["community-settings"] }); },
@@ -158,27 +218,38 @@ function CommunityAdmin() {
       </Card>
 
       <Card className="border border-white/5 bg-white/5 p-6">
-        <h3 className="font-semibold mb-4">Categories</h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          Community categories are managed on GitHub Discussions.
-        </p>
-        <div className="space-y-2">
-          {[
-            { name: "Announcements", emoji: "📢" },
-            { name: "General", emoji: "💬" },
-            { name: "Games", emoji: "🎮" },
-            { name: "Apps", emoji: "📱" },
-            { name: "Bugs", emoji: "🐛" },
-            { name: "Ideas", emoji: "💡" },
-            { name: "Showcase", emoji: "🎨" },
-            { name: "Help", emoji: "❓" },
-          ].map((cat) => (
-            <div key={cat.name} className="flex items-center gap-3 p-3 rounded-lg border border-white/5 bg-white/5">
-              <span className="text-xl">{cat.emoji}</span>
-              <span className="font-medium">{cat.name}</span>
-            </div>
-          ))}
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold">Categories</h3>
+          <Button 
+            size="sm" 
+            variant="outline" 
+            onClick={() => categories.refetch()}
+            disabled={categories.isLoading}
+          >
+            <RefreshCw className={`mr-2 h-4 w-4 ${categories.isLoading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
         </div>
+        <p className="text-sm text-muted-foreground mb-4">
+          Community categories are synced from GitHub Discussions.
+        </p>
+        {categories.isLoading ? (
+          <div className="text-center text-muted-foreground py-8">Loading categories...</div>
+        ) : categories.error ? (
+          <div className="text-center text-destructive py-8">Failed to load categories</div>
+        ) : (
+          <div className="space-y-2">
+            {categories.data?.map((cat) => (
+              <div key={cat.id} className="flex items-center gap-3 p-3 rounded-lg border border-white/5 bg-white/5">
+                <span className="text-xl">{cat.emoji}</span>
+                <div className="flex-1">
+                  <span className="font-medium">{cat.name}</span>
+                  <p className="text-xs text-muted-foreground">{cat.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </Card>
     </div>
   );
