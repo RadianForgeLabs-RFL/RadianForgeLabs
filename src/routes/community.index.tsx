@@ -275,7 +275,7 @@ function CommunityPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'github',
       options: {
-        redirectTo: window.location.origin + '/auth/callback',
+        redirectTo: 'https://zndizxgtyigkjrqmpsqe.supabase.co/auth/v1/callback',
         scopes: 'read:user user:email'
       }
     });
