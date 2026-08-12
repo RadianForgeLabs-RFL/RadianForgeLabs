@@ -30,6 +30,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as SitemapXmlRouteImport } from './routes/sitemap.xml'
 import { Route as ProductsSlugRouteImport } from './routes/products.$slug'
 import { Route as CommunityNumberRouteImport } from './routes/community.$number'
+import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminNewsRouteImport } from './routes/admin.news'
@@ -140,6 +141,11 @@ const CommunityNumberRoute = CommunityNumberRouteImport.update({
   path: '/community/$number',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/callback',
+  path: '/callback',
+  getParentRoute: () => AuthRoute,
+} as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -171,7 +177,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
   '/apps': typeof AppsRoute
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/downloads': typeof DownloadsRoute
   '/entertainment': typeof EntertainmentRoute
   '/games': typeof GamesRoute
@@ -187,6 +193,7 @@ export interface FileRoutesByFullPath {
   '/admin/news': typeof AdminNewsRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/community/$number': typeof CommunityNumberRoute
   '/products/$slug': typeof ProductsSlugRoute
   '/sitemap/xml': typeof SitemapXmlRoute
@@ -197,7 +204,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/apps': typeof AppsRoute
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/downloads': typeof DownloadsRoute
   '/entertainment': typeof EntertainmentRoute
   '/games': typeof GamesRoute
@@ -213,6 +220,7 @@ export interface FileRoutesByTo {
   '/admin/news': typeof AdminNewsRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/community/$number': typeof CommunityNumberRoute
   '/products/$slug': typeof ProductsSlugRoute
   '/sitemap/xml': typeof SitemapXmlRoute
@@ -226,7 +234,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
   '/apps': typeof AppsRoute
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/downloads': typeof DownloadsRoute
   '/entertainment': typeof EntertainmentRoute
   '/games': typeof GamesRoute
@@ -242,6 +250,7 @@ export interface FileRoutesById {
   '/admin/news': typeof AdminNewsRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/community/$number': typeof CommunityNumberRoute
   '/products/$slug': typeof ProductsSlugRoute
   '/sitemap/xml': typeof SitemapXmlRoute
@@ -271,6 +280,7 @@ export interface FileRouteTypes {
     | '/admin/news'
     | '/admin/products'
     | '/admin/settings'
+    | '/auth/callback'
     | '/community/$number'
     | '/products/$slug'
     | '/sitemap/xml'
@@ -297,6 +307,7 @@ export interface FileRouteTypes {
     | '/admin/news'
     | '/admin/products'
     | '/admin/settings'
+    | '/auth/callback'
     | '/community/$number'
     | '/products/$slug'
     | '/sitemap/xml'
@@ -325,6 +336,7 @@ export interface FileRouteTypes {
     | '/admin/news'
     | '/admin/products'
     | '/admin/settings'
+    | '/auth/callback'
     | '/community/$number'
     | '/products/$slug'
     | '/sitemap/xml'
@@ -338,7 +350,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRouteWithChildren
   AppsRoute: typeof AppsRoute
-  AuthRoute: typeof AuthRoute
+  AuthRoute: typeof AuthRouteWithChildren
   DownloadsRoute: typeof DownloadsRoute
   EntertainmentRoute: typeof EntertainmentRoute
   GamesRoute: typeof GamesRoute
@@ -504,6 +516,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CommunityNumberRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/admin/settings': {
       id: '/admin/settings'
       path: '/settings'
@@ -572,13 +591,23 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface AuthRouteChildren {
+  AuthCallbackRoute: typeof AuthCallbackRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthCallbackRoute: AuthCallbackRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AboutRoute: AboutRoute,
   AdminRoute: AdminRouteWithChildren,
   AppsRoute: AppsRoute,
-  AuthRoute: AuthRoute,
+  AuthRoute: AuthRouteWithChildren,
   DownloadsRoute: DownloadsRoute,
   EntertainmentRoute: EntertainmentRoute,
   GamesRoute: GamesRoute,

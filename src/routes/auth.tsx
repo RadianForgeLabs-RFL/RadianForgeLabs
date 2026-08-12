@@ -47,7 +47,13 @@ function AuthPage() {
     try {
       authSchema.parse({ email, password });
       setBusy(true);
-      const { error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin } });
+      const { error } = await supabase.auth.signUp({ 
+        email, 
+        password, 
+        options: { 
+          emailRedirectTo: window.location.origin + '/auth/callback'
+        }
+      });
       if (error) throw error;
       toast.success("Account created — check your email to verify.");
     } catch (e: any) { toast.error(e.message); } finally { setBusy(false); }
@@ -67,7 +73,9 @@ function AuthPage() {
   };
   const reset = async () => {
     if (!email) return toast.error("Enter your email first");
-    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + "/reset-password" });
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { 
+      redirectTo: window.location.origin + "/reset-password" 
+    });
     if (error) toast.error(error.message); else toast.success("Password reset email sent");
   };
 
