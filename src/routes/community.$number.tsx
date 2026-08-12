@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, MessageSquare, ExternalLink, Loader2, AlertCircle, Send, ThumbsUp, CheckCircle, Clock, User, Edit2, Eye, EyeOff, Smile, Paperclip } from "lucide-react";
+import { ArrowLeft, MessageSquare, ExternalLink, Loader2, AlertCircle, Send, ThumbsUp, CheckCircle, Clock, User, Edit2, Eye, EyeOff, Smile, Paperclip, Upload } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -61,6 +61,7 @@ function DiscussionPage() {
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [uploadingFile, setUploadingFile] = useState(false);
 
   // Check if user has GitHub identity linked
   const hasGithubIdentity = user?.identities?.some((identity: any) => identity.provider === 'github');
@@ -407,6 +408,42 @@ function DiscussionPage() {
 
   const emojis = ['👍', '👎', '😄', '🎉', '❤️', '🔥', '🚀', '💡', '👀', '✅'];
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingFile(true);
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `community-uploads/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('product-media')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-media')
+        .getPublicUrl(filePath);
+
+      // Insert markdown image syntax into reply
+      const imageMarkdown = `
+![${file.name}](${publicUrl})
+`;
+      setReplyText(replyText + imageMarkdown);
+    } catch (err) {
+      console.error('Error uploading file:', err);
+      alert('Failed to upload file. Please try again.');
+    } finally {
+      setUploadingFile(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-8">
@@ -525,6 +562,35 @@ function DiscussionPage() {
                     <Smile className="h-4 w-4 mr-1" />
                     Emoji
                   </Button>
+                  <div className="relative">
+                    <input
+                      type="file"
+                      id="file-upload"
+                      className="hidden"
+                      onChange={handleFileUpload}
+                      accept="image/*,.pdf,.doc,.docx"
+                      disabled={uploadingFile}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => document.getElementById('file-upload')?.click()}
+                      disabled={uploadingFile}
+                    >
+                      {uploadingFile ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          Uploading...
+                        </>
+                      ) : (
+                        <>
+                          <Paperclip className="h-4 w-4 mr-1" />
+                          Attach File
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </div>
               </div>
               

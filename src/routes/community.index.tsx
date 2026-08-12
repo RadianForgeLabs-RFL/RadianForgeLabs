@@ -378,6 +378,8 @@ function CommunityPage() {
               // Add to categories if not exists
               if (d.category && !categoryMap.has(d.category.id)) {
                 let displayEmoji = d.category.emoji || '💬';
+                
+                // Extended emoji mapping for more categories
                 const emojiMap: Record<string, string> = {
                   ':video_game:': '🎮',
                   ':speech_balloon:': '💬',
@@ -399,9 +401,56 @@ function CommunityPage() {
                   ':game_die:': '🎲',
                   ':musical_note:': '🎵',
                   ':film:': '🎬',
+                  ':pencil2:': '✏️',
+                  ':hammer:': '🔨',
+                  ':construction:': '🚧',
+                  ':warning:': '⚠️',
+                  ':checkered_flag:': '🏁',
+                  ':trophy:': '🏆',
+                  ':gift:': '🎁',
+                  ':tada:': '🎊',
+                  ':sparkles:': '✨',
+                  ':zap:': '⚡',
+                  ':seedling:': '🌱',
+                  ':deciduous_tree:': '🌳',
+                  ':cloud:': '☁️',
+                  ':snowflake:': '❄️',
+                  ':ocean:': '🌊',
+                  ':mountain:': '⛰️',
+                  ':house:': '🏠',
+                  ':office:': '🏢',
                 };
+                
                 if (displayEmoji.startsWith(':') && displayEmoji.endsWith(':')) {
                   displayEmoji = emojiMap[displayEmoji] || '💬';
+                }
+                
+                // Fallback emoji based on category name if emoji is still generic
+                if (displayEmoji === '💬') {
+                  const categoryName = d.category.name.toLowerCase();
+                  if (categoryName.includes('game') || categoryName.includes('gaming')) {
+                    displayEmoji = '🎮';
+                  } else if (categoryName.includes('app') || categoryName.includes('mobile')) {
+                    displayEmoji = '📱';
+                  } else if (categoryName.includes('bug') || categoryName.includes('issue')) {
+                    displayEmoji = '🐛';
+                  } else if (categoryName.includes('idea') || categoryName.includes('feature')) {
+                    displayEmoji = '💡';
+                  } else if (categoryName.includes('announcement') || categoryName.includes('news')) {
+                    displayEmoji = '📢';
+                  } else if (categoryName.includes('help') || categoryName.includes('support')) {
+                    displayEmoji = '❓';
+                  } else if (categoryName.includes('showcase') || categoryName.includes('project')) {
+                    displayEmoji = '🎨';
+                  } else if (categoryName.includes('general')) {
+                    displayEmoji = '💬';
+                  } else if (categoryName.includes('entertainment')) {
+                    displayEmoji = '🎮';
+                  } else if (categoryName.includes('studio') || categoryName.includes('studios')) {
+                    displayEmoji = '🏢';
+                  } else if (categoryName.includes('download') || categoryName.includes('file')) {
+                    displayEmoji = '📥';
+                  }
                 }
                 
                 categoryMap.set(d.category.id, {
