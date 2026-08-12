@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MessageSquare, ExternalLink, Loader2, AlertCircle, Users, Clock, CheckCircle, X, Plus, Github, Eye, Smile, RefreshCw } from "lucide-react";
+import { MessageSquare, ExternalLink, Loader2, AlertCircle, Users, Clock, CheckCircle, X, Plus, Github, Eye, Smile, RefreshCw, ThumbsUp } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -32,6 +32,7 @@ interface Discussion {
   createdAt: string;
   isAnswered: boolean;
   upvoteCount: number;
+  commentCount: number;
   categoryName?: string;
   categoryId?: string;
 }
@@ -123,6 +124,7 @@ function CommunityPage() {
                   createdAt: d.createdAt,
                   isAnswered: d.answerChosenAt !== null,
                   upvoteCount: d.reactions?.totalCount || 0,
+                  commentCount: 0, // Will be updated when we fetch comments
                   categoryName: d.category?.name || 'General',
                   categoryId: d.category?.id || ''
                 });
@@ -371,6 +373,7 @@ function CommunityPage() {
                 createdAt: d.createdAt,
                 isAnswered: d.answerChosenAt !== null,
                 upvoteCount: d.reactions?.totalCount || 0,
+                commentCount: 0,
                 categoryName: d.category?.name || 'General',
                 categoryId: d.category?.id || ''
               });
@@ -624,7 +627,7 @@ function CommunityPage() {
                     </div>
                     
                     {showEmojiPicker && (
-                      <div className="flex flex-wrap gap-2 p-3 border border-white/10 rounded-lg bg-black/80 backdrop-blur-sm shadow-xl">
+                      <div className="flex flex-wrap gap-2 p-3 border border-white/10 rounded-lg glass shadow-xl">
                         {emojis.map((emoji) => (
                           <button
                             key={emoji}
@@ -758,8 +761,12 @@ function CommunityPage() {
                             {new Date(disc.createdAt).toLocaleDateString()}
                           </span>
                           <span className="flex items-center gap-1">
-                            <MessageSquare className="h-3 w-3" />
+                            <ThumbsUp className="h-3 w-3" />
                             {disc.upvoteCount} reactions
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <MessageSquare className="h-3 w-3" />
+                            {disc.commentCount} replies
                           </span>
                         </div>
                       </div>
