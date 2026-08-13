@@ -164,6 +164,69 @@ export type Database = {
         }
         Relationships: []
       }
+      discussion_templates: {
+        Row: {
+          body_template: string
+          category_id: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          title_template: string
+          updated_at: string | null
+        }
+        Insert: {
+          body_template: string
+          category_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          title_template: string
+          updated_at?: string | null
+        }
+        Update: {
+          body_template?: string
+          category_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          title_template?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      discussion_views: {
+        Row: {
+          discussion_id: string
+          id: string
+          ip_address: string | null
+          user_id: string | null
+          viewed_at: string | null
+        }
+        Insert: {
+          discussion_id: string
+          id?: string
+          ip_address?: string | null
+          user_id?: string | null
+          viewed_at?: string | null
+        }
+        Update: {
+          discussion_id?: string
+          id?: string
+          ip_address?: string | null
+          user_id?: string | null
+          viewed_at?: string | null
+        }
+        Relationships: []
+      }
       downloads: {
         Row: {
           architecture: string | null

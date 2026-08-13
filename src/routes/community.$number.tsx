@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, MessageSquare, ExternalLink, Loader2, AlertCircle, Send, ThumbsUp, CheckCircle, Clock, User, Edit2, Eye, EyeOff, Smile, Paperclip, Upload, Trash2 } from "lucide-react";
+import { ArrowLeft, MessageSquare, ExternalLink, Loader2, AlertCircle, Send, ThumbsUp, CheckCircle, Clock, User, Edit2, Eye, EyeOff, Smile, Paperclip, Upload, Trash2, Bell, BellOff } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,6 +34,7 @@ interface DiscussionDetail {
   isAnswered: boolean;
   upvoteCount: number;
   commentCount: number;
+  viewerFollowing?: boolean;
 }
 
 export const Route = createFileRoute("/community/$number")({
@@ -74,6 +75,8 @@ function DiscussionPage() {
   const [pollAllowAddOptions, setPollAllowAddOptions] = useState(false);
   const [polls, setPolls] = useState<any[]>([]);
   const [userVotes, setUserVotes] = useState<Record<string, string>>({});
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [viewCount, setViewCount] = useState(0);
 
   // Check if user has GitHub identity linked
   const hasGithubIdentity = user?.identities?.some((identity: any) => identity.provider === 'github');
@@ -168,6 +171,46 @@ function DiscussionPage() {
     fetchPolls();
   }, [discussion, user]);
 
+  // Track view count
+  useEffect(() => {
+    async function trackView() {
+      if (!discussion) return;
+
+      try {
+        // Insert view record
+        if (user?.id) {
+          await (supabase as any)
+            .from('discussion_views')
+            .insert({
+              discussion_id: discussion.id,
+              user_id: user.id,
+            });
+        } else {
+          // Track by IP for anonymous users (simplified)
+          await (supabase as any)
+            .from('discussion_views')
+            .insert({
+              discussion_id: discussion.id,
+              ip_address: 'anonymous',
+            });
+        }
+
+        // Get total view count
+        const { count } = await supabase
+          .from('discussion_views')
+          .select('*', { count: 'exact', head: true })
+          .eq('discussion_id', discussion.id);
+
+        setViewCount(count || 0);
+      } catch (err) {
+        // Ignore duplicate errors
+        console.error('Error tracking view:', err);
+      }
+    }
+
+    trackView();
+  }, [discussion, user]);
+
   useEffect(() => {
     async function fetchDiscussion() {
       try {
@@ -194,6 +237,7 @@ function DiscussionPage() {
                     reactions {
                       totalCount
                     }
+                    viewerFollowing
                     comments(first: 50) {
                       totalCount
                       nodes {
@@ -250,6 +294,7 @@ function DiscussionPage() {
                 isAnswered: repo.discussion.answerChosenAt !== null,
                 upvoteCount: repo.discussion.reactions?.totalCount || 0,
                 commentCount: repo.discussion.comments?.totalCount || 0,
+                viewerFollowing: repo.discussion.viewerFollowing || false,
               };
               
               if (repo.discussion.comments?.nodes) {
@@ -274,6 +319,7 @@ function DiscussionPage() {
 
         setDiscussion(foundDiscussion);
         setComments(foundComments);
+        setIsFollowing(foundDiscussion.viewerFollowing || false);
       } catch (err) {
         console.error('Error fetching discussion:', err);
         setError(err instanceof Error ? err.message : 'Failed to load discussion');
@@ -871,6 +917,44 @@ function DiscussionPage() {
     setPollOptions(newOptions);
   };
 
+  const handleFollowDiscussion = async () => {
+    if (!hasGithubIdentity) {
+      setShowLinkGithub(true);
+      return;
+    }
+
+    if (!discussion) return;
+
+    try {
+      const mutation = `
+        mutation($discussionId: ID!) {
+          ${isFollowing ? 'unfollowDiscussion' : 'followDiscussion'}(input: {discussionId: $discussionId}) {
+            discussion {
+              id
+              viewerFollowing
+            }
+          }
+        }
+      `;
+
+      const response = await fetch('/api/github-graphql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: mutation,
+          variables: { discussionId: discussion.id },
+        }),
+      });
+
+      if (response.ok) {
+        setIsFollowing(!isFollowing);
+      }
+    } catch (err) {
+      console.error('Error toggling follow:', err);
+      alert('Failed to update follow status');
+    }
+  };
+
   const emojis = ['👍', '👎', '😄', '🎉', '❤️', '🔥', '🚀', '💡', '👀', '✅'];
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1151,6 +1235,10 @@ function DiscussionPage() {
             <MessageSquare className="h-4 w-4" />
             <span>{discussion.commentCount} comments</span>
           </div>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Eye className="h-4 w-4" />
+            <span>{viewCount} views</span>
+          </div>
           {discussion.isAnswered && (
             <div className="flex items-center gap-2 text-sm text-green-500">
               <CheckCircle className="h-4 w-4" />
@@ -1158,6 +1246,24 @@ function DiscussionPage() {
             </div>
           )}
           <div className="flex-1" />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleFollowDiscussion}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            {isFollowing ? (
+              <>
+                <BellOff className="h-4 w-4 mr-1" />
+                Unfollow
+              </>
+            ) : (
+              <>
+                <Bell className="h-4 w-4 mr-1" />
+                Follow
+              </>
+            )}
+          </Button>
           <div className="relative">
             <Button
               variant="ghost"

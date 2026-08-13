@@ -70,6 +70,8 @@ function CommunityPage() {
   const [uploadingFiles, setUploadingFiles] = useState(false);
   const [isMaintainer, setIsMaintainer] = useState(false);
   const [userPermissions, setUserPermissions] = useState<string[]>([]);
+  const [templates, setTemplates] = useState<any[]>([]);
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const { user } = useAuth();
   const router = useRouter();
 
@@ -122,6 +124,24 @@ function CommunityPage() {
 
     fetchUserPermissions();
   }, [hasGithubIdentity, user]);
+
+  // Fetch discussion templates
+  useEffect(() => {
+    async function fetchTemplates() {
+      try {
+        const { data: templatesData } = await (supabase as any)
+          .from('discussion_templates')
+          .select('*')
+          .eq('is_active', true);
+
+        setTemplates(templatesData || []);
+      } catch (err) {
+        console.error('Error fetching templates:', err);
+      }
+    }
+
+    fetchTemplates();
+  }, []);
 
   useEffect(() => {
     async function fetchDiscussions() {
@@ -1052,6 +1072,18 @@ function CommunityPage() {
     setMentionQuery('');
   };
 
+  const handleApplyTemplate = (templateId: string) => {
+    const template = templates.find(t => t.id === templateId);
+    if (template) {
+      setNewDiscussion({
+        title: template.title_template,
+        body: template.body_template,
+        categoryId: template.category_id || '',
+      });
+      setSelectedTemplate(templateId);
+    }
+  };
+
   const handleBodyChange = (value: string) => {
     setNewDiscussion({ ...newDiscussion, body: value });
     
@@ -1587,8 +1619,30 @@ function CommunityPage() {
                       onChange={(e) => setNewDiscussion({ ...newDiscussion, title: e.target.value })}
                       placeholder="What's on your mind?"
                       required
+                      className="border-white/10 bg-white/5"
                     />
                   </div>
+
+                  {/* Template Selector */}
+                  {templates.length > 0 && (
+                    <div>
+                      <Label htmlFor="template">Use Template</Label>
+                      <select
+                        id="template"
+                        value={selectedTemplate || ''}
+                        onChange={(e) => e.target.value ? handleApplyTemplate(e.target.value) : setSelectedTemplate(null)}
+                        className="w-full p-2 rounded border border-white/10 bg-white/5 text-foreground"
+                      >
+                        <option value="">Select a template...</option>
+                        {templates.map((template) => (
+                          <option key={template.id} value={template.id}>
+                            {template.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
                   <div>
                     <Label htmlFor="category">Category</Label>
                     <Select value={newDiscussion.categoryId} onValueChange={(value) => setNewDiscussion({ ...newDiscussion, categoryId: value })}>
