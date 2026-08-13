@@ -49,6 +49,12 @@ export default {
     try {
       const url = new URL(request.url);
       
+      // Log env for debugging
+      console.log('server.ts fetch called, env:', env ? 'exists' : 'null/undefined');
+      if (env) {
+        console.log('env keys:', Object.keys(env));
+      }
+      
       // Handle GitHub GraphQL API proxy
       if (url.pathname === '/api/github-graphql' && request.method === 'POST') {
         try {
@@ -63,12 +69,25 @@ export default {
           }
 
           // Get GitHub token from environment
-          // Try both env parameter and process.env for Cloudflare Pages compatibility
-          const githubToken = (env as any)?.GITHUB_TOKEN || process.env.GITHUB_TOKEN;
+          // Try multiple sources for Cloudflare Pages/Nitro compatibility
+          let githubToken = (env as any)?.GITHUB_TOKEN;
+          
+          // If not in env, try process.env
           if (!githubToken) {
-            console.error('GITHUB_TOKEN not found in env or process.env');
-            console.error('env keys:', env ? Object.keys(env) : 'env is null/undefined');
-            console.error('process.env keys:', Object.keys(process.env).filter(k => k.includes('GITHUB')));
+            githubToken = process.env.GITHUB_TOKEN;
+          }
+          
+          // If still not found, try accessing via Nitro runtime config
+          if (!githubToken && typeof (globalThis as any).$nitro !== 'undefined') {
+            githubToken = (globalThis as any).$nitro?.runtimeConfig?.public?.GITHUB_TOKEN || 
+                          (globalThis as any).$nitro?.runtimeConfig?.GITHUB_TOKEN;
+          }
+          
+          if (!githubToken) {
+            console.error('GITHUB_TOKEN not found in any source');
+            console.error('env:', env ? Object.keys(env) : 'env is null/undefined');
+            console.error('process.env GITHUB keys:', Object.keys(process.env).filter(k => k.includes('GITHUB')));
+            console.error('globalThis.$nitro:', typeof (globalThis as any).$nitro !== 'undefined' ? 'exists' : 'undefined');
             return new Response(JSON.stringify({ 
               error: 'GitHub token not configured',
               message: 'Please add GITHUB_TOKEN to Cloudflare Pages environment variables.'
