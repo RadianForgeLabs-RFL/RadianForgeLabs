@@ -1015,13 +1015,15 @@ function CommunityPage() {
 
     try {
       if (pin) {
-        // Add to database
-        const { error } = await supabase
+        // Use upsert to handle duplicate key errors
+        const { error } = await (supabase as any)
           .from('pinned_discussions')
-          .insert({
+          .upsert({
             discussion_id: discussionId,
             organization: 'RadianForgeLabs',
             pinned_by: user?.id,
+          }, {
+            onConflict: 'discussion_id,organization'
           });
         
         if (error) {
@@ -1051,12 +1053,9 @@ function CommunityPage() {
       setAllDiscussions(allDiscussions.map(d =>
         d.id === discussionId ? { ...d, pinned: pin } : d
       ));
-      
-      // Re-apply filters to show pinned discussions at top
-      applyFilters(selectedCategory, searchQuery, sortBy);
     } catch (err) {
-      console.error('Error toggling discussion pin:', err);
-      alert('Failed to update discussion pin status');
+      console.error('Error toggling pin:', err);
+      alert('Failed to update pin status');
     }
   };
 

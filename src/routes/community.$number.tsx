@@ -1131,8 +1131,8 @@ function DiscussionPage() {
           </div>
         )}
 
-        {/* Create Poll Button */}
-        {user && (
+        {/* Create Poll Button - Only for polls category */}
+        {user && discussion.categoryName.toLowerCase().includes('poll') && (
           <div className="mb-4">
             {!showPollCreator ? (
               <Button
@@ -1568,26 +1568,34 @@ function DiscussionPage() {
                                     Hide
                                   </Button>
                                 )}
-                                {comment.isAnswer ? (
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-6 text-xs text-green-600 hover:text-green-500"
-                                    onClick={() => handleUnmarkAsAnswer(comment.id)}
-                                  >
-                                    <CheckCircle className="h-3 w-3 mr-1" />
-                                    Unmark Answer
-                                  </Button>
-                                ) : (
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-6 text-xs text-purple-600 hover:text-purple-500"
-                                    onClick={() => handleMarkAsAnswer(comment.id)}
-                                  >
-                                    <CheckCircle className="h-3 w-3 mr-1" />
-                                    Mark Answer
-                                  </Button>
+                                {/* Only show Mark Answer for bug reports/Q&A categories */}
+                                {(discussion.categoryName.toLowerCase().includes('bug') || 
+                                  discussion.categoryName.toLowerCase().includes('q&a') ||
+                                  discussion.categoryName.toLowerCase().includes('question') ||
+                                  discussion.categoryName.toLowerCase().includes('help')) && (
+                                  <>
+                                    {comment.isAnswer ? (
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-6 text-xs text-green-600 hover:text-green-500"
+                                        onClick={() => handleUnmarkAsAnswer(comment.id)}
+                                      >
+                                        <CheckCircle className="h-3 w-3 mr-1" />
+                                        Unmark Answer
+                                      </Button>
+                                    ) : (
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-6 text-xs text-purple-600 hover:text-purple-500"
+                                        onClick={() => handleMarkAsAnswer(comment.id)}
+                                      >
+                                        <CheckCircle className="h-3 w-3 mr-1" />
+                                        Mark Answer
+                                      </Button>
+                                    )}
+                                  </>
                                 )}
                               </>
                             )}
