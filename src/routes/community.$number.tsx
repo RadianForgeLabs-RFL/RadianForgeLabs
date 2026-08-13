@@ -65,9 +65,58 @@ function DiscussionPage() {
   const [uploadingFile, setUploadingFile] = useState(false);
   const [showDiscussionEmojiPicker, setShowDiscussionEmojiPicker] = useState(false);
   const [showHiddenContent, setShowHiddenContent] = useState(false);
+  const [isMaintainer, setIsMaintainer] = useState(false);
+  const [userPermissions, setUserPermissions] = useState<string[]>([]);
 
   // Check if user has GitHub identity linked
   const hasGithubIdentity = user?.identities?.some((identity: any) => identity.provider === 'github');
+
+  // Fetch user permissions for the repository
+  useEffect(() => {
+    async function fetchUserPermissions() {
+      if (!hasGithubIdentity || !user) return;
+
+      try {
+        const query = `
+          query {
+            organization(login: "RadianForgeLabs") {
+              repositories(first: 10) {
+                nodes {
+                  name
+                  viewerPermission
+                }
+              }
+            }
+            viewer {
+              login
+            }
+          }
+        `;
+
+        const response = await fetch('/api/github-graphql', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const permissions = data.data?.organization?.repositories?.nodes?.map((repo: any) => repo.viewerPermission) || [];
+          setUserPermissions(permissions);
+          
+          // Check if user has admin or maintain permission on any repository
+          const hasMaintainerAccess = permissions.some((perm: string) => 
+            perm === 'ADMIN' || perm === 'MAINTAIN' || perm === 'WRITE'
+          );
+          setIsMaintainer(hasMaintainerAccess);
+        }
+      } catch (err) {
+        console.error('Error fetching user permissions:', err);
+      }
+    }
+
+    fetchUserPermissions();
+  }, [hasGithubIdentity, user]);
 
   useEffect(() => {
     async function fetchDiscussion() {
@@ -414,6 +463,11 @@ function DiscussionPage() {
       return;
     }
 
+    if (!isMaintainer) {
+      alert('Only maintainers can hide comments.');
+      return;
+    }
+
     if (!confirm('Are you sure you want to hide this comment?')) return;
 
     try {
@@ -456,6 +510,11 @@ function DiscussionPage() {
       return;
     }
 
+    if (!isMaintainer) {
+      alert('Only maintainers can unhide comments.');
+      return;
+    }
+
     try {
       const mutation = `
         mutation($commentId: ID!) {
@@ -493,6 +552,11 @@ function DiscussionPage() {
   const handleMarkAsAnswer = async (commentId: string) => {
     if (!hasGithubIdentity) {
       setShowLinkGithub(true);
+      return;
+    }
+
+    if (!isMaintainer) {
+      alert('Only maintainers can mark comments as answers.');
       return;
     }
 
@@ -546,6 +610,11 @@ function DiscussionPage() {
   const handleUnmarkAsAnswer = async (commentId: string) => {
     if (!hasGithubIdentity) {
       setShowLinkGithub(true);
+      return;
+    }
+
+    if (!isMaintainer) {
+      alert('Only maintainers can unmark comments as answers.');
       return;
     }
 
@@ -967,7 +1036,7 @@ function DiscussionPage() {
                                 </button>
                               ))}
                             </div>
-                            {hasGithubIdentity && (
+                            {hasGithubIdentity && isMaintainer && (
                               <>
                                 <Button
                                   variant="ghost"

@@ -68,11 +68,60 @@ function CommunityPage() {
   const [mentionQuery, setMentionQuery] = useState('');
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const [uploadingFiles, setUploadingFiles] = useState(false);
+  const [isMaintainer, setIsMaintainer] = useState(false);
+  const [userPermissions, setUserPermissions] = useState<string[]>([]);
   const { user } = useAuth();
   const router = useRouter();
 
   // Check if user has GitHub identity linked
   const hasGithubIdentity = user?.identities?.some((identity: any) => identity.provider === 'github');
+
+  // Fetch user permissions for the repository
+  useEffect(() => {
+    async function fetchUserPermissions() {
+      if (!hasGithubIdentity || !user) return;
+
+      try {
+        const query = `
+          query {
+            organization(login: "RadianForgeLabs") {
+              repositories(first: 10) {
+                nodes {
+                  name
+                  viewerPermission
+                }
+              }
+            }
+            viewer {
+              login
+            }
+          }
+        `;
+
+        const response = await fetch('/api/github-graphql', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const permissions = data.data?.organization?.repositories?.nodes?.map((repo: any) => repo.viewerPermission) || [];
+          setUserPermissions(permissions);
+          
+          // Check if user has admin or maintain permission on any repository
+          const hasMaintainerAccess = permissions.some((perm: string) => 
+            perm === 'ADMIN' || perm === 'MAINTAIN' || perm === 'WRITE'
+          );
+          setIsMaintainer(hasMaintainerAccess);
+        }
+      } catch (err) {
+        console.error('Error fetching user permissions:', err);
+      }
+    }
+
+    fetchUserPermissions();
+  }, [hasGithubIdentity, user]);
 
   useEffect(() => {
     async function fetchDiscussions() {
@@ -722,6 +771,11 @@ function CommunityPage() {
       return;
     }
 
+    if (!isMaintainer) {
+      alert('Only maintainers can close or reopen discussions.');
+      return;
+    }
+
     try {
       const mutation = close
         ? `
@@ -770,6 +824,11 @@ function CommunityPage() {
       return;
     }
 
+    if (!isMaintainer) {
+      alert('Only maintainers can lock or unlock discussions.');
+      return;
+    }
+
     try {
       const mutation = lock
         ? `
@@ -815,6 +874,11 @@ function CommunityPage() {
   const handleDeleteDiscussion = async (discussionId: string) => {
     if (!hasGithubIdentity) {
       setShowLinkGithub(true);
+      return;
+    }
+
+    if (!isMaintainer) {
+      alert('Only maintainers can delete discussions.');
       return;
     }
 
@@ -913,6 +977,11 @@ function CommunityPage() {
   const handlePinDiscussion = async (discussionId: string, pin: boolean) => {
     if (!hasGithubIdentity) {
       setShowLinkGithub(true);
+      return;
+    }
+
+    if (!isMaintainer) {
+      alert('Only maintainers can pin or unpin discussions.');
       return;
     }
 
@@ -1825,7 +1894,7 @@ function CommunityPage() {
                           {disc.commentCount} comments
                         </span>
                       </div>
-                      {hasGithubIdentity && (
+                      {hasGithubIdentity && isMaintainer && (
                         <div className="flex items-center gap-2 mt-2">
                           {disc.pinned ? (
                             <Button
