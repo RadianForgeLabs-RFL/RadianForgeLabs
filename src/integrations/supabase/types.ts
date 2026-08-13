@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.15"
   }
   public: {
     Tables: {
@@ -35,39 +35,6 @@ export type Database = {
           id?: string
           message?: string
           variant?: string
-        }
-        Relationships: []
-      }
-      categories: {
-        Row: {
-          created_at: string
-          description: string | null
-          icon: string | null
-          id: string
-          kind: Database["public"]["Enums"]["product_kind"] | null
-          name: string
-          slug: string
-          sort_order: number
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          icon?: string | null
-          id?: string
-          kind?: Database["public"]["Enums"]["product_kind"] | null
-          name: string
-          slug: string
-          sort_order?: number
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          icon?: string | null
-          id?: string
-          kind?: Database["public"]["Enums"]["product_kind"] | null
-          name?: string
-          slug?: string
-          sort_order?: number
         }
         Relationships: []
       }
@@ -164,39 +131,6 @@ export type Database = {
         }
         Relationships: []
       }
-      developers: {
-        Row: {
-          bio: string | null
-          created_at: string
-          id: string
-          logo_url: string | null
-          name: string
-          slug: string
-          verified: boolean
-          website: string | null
-        }
-        Insert: {
-          bio?: string | null
-          created_at?: string
-          id?: string
-          logo_url?: string | null
-          name: string
-          slug: string
-          verified?: boolean
-          website?: string | null
-        }
-        Update: {
-          bio?: string | null
-          created_at?: string
-          id?: string
-          logo_url?: string | null
-          name?: string
-          slug?: string
-          verified?: boolean
-          website?: string | null
-        }
-        Relationships: []
-      }
       downloads: {
         Row: {
           architecture: string | null
@@ -250,32 +184,6 @@ export type Database = {
           },
         ]
       }
-      favorites: {
-        Row: {
-          created_at: string
-          product_id: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          product_id: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          product_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "favorites_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       news: {
         Row: {
           body: string | null
@@ -309,74 +217,12 @@ export type Database = {
         }
         Relationships: []
       }
-      preorders: {
-        Row: {
-          created_at: string
-          email: string
-          id: string
-          product_id: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          id?: string
-          product_id: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          id?: string
-          product_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "preorders_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      product_tags: {
-        Row: {
-          product_id: string
-          tag_id: string
-        }
-        Insert: {
-          product_id: string
-          tag_id: string
-        }
-        Update: {
-          product_id?: string
-          tag_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "product_tags_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "product_tags_tag_id_fkey"
-            columns: ["tag_id"]
-            isOneToOne: false
-            referencedRelation: "tags"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       products: {
         Row: {
+          app_modes: Database["public"]["Enums"]["app_mode"][] | null
           architectures: string[] | null
           banner_opacity: number
           banner_url: string | null
-          category_id: string | null
           changelog: string | null
           coming_soon: boolean
           created_at: string
@@ -401,8 +247,6 @@ export type Database = {
           play_modes: Database["public"]["Enums"]["play_mode"][] | null
           published: boolean
           publisher: string | null
-          rating_avg: number
-          rating_count: number
           release_date: string | null
           requirements: string | null
           roadmap: string | null
@@ -415,10 +259,10 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          app_modes?: Database["public"]["Enums"]["app_mode"][] | null
           architectures?: string[] | null
           banner_opacity?: number
           banner_url?: string | null
-          category_id?: string | null
           changelog?: string | null
           coming_soon?: boolean
           created_at?: string
@@ -443,8 +287,6 @@ export type Database = {
           play_modes?: Database["public"]["Enums"]["play_mode"][] | null
           published?: boolean
           publisher?: string | null
-          rating_avg?: number
-          rating_count?: number
           release_date?: string | null
           requirements?: string | null
           roadmap?: string | null
@@ -457,10 +299,10 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          app_modes?: Database["public"]["Enums"]["app_mode"][] | null
           architectures?: string[] | null
           banner_opacity?: number
           banner_url?: string | null
-          category_id?: string | null
           changelog?: string | null
           coming_soon?: boolean
           created_at?: string
@@ -485,8 +327,6 @@ export type Database = {
           play_modes?: Database["public"]["Enums"]["play_mode"][] | null
           published?: boolean
           publisher?: string | null
-          rating_avg?: number
-          rating_count?: number
           release_date?: string | null
           requirements?: string | null
           roadmap?: string | null
@@ -498,22 +338,7 @@ export type Database = {
           trailer_url?: string | null
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "products_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "categories"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "products_developer_id_fkey"
-            columns: ["developer_id"]
-            isOneToOne: false
-            referencedRelation: "developers"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -523,6 +348,7 @@ export type Database = {
           display_name: string | null
           id: string
           link_with_github: boolean | null
+          link_with_google: boolean | null
           updated_at: string
           username: string | null
         }
@@ -533,6 +359,7 @@ export type Database = {
           display_name?: string | null
           id: string
           link_with_github?: boolean | null
+          link_with_google?: boolean | null
           updated_at?: string
           username?: string | null
         }
@@ -543,101 +370,11 @@ export type Database = {
           display_name?: string | null
           id?: string
           link_with_github?: boolean | null
+          link_with_google?: boolean | null
           updated_at?: string
           username?: string | null
         }
         Relationships: []
-      }
-      requests: {
-        Row: {
-          body: string
-          created_at: string
-          id: string
-          kind: Database["public"]["Enums"]["request_type"]
-          product_id: string | null
-          status: string
-          title: string
-          user_id: string | null
-        }
-        Insert: {
-          body: string
-          created_at?: string
-          id?: string
-          kind: Database["public"]["Enums"]["request_type"]
-          product_id?: string | null
-          status?: string
-          title: string
-          user_id?: string | null
-        }
-        Update: {
-          body?: string
-          created_at?: string
-          id?: string
-          kind?: Database["public"]["Enums"]["request_type"]
-          product_id?: string | null
-          status?: string
-          title?: string
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "requests_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      reviews: {
-        Row: {
-          body: string | null
-          created_at: string
-          dislikes: number
-          id: string
-          likes: number
-          pinned: boolean
-          product_id: string
-          rating: number
-          title: string | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          body?: string | null
-          created_at?: string
-          dislikes?: number
-          id?: string
-          likes?: number
-          pinned?: boolean
-          product_id: string
-          rating: number
-          title?: string | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          body?: string | null
-          created_at?: string
-          dislikes?: number
-          id?: string
-          likes?: number
-          pinned?: boolean
-          product_id?: string
-          rating?: number
-          title?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "reviews_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       screenshots: {
         Row: {
@@ -673,52 +410,19 @@ export type Database = {
       }
       settings: {
         Row: {
-          downloads_count: string | null
-          entertainment_icon: string | null
           key: string
-          player_count: string | null
-          studios_icon: string | null
           updated_at: string
-          user_count: string | null
           value: Json
         }
         Insert: {
-          downloads_count?: string | null
-          entertainment_icon?: string | null
           key: string
-          player_count?: string | null
-          studios_icon?: string | null
           updated_at?: string
-          user_count?: string | null
           value: Json
         }
         Update: {
-          downloads_count?: string | null
-          entertainment_icon?: string | null
           key?: string
-          player_count?: string | null
-          studios_icon?: string | null
           updated_at?: string
-          user_count?: string | null
           value?: Json
-        }
-        Relationships: []
-      }
-      tags: {
-        Row: {
-          id: string
-          name: string
-          slug: string
-        }
-        Insert: {
-          id?: string
-          name: string
-          slug: string
-        }
-        Update: {
-          id?: string
-          name?: string
-          slug?: string
         }
         Relationships: []
       }
@@ -783,6 +487,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      demote_from_admin: { Args: { target_user_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -790,8 +495,16 @@ export type Database = {
         }
         Returns: boolean
       }
+      promote_to_admin: { Args: { target_user_id: string }; Returns: boolean }
     }
     Enums: {
+      app_mode:
+        | "offline"
+        | "online"
+        | "sync"
+        | "local_only"
+        | "cloud_based"
+        | "hybrid"
       app_role: "admin" | "moderator" | "user"
       play_mode:
         | "single_player"
@@ -946,6 +659,14 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_mode: [
+        "offline",
+        "online",
+        "sync",
+        "local_only",
+        "cloud_based",
+        "hybrid",
+      ],
       app_role: ["admin", "moderator", "user"],
       play_mode: [
         "single_player",
