@@ -59,6 +59,9 @@ function CommunityPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'most_active'>('newest');
+  const [showEditDiscussion, setShowEditDiscussion] = useState(false);
+  const [editingDiscussion, setEditingDiscussion] = useState<Discussion | null>(null);
+  const [editDiscussion, setEditDiscussion] = useState({ title: '', body: '' });
   const { user } = useAuth();
   const router = useRouter();
 
@@ -771,6 +774,73 @@ function CommunityPage() {
     }
   };
 
+  const handleEditDiscussion = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!hasGithubIdentity) {
+      setShowLinkGithub(true);
+      return;
+    }
+    
+    if (!editingDiscussion) return;
+
+    setIsSubmitting(true);
+
+    try {
+      const mutation = `
+        mutation($discussionId: ID!, $title: String!, $body: String!) {
+          updateDiscussion(input: {discussionId: $discussionId, title: $title, body: $body}) {
+            discussion {
+              id
+              title
+              body
+            }
+          }
+        }
+      `;
+
+      await fetch('/api/github-graphql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: mutation,
+          variables: {
+            discussionId: editingDiscussion.id,
+            title: editDiscussion.title,
+            body: editDiscussion.body,
+          },
+        }),
+      });
+
+      // Update local state
+      setDiscussions(discussions.map(d =>
+        d.id === editingDiscussion.id
+          ? { ...d, title: editDiscussion.title, body: editDiscussion.body }
+          : d
+      ));
+      setAllDiscussions(allDiscussions.map(d =>
+        d.id === editingDiscussion.id
+          ? { ...d, title: editDiscussion.title, body: editDiscussion.body }
+          : d
+      ));
+
+      setShowEditDiscussion(false);
+      setEditingDiscussion(null);
+      setEditDiscussion({ title: '', body: '' });
+    } catch (err) {
+      console.error('Error editing discussion:', err);
+      alert('Failed to edit discussion');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const openEditDialog = (discussion: Discussion) => {
+    setEditingDiscussion(discussion);
+    setEditDiscussion({ title: discussion.title, body: discussion.body || '' });
+    setShowEditDiscussion(true);
+  };
+
   const emojis = ['👍', '👎', '😄', '🎉', '❤️', '🔥', '🚀', '💡', '👀', '✅'];
 
   const handleRefresh = async () => {
@@ -1371,6 +1441,98 @@ function CommunityPage() {
             </Card>
           )}
 
+          {showEditDiscussion && editingDiscussion && (
+            <Card className="border border-white/5 bg-white/5 p-6 mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">Edit Discussion</h3>
+                <Button variant="ghost" size="sm" onClick={() => setShowEditDiscussion(false)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <form onSubmit={handleEditDiscussion}>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="edit-title">Title</Label>
+                    <Input
+                      id="edit-title"
+                      value={editDiscussion.title}
+                      onChange={(e) => setEditDiscussion({ ...editDiscussion, title: e.target.value })}
+                      placeholder="Discussion title"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <Label htmlFor="edit-body">Content</Label>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowMarkdownPreview(!showMarkdownPreview)}
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          Preview
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                        >
+                          <Smile className="h-4 w-4 mr-1" />
+                          Emoji
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {showEmojiPicker && (
+                      <div className="flex flex-wrap gap-2 p-3 border border-white/10 rounded-lg glass shadow-xl mb-3">
+                        {emojis.map((emoji) => (
+                          <button
+                            key={emoji}
+                            type="button"
+                            onClick={() => setEditDiscussion({ ...editDiscussion, body: editDiscussion.body + emoji })}
+                            className="text-2xl hover:scale-125 transition-transform"
+                          >
+                            {emoji}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {showMarkdownPreview ? (
+                      <div className="prose prose-invert max-w-none p-4 border border-white/10 rounded-lg bg-white/5 min-h-[150px]">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{editDiscussion.body || '*Preview will appear here*'}</ReactMarkdown>
+                      </div>
+                    ) : (
+                      <Textarea
+                        id="edit-body"
+                        value={editDiscussion.body}
+                        onChange={(e) => setEditDiscussion({ ...editDiscussion, body: e.target.value })}
+                        placeholder="Describe your discussion in detail... (Markdown supported)"
+                        rows={6}
+                        required
+                      />
+                    )}
+                    
+                    <div className="text-xs text-muted-foreground mt-2">
+                      Supports: **bold**, *italic*, `code`, [links](url), and more
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button type="button" variant="outline" onClick={() => setShowEditDiscussion(false)}>
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={isSubmitting}>
+                      {isSubmitting ? 'Updating...' : 'Update Discussion'}
+                    </Button>
+                  </div>
+                </div>
+              </form>
+            </Card>
+          )}
+
           {showLinkGithub && (
             <Card className="border border-white/5 bg-white/5 p-6 mb-6">
               <div className="flex items-center justify-between mb-4">
@@ -1476,6 +1638,15 @@ function CommunityPage() {
                       </div>
                       {hasGithubIdentity && (
                         <div className="flex items-center gap-2 mt-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 text-xs"
+                            onClick={() => openEditDialog(disc)}
+                          >
+                            <Edit2 className="h-3 w-3 mr-1" />
+                            Edit
+                          </Button>
                           {disc.closed ? (
                             <Button
                               variant="ghost"
