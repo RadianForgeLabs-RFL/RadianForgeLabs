@@ -64,6 +64,8 @@ function CommunityPage() {
   const [editDiscussion, setEditDiscussion] = useState({ title: '', body: '' });
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
+  const [showMentionDropdown, setShowMentionDropdown] = useState(false);
+  const [mentionQuery, setMentionQuery] = useState('');
   const { user } = useAuth();
   const router = useRouter();
 
@@ -859,6 +861,36 @@ function CommunityPage() {
     setShowEditDiscussion(true);
   };
 
+  const handleMention = (username: string) => {
+    setNewDiscussion({ ...newDiscussion, body: newDiscussion.body + `@${username} ` });
+    setShowMentionDropdown(false);
+    setMentionQuery('');
+  };
+
+  const handleBodyChange = (value: string) => {
+    setNewDiscussion({ ...newDiscussion, body: value });
+    
+    // Check for @ mentions
+    const lastAtIndex = value.lastIndexOf('@');
+    if (lastAtIndex !== -1) {
+      const textAfterAt = value.slice(lastAtIndex + 1);
+      const nextSpaceIndex = textAfterAt.indexOf(' ');
+      const mentionText = nextSpaceIndex === -1 ? textAfterAt : textAfterAt.slice(0, nextSpaceIndex);
+      
+      if (mentionText.length > 0 && (nextSpaceIndex === -1 || nextSpaceIndex === value.length - lastAtIndex - 1)) {
+        setMentionQuery(mentionText);
+        setShowMentionDropdown(true);
+      } else {
+        setShowMentionDropdown(false);
+      }
+    } else {
+      setShowMentionDropdown(false);
+    }
+  };
+
+  // Extract unique usernames from discussions for mention suggestions
+  const mentionedUsers = Array.from(new Set(allDiscussions.map(d => d.author))).filter(Boolean);
+
   const emojis = ['👍', '👎', '😄', '🎉', '❤️', '🔥', '🚀', '💡', '👀', '✅'];
 
   const handleRefresh = async () => {
@@ -1432,14 +1464,37 @@ function CommunityPage() {
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>{newDiscussion.body || '*Preview will appear here*'}</ReactMarkdown>
                       </div>
                     ) : (
-                      <Textarea
-                        id="body"
-                        value={newDiscussion.body}
-                        onChange={(e) => setNewDiscussion({ ...newDiscussion, body: e.target.value })}
-                        placeholder="Describe your discussion in detail... (Markdown supported)"
-                        rows={6}
-                        required
-                      />
+                      <div className="relative">
+                        <Textarea
+                          id="body"
+                          value={newDiscussion.body}
+                          onChange={(e) => handleBodyChange(e.target.value)}
+                          placeholder="Describe your discussion in detail... (Markdown supported, use @ to mention users)"
+                          rows={6}
+                          required
+                        />
+                        {showMentionDropdown && (
+                          <div className="absolute top-full left-0 mt-1 w-full max-h-48 overflow-y-auto border border-white/10 rounded-lg bg-white/5 glass shadow-xl z-10">
+                            {mentionedUsers
+                              .filter(user => user.toLowerCase().includes(mentionQuery.toLowerCase()))
+                              .slice(0, 5)
+                              .map((username) => (
+                                <button
+                                  key={username}
+                                  type="button"
+                                  onClick={() => handleMention(username)}
+                                  className="w-full text-left px-4 py-2 hover:bg-white/10 transition-colors flex items-center gap-2"
+                                >
+                                  <Users className="h-4 w-4 text-muted-foreground" />
+                                  <span>@{username}</span>
+                                </button>
+                              ))}
+                            {mentionedUsers.filter(user => user.toLowerCase().includes(mentionQuery.toLowerCase())).length === 0 && (
+                              <div className="px-4 py-2 text-sm text-muted-foreground">No users found</div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     )}
                     
                     <div className="text-xs text-muted-foreground mt-2">
