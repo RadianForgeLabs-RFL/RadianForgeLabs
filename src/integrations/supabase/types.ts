@@ -164,6 +164,27 @@ export type Database = {
         }
         Relationships: []
       }
+      discussion_follows: {
+        Row: {
+          discussion_id: string
+          followed_at: string | null
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          discussion_id: string
+          followed_at?: string | null
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          discussion_id?: string
+          followed_at?: string | null
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       discussion_templates: {
         Row: {
           body_template: string

@@ -34,7 +34,6 @@ interface DiscussionDetail {
   isAnswered: boolean;
   upvoteCount: number;
   commentCount: number;
-  viewerFollowing?: boolean;
 }
 
 export const Route = createFileRoute("/community/$number")({
@@ -237,7 +236,6 @@ function DiscussionPage() {
                     reactions {
                       totalCount
                     }
-                    viewerFollowing
                     comments(first: 50) {
                       totalCount
                       nodes {
@@ -294,7 +292,6 @@ function DiscussionPage() {
                 isAnswered: repo.discussion.answerChosenAt !== null,
                 upvoteCount: repo.discussion.reactions?.totalCount || 0,
                 commentCount: repo.discussion.comments?.totalCount || 0,
-                viewerFollowing: repo.discussion.viewerFollowing || false,
               };
               
               if (repo.discussion.comments?.nodes) {
@@ -319,7 +316,17 @@ function DiscussionPage() {
 
         setDiscussion(foundDiscussion);
         setComments(foundComments);
-        setIsFollowing(foundDiscussion.viewerFollowing || false);
+        
+        // Check follow status from Supabase
+        if (user?.id) {
+          const { data: followData } = await (supabase as any)
+            .from('discussion_follows')
+            .select('*')
+            .eq('discussion_id', foundDiscussion.id)
+            .eq('user_id', user.id)
+            .single();
+          setIsFollowing(!!followData);
+        }
       } catch (err) {
         console.error('Error fetching discussion:', err);
         setError(err instanceof Error ? err.message : 'Failed to load discussion');
@@ -926,28 +933,30 @@ function DiscussionPage() {
     if (!discussion) return;
 
     try {
-      const mutation = `
-        mutation($discussionId: ID!) {
-          ${isFollowing ? 'unfollowDiscussion' : 'followDiscussion'}(input: {discussionId: $discussionId}) {
-            discussion {
-              id
-              viewerFollowing
-            }
-          }
-        }
-      `;
+      // GitHub GraphQL API doesn't have follow/unfollow mutations for discussions
+      // We'll track this locally in Supabase instead
+      const { data: existingFollow } = await (supabase as any)
+        .from('discussion_follows')
+        .select('*')
+        .eq('discussion_id', discussion.id)
+        .eq('user_id', user?.id)
+        .single();
 
-      const response = await fetch('/api/github-graphql', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query: mutation,
-          variables: { discussionId: discussion.id },
-        }),
-      });
-
-      if (response.ok) {
-        setIsFollowing(!isFollowing);
+      if (existingFollow) {
+        await (supabase as any)
+          .from('discussion_follows')
+          .delete()
+          .eq('discussion_id', discussion.id)
+          .eq('user_id', user?.id);
+        setIsFollowing(false);
+      } else {
+        await (supabase as any)
+          .from('discussion_follows')
+          .insert({
+            discussion_id: discussion.id,
+            user_id: user?.id,
+          });
+        setIsFollowing(true);
       }
     } catch (err) {
       console.error('Error toggling follow:', err);
