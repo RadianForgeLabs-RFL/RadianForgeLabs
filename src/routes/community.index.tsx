@@ -1053,6 +1053,9 @@ function CommunityPage() {
       setAllDiscussions(allDiscussions.map(d =>
         d.id === discussionId ? { ...d, pinned: pin } : d
       ));
+      
+      // Re-apply filters to show pinned discussions at top
+      applyFilters(selectedCategory, searchQuery, sortBy);
     } catch (err) {
       console.error('Error toggling pin:', err);
       alert('Failed to update pin status');
@@ -1537,23 +1540,31 @@ function CommunityPage() {
                 <div className="text-xs opacity-70">View all discussions</div>
               </div>
             </button>
-            {categories.map((cat) => (
-              <button 
-                key={cat.id} 
-                onClick={() => handleCategoryFilter(cat.id)}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors ${
-                  selectedCategory === cat.id 
-                    ? 'bg-purple-500/20 text-purple-400' 
-                    : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'
-                }`}
-              >
-                <span className="text-xl">{cat.emoji}</span>
-                <div className="flex-1">
-                  <div className="font-medium">{cat.name}</div>
-                  <div className="text-xs opacity-70">{cat.description}</div>
-                </div>
-              </button>
-            ))}
+            {categories.map((cat) => {
+              // Count discussions in this category
+              const categoryCount = allDiscussions.filter(d => d.categoryId === cat.id).length;
+              
+              return (
+                <button 
+                  key={cat.id} 
+                  onClick={() => handleCategoryFilter(cat.id)}
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors ${
+                    selectedCategory === cat.id 
+                      ? 'bg-purple-500/20 text-purple-400' 
+                      : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'
+                  }`}
+                >
+                  <span className="text-xl">{cat.emoji}</span>
+                  <div className="flex-1">
+                    <div className="font-medium">{cat.name}</div>
+                    <div className="text-xs opacity-70">{cat.description}</div>
+                  </div>
+                  {categoryCount > 0 && (
+                    <span className="text-xs bg-white/10 px-2 py-0.5 rounded-full">{categoryCount}</span>
+                  )}
+                </button>
+              );
+            })}
           </nav>
         </aside>
 
@@ -1959,7 +1970,19 @@ function CommunityPage() {
                         {disc.categoryName && (
                           <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-500">{disc.categoryName}</span>
                         )}
-                        {disc.isAnswered && <CheckCircle className="h-4 w-4 text-green-500" />}
+                        {/* Show answered status for Q&A/Bug categories */}
+                        {(disc.categoryName?.toLowerCase().includes('q&a') || 
+                          disc.categoryName?.toLowerCase().includes('bug') ||
+                          disc.categoryName?.toLowerCase().includes('question') ||
+                          disc.categoryName?.toLowerCase().includes('help')) && (
+                          <>
+                            {disc.isAnswered ? (
+                              <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/20 text-green-500">Answered</span>
+                            ) : (
+                              <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-500">Not Answered</span>
+                            )}
+                          </>
+                        )}
                         {disc.closed && <span className="text-xs px-2 py-0.5 rounded-full bg-red-500/20 text-red-500">Closed</span>}
                         {disc.locked && <Lock className="h-4 w-4 text-yellow-500" />}
                       </div>
