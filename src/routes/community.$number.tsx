@@ -20,6 +20,8 @@ interface Comment {
   isAnswer?: boolean;
   upvoteCount: number;
   isHidden?: boolean;
+  replyTo?: string;
+  replies?: Comment[];
 }
 
 interface DiscussionDetail {
@@ -69,6 +71,10 @@ function DiscussionPage() {
   const [userPermissions, setUserPermissions] = useState<string[]>([]);
   const [isFollowing, setIsFollowing] = useState(false);
   const [viewCount, setViewCount] = useState(0);
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [showReplyForm, setShowReplyForm] = useState(false);
+  const [replyToText, setReplyToText] = useState('');
+  const [isSubmittingReply, setIsSubmittingReply] = useState(false);
 
   // Check if user has GitHub identity linked
   const hasGithubIdentity = user?.identities?.some((identity: any) => identity.provider === 'github');
@@ -200,6 +206,12 @@ function DiscussionPage() {
                         reactions {
                           totalCount
                         }
+                        replyTo {
+                          id
+                          author {
+                            login
+                          }
+                        }
                       }
                     }
                   }
@@ -253,7 +265,27 @@ function DiscussionPage() {
                   createdAt: c.createdAt,
                   isAnswer: c.isAnswer || false,
                   upvoteCount: c.reactions?.totalCount || 0,
+                  replyTo: c.replyTo?.id || null,
+                  replies: [],
                 }));
+
+                // Organize comments into nested structure
+                const topLevelComments: Comment[] = [];
+                const commentsMap = new Map(foundComments.map(c => [c.id, c]));
+
+                foundComments.forEach(comment => {
+                  if (comment.replyTo) {
+                    const parentComment = commentsMap.get(comment.replyTo);
+                    if (parentComment) {
+                      parentComment.replies = parentComment.replies || [];
+                      parentComment.replies.push(comment);
+                    }
+                  } else {
+                    topLevelComments.push(comment);
+                  }
+                });
+
+                foundComments = topLevelComments;
               }
               break;
             }
@@ -760,6 +792,110 @@ function DiscussionPage() {
     }
   };
 
+  const handleReplyToComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!hasGithubIdentity) {
+      setShowLinkGithub(true);
+      return;
+    }
+    
+    if (!replyToText.trim() || !replyingTo) return;
+    
+    setIsSubmittingReply(true);
+
+    try {
+      // Using GraphQL to add comment with replyTo
+      const mutation = `
+        mutation($discussionId: ID!, $body: String!, $replyToId: ID!) {
+          addDiscussionComment(input: {discussionId: $discussionId, body: $body, replyToId: $replyToId}) {
+            comment {
+              id
+              body
+              createdAt
+              author {
+                login
+                avatarUrl
+              }
+              replyTo {
+                id
+                author {
+                  login
+                }
+              }
+            }
+          }
+        }
+      `;
+
+      const response = await fetch('/api/github-graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: mutation,
+          variables: {
+            discussionId: discussion?.id,
+            body: replyToText,
+            replyToId: replyingTo,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to post reply');
+      }
+
+      const data = await response.json();
+      
+      // Add new reply to local state
+      if (data.data?.addDiscussionComment?.comment) {
+        const newReply = data.data.addDiscussionComment.comment;
+        const replyObj = {
+          id: newReply.id,
+          author: newReply.author?.login || user?.user_metadata?.user_name || 'Unknown',
+          avatar: newReply.author?.avatarUrl || user?.user_metadata?.avatar_url || '',
+          body: newReply.body,
+          createdAt: newReply.createdAt,
+          upvoteCount: 0,
+          replyTo: newReply.replyTo?.id || null,
+          replies: [],
+        };
+
+        setComments(prevComments => {
+          const addReplyToComment = (comments: Comment[]): Comment[] => {
+            return comments.map(comment => {
+              if (comment.id === replyingTo) {
+                return {
+                  ...comment,
+                  replies: [...(comment.replies || []), replyObj]
+                };
+              }
+              if (comment.replies) {
+                return {
+                  ...comment,
+                  replies: addReplyToComment(comment.replies)
+                };
+              }
+              return comment;
+            });
+          };
+          return addReplyToComment(prevComments);
+        });
+      }
+      
+      setReplyToText('');
+      setReplyingTo(null);
+      setShowReplyForm(false);
+    } catch (err) {
+      console.error('Error posting reply:', err);
+      alert('Failed to post reply. Please try again.');
+    } finally {
+      setIsSubmittingReply(false);
+    }
+  };
+
   const emojis = ['👍', '👎', '😄', '🎉', '❤️', '🔥', '🚀', '💡', '👀', '✅'];
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1169,6 +1305,21 @@ function DiscussionPage() {
                                 </button>
                               ))}
                             </div>
+                            {/* Only show Reply button for bug reports/Q&A categories */}
+                            {(discussion.categoryName.toLowerCase().includes('bug') || 
+                              discussion.categoryName.toLowerCase().includes('q&a') ||
+                              discussion.categoryName.toLowerCase().includes('question') ||
+                              discussion.categoryName.toLowerCase().includes('help')) && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 text-xs"
+                                onClick={() => { setReplyingTo(comment.id); setShowReplyForm(true); }}
+                              >
+                                <MessageSquare className="h-3 w-3 mr-1" />
+                                Reply
+                              </Button>
+                            )}
                             {hasGithubIdentity && isMaintainer && (
                               <>
                                 <Button
@@ -1248,6 +1399,92 @@ function DiscussionPage() {
                   )}
                 </div>
               </div>
+
+              {/* Reply Form */}
+              {showReplyForm && replyingTo === comment.id && (
+                <Card className="border border-white/10 bg-white/5 p-4 ml-11 mt-3">
+                  <form onSubmit={handleReplyToComment}>
+                    <div className="space-y-3">
+                      <Textarea
+                        value={replyToText}
+                        onChange={(e) => setReplyToText(e.target.value)}
+                        placeholder="Write your reply..."
+                        rows={3}
+                        className="border-white/10 bg-white/5"
+                      />
+                      <div className="flex gap-2">
+                        <Button type="submit" size="sm" disabled={isSubmittingReply || !replyToText.trim()}>
+                          {isSubmittingReply ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Posting...
+                            </>
+                          ) : (
+                            <>
+                              <Send className="mr-2 h-4 w-4" />
+                              Reply
+                            </>
+                          )}
+                        </Button>
+                        <Button type="button" size="sm" variant="outline" onClick={() => { setShowReplyForm(false); setReplyingTo(null); setReplyToText(''); }}>
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  </form>
+                </Card>
+              )}
+
+              {/* Nested Replies */}
+              {comment.replies && comment.replies.length > 0 && (
+                <div className="ml-11 mt-4 space-y-3">
+                  {comment.replies.map((reply) => (
+                    <Card key={reply.id} className={`border border-white/5 bg-white/5 p-3 ${reply.isAnswer ? 'border-green-500/30 bg-green-500/5' : ''}`}>
+                      <div className="flex items-start gap-2">
+                        <img
+                          src={reply.avatar}
+                          alt={reply.author}
+                          className="h-6 w-6 rounded-full"
+                        />
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-medium text-sm">{reply.author}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(reply.createdAt).toLocaleDateString()}
+                            </span>
+                            {reply.isAnswer && (
+                              <span className="px-2 py-0.5 rounded-full text-xs bg-green-500/20 text-green-500">
+                                ✓ Answer
+                              </span>
+                            )}
+                          </div>
+                          <div className="prose prose-invert max-w-none text-xs">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{reply.body}</ReactMarkdown>
+                          </div>
+                          <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <ThumbsUp className="h-3 w-3" />
+                              <span>{reply.upvoteCount}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              {emojis.slice(0, 3).map((emoji) => (
+                                <button
+                                  key={emoji}
+                                  onClick={() => handleAddReaction(reply.id, emoji)}
+                                  className="hover:scale-125 transition-transform"
+                                  title={`React with ${emoji}`}
+                                >
+                                  {emoji}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </Card>
           ))}
           
