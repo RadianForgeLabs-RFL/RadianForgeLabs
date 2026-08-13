@@ -503,13 +503,6 @@ export type Database = {
             referencedRelation: "categories"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "products_developer_id_fkey"
-            columns: ["developer_id"]
-            isOneToOne: false
-            referencedRelation: "developers"
-            referencedColumns: ["id"]
-          },
         ]
       }
       profiles: {

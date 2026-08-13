@@ -139,7 +139,7 @@ export const productBySlugQuery = (slug: string) =>
     queryFn: async () => {
       const { data, error } = await supabase
         .from("products")
-        .select("*, developer:developers(*), category:categories(*), screenshots(*), downloads(*), versions(*), tags:product_tags(tag:tags(*))")
+        .select("*, category:categories(*), screenshots(*), downloads(*), versions(*), tags:product_tags(tag:tags(*))")
         .eq("slug", slug)
         .maybeSingle();
       if (error) throw error;
@@ -154,18 +154,6 @@ export const categoriesQuery = () =>
     queryKey: ["categories"],
     queryFn: async () => {
       const { data, error } = await supabase.from("categories").select("*").order("sort_order");
-      if (error) throw error;
-      return data ?? [];
-    },
-    staleTime: 30 * 60 * 1000, // 30 minutes
-    gcTime: 60 * 60 * 1000, // 1 hour
-  });
-
-export const developersQuery = () =>
-  queryOptions({
-    queryKey: ["developers"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("developers").select("*").order("name");
       if (error) throw error;
       return data ?? [];
     },
