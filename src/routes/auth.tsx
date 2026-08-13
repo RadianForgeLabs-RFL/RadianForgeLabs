@@ -69,7 +69,7 @@ function AuthPage() {
       });
       if (error) {
         if (error.message.includes('User already registered')) {
-          throw new Error('An account with this email already exists');
+          throw new Error('Account already exists. Please sign in instead.');
         }
         if (error.message.includes('Password should be')) {
           throw new Error('Password must be at least 8 characters');
@@ -143,7 +143,7 @@ function AuthPage() {
     <div className="mx-auto flex max-w-md flex-col items-center px-4 py-16">
       <Link to="/" className="mb-8 flex items-center gap-2.5">
         <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-brand font-bold text-brand-foreground shadow-glow">RFL</div>
-        <div><div className="font-bold">RFL Studios</div></div>
+        <div><div className="font-bold">RadianForgeLabs</div></div>
       </Link>
       <Card className="glass-strong w-full border-white/5 bg-transparent p-6">
         <Tabs defaultValue="signin">
