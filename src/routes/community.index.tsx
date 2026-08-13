@@ -62,6 +62,8 @@ function CommunityPage() {
   const [showEditDiscussion, setShowEditDiscussion] = useState(false);
   const [editingDiscussion, setEditingDiscussion] = useState<Discussion | null>(null);
   const [editDiscussion, setEditDiscussion] = useState({ title: '', body: '' });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
   const { user } = useAuth();
   const router = useRouter();
 
@@ -594,16 +596,19 @@ function CommunityPage() {
 
   const handleCategoryFilter = (categoryId: string | null) => {
     setSelectedCategory(categoryId);
+    setCurrentPage(1); // Reset to first page when filtering
     applyFilters(categoryId, searchQuery, sortBy);
   };
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
+    setCurrentPage(1); // Reset to first page when searching
     applyFilters(selectedCategory, query, sortBy);
   };
 
   const handleSort = (sort: 'newest' | 'oldest' | 'most_active') => {
     setSortBy(sort);
+    setCurrentPage(1); // Reset to first page when sorting
     applyFilters(selectedCategory, searchQuery, sort);
   };
 
@@ -639,6 +644,19 @@ function CommunityPage() {
     }
 
     setDiscussions(filtered);
+  };
+
+  // Get paginated discussions
+  const paginatedDiscussions = discussions.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const totalPages = Math.ceil(discussions.length / itemsPerPage);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleCloseDiscussion = async (discussionId: string, close: boolean) => {
@@ -1596,7 +1614,7 @@ function CommunityPage() {
             </Card>
           ) : (
             <div className="space-y-3">
-              {discussions.map((disc) => (
+              {paginatedDiscussions.map((disc) => (
                 <Card key={disc.id} className={`border border-white/5 bg-white/5 p-4 hover:bg-white/10 transition-colors ${disc.closed ? 'opacity-70' : ''}`}>
                   <div className="flex items-start gap-4">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-500/20 text-purple-500">
@@ -1704,6 +1722,39 @@ function CommunityPage() {
                   </div>
                 </Card>
               ))}
+            </div>
+          )}
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-6">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </Button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <Button
+                  key={page}
+                  variant={currentPage === page ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handlePageChange(page)}
+                  className="w-8"
+                >
+                  {page}
+                </Button>
+              ))}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </Button>
             </div>
           )}
         </div>
