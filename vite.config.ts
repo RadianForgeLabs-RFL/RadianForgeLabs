@@ -71,6 +71,16 @@ export default defineConfig({
               }
               proxyReq.setHeader('User-Agent', 'RadianForgeLabs-Community');
             });
+            proxy.on('error', (err, req, res) => {
+              console.error('Proxy error:', err);
+              if (!res.headersSent) {
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Proxy error', message: err.message }));
+              }
+            });
+            proxy.on('proxyRes', (proxyRes, req, res) => {
+              console.log('Proxy response status:', proxyRes.statusCode);
+            });
           },
         },
       },

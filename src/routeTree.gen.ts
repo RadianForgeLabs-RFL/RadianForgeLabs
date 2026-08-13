@@ -31,6 +31,7 @@ import { Route as SitemapXmlRouteImport } from './routes/sitemap.xml'
 import { Route as ProductsSlugRouteImport } from './routes/products.$slug'
 import { Route as CommunityNumberRouteImport } from './routes/community.$number'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
+import { Route as ApiGithubGraphqlRouteImport } from './routes/api.github-graphql'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminNewsRouteImport } from './routes/admin.news'
@@ -146,6 +147,11 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   path: '/callback',
   getParentRoute: () => AuthRoute,
 } as any)
+const ApiGithubGraphqlRoute = ApiGithubGraphqlRouteImport.update({
+  id: '/api/github-graphql',
+  path: '/api/github-graphql',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -193,6 +199,7 @@ export interface FileRoutesByFullPath {
   '/admin/news': typeof AdminNewsRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/api/github-graphql': typeof ApiGithubGraphqlRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/community/$number': typeof CommunityNumberRoute
   '/products/$slug': typeof ProductsSlugRoute
@@ -220,6 +227,7 @@ export interface FileRoutesByTo {
   '/admin/news': typeof AdminNewsRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/api/github-graphql': typeof ApiGithubGraphqlRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/community/$number': typeof CommunityNumberRoute
   '/products/$slug': typeof ProductsSlugRoute
@@ -250,6 +258,7 @@ export interface FileRoutesById {
   '/admin/news': typeof AdminNewsRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/api/github-graphql': typeof ApiGithubGraphqlRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/community/$number': typeof CommunityNumberRoute
   '/products/$slug': typeof ProductsSlugRoute
@@ -280,6 +289,7 @@ export interface FileRouteTypes {
     | '/admin/news'
     | '/admin/products'
     | '/admin/settings'
+    | '/api/github-graphql'
     | '/auth/callback'
     | '/community/$number'
     | '/products/$slug'
@@ -307,6 +317,7 @@ export interface FileRouteTypes {
     | '/admin/news'
     | '/admin/products'
     | '/admin/settings'
+    | '/api/github-graphql'
     | '/auth/callback'
     | '/community/$number'
     | '/products/$slug'
@@ -336,6 +347,7 @@ export interface FileRouteTypes {
     | '/admin/news'
     | '/admin/products'
     | '/admin/settings'
+    | '/api/github-graphql'
     | '/auth/callback'
     | '/community/$number'
     | '/products/$slug'
@@ -361,6 +373,7 @@ export interface RootRouteChildren {
   StudiosRoute: typeof StudiosRoute
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
+  ApiGithubGraphqlRoute: typeof ApiGithubGraphqlRoute
   CommunityNumberRoute: typeof CommunityNumberRoute
   ProductsSlugRoute: typeof ProductsSlugRoute
   SitemapXmlRoute: typeof SitemapXmlRoute
@@ -523,6 +536,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/api/github-graphql': {
+      id: '/api/github-graphql'
+      path: '/api/github-graphql'
+      fullPath: '/api/github-graphql'
+      preLoaderRoute: typeof ApiGithubGraphqlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/settings': {
       id: '/admin/settings'
       path: '/settings'
@@ -618,6 +638,7 @@ const rootRouteChildren: RootRouteChildren = {
   StudiosRoute: StudiosRoute,
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
+  ApiGithubGraphqlRoute: ApiGithubGraphqlRoute,
   CommunityNumberRoute: CommunityNumberRoute,
   ProductsSlugRoute: ProductsSlugRoute,
   SitemapXmlRoute: SitemapXmlRoute,
