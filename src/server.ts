@@ -47,6 +47,78 @@ function isH3SwallowedErrorBody(body: string): boolean {
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
+      const url = new URL(request.url);
+      
+      // Handle GitHub GraphQL API proxy
+      if (url.pathname === '/api/github-graphql' && request.method === 'POST') {
+        try {
+          const body = await request.json();
+          const { query, variables } = body;
+
+          if (!query) {
+            return new Response(JSON.stringify({ error: 'Query is required' }), { 
+              status: 400,
+              headers: { 'Content-Type': 'application/json' }
+            });
+          }
+
+          // Get GitHub token from environment
+          const githubToken = (env as any)?.GITHUB_TOKEN;
+          if (!githubToken) {
+            return new Response(JSON.stringify({ 
+              error: 'GitHub token not configured',
+              message: 'Please add GITHUB_TOKEN to Cloudflare Pages environment variables.'
+            }), { 
+              status: 500,
+              headers: { 'Content-Type': 'application/json' }
+            });
+          }
+
+          const requestBody: any = { query };
+          if (variables) {
+            requestBody.variables = variables;
+          }
+
+          const response = await fetch('https://api.github.com/graphql', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${githubToken}`,
+              'Content-Type': 'application/json',
+              'User-Agent': 'RadianForgeLabs-Community',
+            },
+            body: JSON.stringify(requestBody),
+          });
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            return new Response(JSON.stringify({ 
+              error: 'GitHub API error',
+              status: response.status,
+              details: errorText
+            }), { 
+              status: response.status,
+              headers: { 'Content-Type': 'application/json' }
+            });
+          }
+
+          const data = await response.json();
+          return new Response(JSON.stringify(data), {
+            headers: {
+              'Content-Type': 'application/json',
+              'Access-Control-Allow-Origin': '*',
+            },
+          });
+        } catch (error) {
+          return new Response(JSON.stringify({ 
+            error: 'Internal server error',
+            message: error instanceof Error ? error.message : String(error)
+          }), { 
+            status: 500,
+            headers: { 'Content-Type': 'application/json' }
+          });
+        }
+      }
+
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);
