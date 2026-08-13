@@ -1,5 +1,6 @@
 name = "rfl-studios"
 compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
 
 [vars]
 # Supabase configuration (public keys only)
@@ -7,10 +8,9 @@ SUPABASE_URL = "https://zndizxgtyigkjrqmpsqe.supabase.co"
 SUPABASE_PUBLISHABLE_KEY = "sb_publishable_k3Wu2nWZPLygGAua7wDupQ_EspyYhmr"
 SUPABASE_JWKS_URL = "https://zndizxgtyigkjrqmpsqe.supabase.co/auth/v1/.well-known/jwks.json"
 
-# IMPORTANT: The following must be set as Environment Variables (not Secrets) in Cloudflare Dashboard
-# Go to Cloudflare Dashboard > Settings > Variables and Secrets > Add > Environment variable type
-# 
-# Required environment variables:
-# - GITHUB_TOKEN: Your GitHub personal access token
-# - SUPABASE_SECRET_KEY: Your Supabase secret key  
-# - SESSION_SECRET: Your session secret
+# Declare secrets that should be bound from Cloudflare Dashboard
+# These must be set as Secrets in Cloudflare Dashboard (Settings > Variables and Secrets > Add > Secret type)
+[secrets]
+# GITHUB_TOKEN = ""  # Set in Cloudflare Dashboard as Secret
+# SUPABASE_SECRET_KEY = ""  # Set in Cloudflare Dashboard as Secret
+# SESSION_SECRET = ""  # Set in Cloudflare Dashboard as Secret
