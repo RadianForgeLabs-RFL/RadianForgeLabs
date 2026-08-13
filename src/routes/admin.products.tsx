@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { adminProductListQuery } from "@/lib/data";
@@ -70,7 +70,12 @@ function AdminProducts() {
                 <div className="text-xs text-muted-foreground">{p.slug} · v{p.latest_version} · {p.status}</div>
               </div>
               <div className="flex gap-2">
-                <ProductDialog product={p} trigger={<Button size="sm" variant="outline" className="border-white/10"><Pencil className="h-4 w-4" /></Button>} />
+                <Link to="/products/$slug" params={{ slug: p.slug }}>
+                  <Button size="sm" variant="outline" className="border-white/10">
+                    <Pencil className="h-4 w-4 mr-2" />
+                    Edit
+                  </Button>
+                </Link>
                 <Button size="sm" variant="outline" className="border-white/10 text-destructive" onClick={() => { if (confirm("Delete?")) del.mutate(p.id); }}>
                   <Trash2 className="h-4 w-4" />
                 </Button>
