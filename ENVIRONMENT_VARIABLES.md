@@ -25,8 +25,11 @@ These variables are NEVER exposed to the browser and must be configured in your 
 ### GitHub (Required for Community Features)
 - `GITHUB_TOKEN` - GitHub personal access token for GraphQL API
   - **WARNING**: Never expose this to the client
-  - Used in Cloudflare Pages Functions (`/api/github-graphql`)
+  - **CRITICAL**: Required for both local development AND production
+  - Used in Cloudflare Pages Functions (`/api/github-graphql`) in production
+  - Used in Vite proxy for local development
   - Required scopes: `read:org`, `read:discussion`, `read:user`
+  - **Without this variable, community discussions will NOT load**
 
 ### OAuth Provider Secrets (Optional - Configured in Supabase Dashboard)
 These are typically configured directly in the Supabase Dashboard under Authentication → Providers:
