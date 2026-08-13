@@ -1070,6 +1070,19 @@ function DiscussionPage() {
               <span>{new Date(discussion.createdAt).toLocaleDateString()}</span>
               <span>•</span>
               <span className="px-2 py-1 rounded bg-white/5">{discussion.categoryName}</span>
+              {/* Show answered status for Q&A/Bug categories */}
+              {(discussion.categoryName?.toLowerCase().includes('q&a') || 
+                discussion.categoryName?.toLowerCase().includes('bug') ||
+                discussion.categoryName?.toLowerCase().includes('question') ||
+                discussion.categoryName?.toLowerCase().includes('help')) && (
+                <>
+                  {discussion.isAnswered ? (
+                    <span className="px-2 py-1 rounded bg-green-500/20 text-green-500 text-xs">Answered</span>
+                  ) : (
+                    <span className="px-2 py-1 rounded bg-yellow-500/20 text-yellow-500 text-xs">Not Answered</span>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>
