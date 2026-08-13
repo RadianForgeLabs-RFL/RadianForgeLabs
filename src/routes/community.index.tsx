@@ -195,6 +195,14 @@ function CommunityPage() {
         let allDiscussions: Discussion[] = [];
         const categoryMap = new Map<string, { id: string; name: string; emoji: string; description: string }>();
         
+        // Fetch pinned discussions from Supabase
+        const { data: pinnedDiscussions, error: pinnedError } = await supabase
+          .from('pinned_discussions')
+          .select('discussion_id')
+          .eq('organization', 'RadianForgeLabs');
+        
+        const pinnedIds = new Set(pinnedDiscussions?.map((p: any) => p.discussion_id) || []);
+        
         if (data.data?.organization?.repositories?.nodes) {
           data.data.organization.repositories.nodes.forEach((repo: any) => {
             if (repo.discussions?.nodes) {
@@ -216,7 +224,7 @@ function CommunityPage() {
                   categoryId: d.category?.id || '',
                   closed: d.closedAt !== null,
                   locked: d.locked || false,
-                  pinned: false // GitHub doesn't expose pinned in discussions API
+                  pinned: pinnedIds.has(d.id) // Check if discussion is pinned
                 });
                 
                 // Add to categories if not exists
@@ -986,8 +994,37 @@ function CommunityPage() {
     }
 
     try {
-      // GitHub doesn't have a direct pin mutation for discussions
-      // We'll simulate pinning by updating local state and sorting pinned discussions first
+      if (pin) {
+        // Add to database
+        const { error } = await supabase
+          .from('pinned_discussions')
+          .insert({
+            discussion_id: discussionId,
+            organization: 'RadianForgeLabs',
+            pinned_by: user?.id,
+          });
+        
+        if (error) {
+          console.error('Error pinning discussion:', error);
+          alert('Failed to pin discussion');
+          return;
+        }
+      } else {
+        // Remove from database
+        const { error } = await supabase
+          .from('pinned_discussions')
+          .delete()
+          .eq('discussion_id', discussionId)
+          .eq('organization', 'RadianForgeLabs');
+        
+        if (error) {
+          console.error('Error unpinning discussion:', error);
+          alert('Failed to unpin discussion');
+          return;
+        }
+      }
+
+      // Update local state
       setDiscussions(discussions.map(d =>
         d.id === discussionId ? { ...d, pinned: pin } : d
       ));
