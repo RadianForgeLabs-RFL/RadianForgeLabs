@@ -73,7 +73,7 @@ function Home() {
   const counts = useQuery(homeCountsQuery());
   const latestApps = useQuery(allProductsQuery("app"));
   const latestGames = useQuery(allProductsQuery("game"));
-  const c = counts.data ?? { apps: 0, games: 0, userCount: "10K+", playerCount: "10K+", downloadsCount: "50K+", studiosIcon: "Code", entertainmentIcon: "Gamepad2", studiosIconUrl: null, entertainmentIconUrl: null };
+  const c = counts.data ?? { apps: 0, games: 0, userCount: "10K+", playerCount: "10K+", downloadsCount: "50K+", studiosIcon: "Code", entertainmentIcon: "Gamepad2", studiosIconUrl: null, entertainmentIconUrl: null, heroBannerUrl: null, studiosBannerUrl: null, entertainmentBannerUrl: null };
 
   // Dynamic icon mapping
   const iconMap: Record<string, any> = { Code, Gamepad2, Building2, Users, Download, Zap, Github, Mail };
@@ -85,22 +85,29 @@ function Home() {
       {/* HERO */}
       <section className="relative overflow-hidden border-b border-white/5 bg-gradient-to-b from-blue-500/5 via-purple-500/5 to-transparent">
         <div className="mx-auto max-w-7xl px-4 py-20 md:py-32">
-          <div className="max-w-4xl">
-            <h1 className="text-5xl font-bold leading-tight tracking-tight md:text-7xl">
-              <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-rose-500 bg-clip-text text-transparent">Radian Forge Labs</span>
-            </h1>
-            <p className="mt-6 max-w-2xl text-xl text-muted-foreground md:text-2xl">
-              Building the future through professional software and immersive gaming experiences.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Button asChild size="lg" className="bg-gradient-to-r from-blue-600 to-sky-500 text-white hover:opacity-90">
-                <Link to="/studios">RFL Studios</Link>
-              </Button>
-              <Button asChild size="lg" className="bg-gradient-to-r from-rose-500 to-rose-400 text-white hover:opacity-90">
-                <Link to="/entertainment">RFL Entertainment</Link>
-              </Button>
+          <div className="grid gap-8 md:grid-cols-2 items-center">
+            <div className="max-w-4xl">
+              <h1 className="text-5xl font-bold leading-tight tracking-tight md:text-7xl">
+                <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-rose-500 bg-clip-text text-transparent">Radian Forge Labs</span>
+              </h1>
+              <p className="mt-6 max-w-2xl text-xl text-muted-foreground md:text-2xl">
+                Building the future through professional software and immersive gaming experiences.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Button asChild size="lg" className="bg-gradient-to-r from-blue-600 to-sky-500 text-white hover:opacity-90">
+                  <Link to="/studios">RFL Studios</Link>
+                </Button>
+                <Button asChild size="lg" className="bg-gradient-to-r from-rose-500 to-rose-400 text-white hover:opacity-90">
+                  <Link to="/entertainment">RFL Entertainment</Link>
+                </Button>
 
+              </div>
             </div>
+            {c.heroBannerUrl && (
+              <div className="relative">
+                <img src={String(c.heroBannerUrl)} alt="Hero Banner" className="rounded-2xl border border-white/10 shadow-2xl" />
+              </div>
+            )}
           </div>
         </div>
       </section>

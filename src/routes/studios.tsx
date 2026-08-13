@@ -32,27 +32,35 @@ function Studios() {
   const apps = useQuery(productListQuery("app"));
   const comingSoon = useQuery(comingSoonQuery("app"));
   const counts = useQuery(homeCountsQuery());
+  const c = counts.data ?? { studiosBannerUrl: null };
 
   return (
     <div>
       {/* HERO */}
       <section className="relative overflow-hidden border-b border-blue-500/10 bg-gradient-to-b from-blue-500/5 via-transparent to-transparent">
         <div className="mx-auto max-w-7xl px-4 py-20 md:py-32">
-          <div className="max-w-3xl">
-            <h1 className="text-5xl font-bold leading-tight tracking-tight md:text-7xl">
-              <span className="bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">RFL Studios</span>
-            </h1>
-            <p className="mt-6 max-w-2xl text-xl text-muted-foreground">
-              Professional software solutions for Windows and Android. Building tools that empower developers and users alike.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Button asChild size="lg" className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white hover:opacity-90">
-                <Link to="/apps">Browse Apps</Link>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="border-blue-500/30 text-blue-400 hover:bg-blue-500/10">
-                <Link to="/apps">Coming Soon</Link>
-              </Button>
+          <div className="grid gap-8 md:grid-cols-2 items-center">
+            <div className="max-w-3xl">
+              <h1 className="text-5xl font-bold leading-tight tracking-tight md:text-7xl">
+                <span className="bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">RFL Studios</span>
+              </h1>
+              <p className="mt-6 max-w-2xl text-xl text-muted-foreground">
+                Professional software solutions for Windows and Android. Building tools that empower developers and users alike.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Button asChild size="lg" className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white hover:opacity-90">
+                  <Link to="/apps">Browse Apps</Link>
+                </Button>
+                <Button asChild size="lg" variant="outline" className="border-blue-500/30 text-blue-400 hover:bg-blue-500/10">
+                  <Link to="/apps">Coming Soon</Link>
+                </Button>
+              </div>
             </div>
+            {c.studiosBannerUrl && (
+              <div className="relative">
+                <img src={String(c.studiosBannerUrl)} alt="Studios Banner" className="rounded-2xl border border-white/10 shadow-2xl" />
+              </div>
+            )}
           </div>
         </div>
       </section>

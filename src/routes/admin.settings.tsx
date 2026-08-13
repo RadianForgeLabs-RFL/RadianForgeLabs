@@ -25,6 +25,9 @@ function AdminSettings() {
   const [entertainmentIcon, setEntertainmentIcon] = useState("Gamepad2");
   const [studiosIconUrl, setStudiosIconUrl] = useState<string | null>(null);
   const [entertainmentIconUrl, setEntertainmentIconUrl] = useState<string | null>(null);
+  const [heroBannerUrl, setHeroBannerUrl] = useState<string | null>(null);
+  const [studiosBannerUrl, setStudiosBannerUrl] = useState<string | null>(null);
+  const [entertainmentBannerUrl, setEntertainmentBannerUrl] = useState<string | null>(null);
 
   const ann = useQuery({ queryKey: ["ann-all"], queryFn: async () => (await supabase.from("announcements").select("*").order("created_at", { ascending: false })).data ?? [] });
   const set = useQuery({ queryKey: ["settings-all"], queryFn: async () => (await supabase.from("settings").select("*")).data ?? [] });
@@ -40,6 +43,9 @@ function AdminSettings() {
     const ei = set.data?.find((s: any) => s.key === "entertainment_icon");
     const siu = set.data?.find((s: any) => s.key === "studios_icon_url");
     const eiu = set.data?.find((s: any) => s.key === "entertainment_icon_url");
+    const hb = set.data?.find((s: any) => s.key === "hero_banner_url");
+    const sb = set.data?.find((s: any) => s.key === "studios_banner_url");
+    const eb = set.data?.find((s: any) => s.key === "entertainment_banner_url");
     
     if (uc) setUserCount(String(uc.value ?? ''));
     if (pc) setPlayerCount(String(pc.value ?? ''));
@@ -48,6 +54,9 @@ function AdminSettings() {
     if (ei) setEntertainmentIcon(String(ei.value ?? ''));
     if (siu) setStudiosIconUrl(siu.value ? String(siu.value) : null);
     if (eiu) setEntertainmentIconUrl(eiu.value ? String(eiu.value) : null);
+    if (hb) setHeroBannerUrl(hb.value ? String(hb.value) : null);
+    if (sb) setStudiosBannerUrl(sb.value ? String(sb.value) : null);
+    if (eb) setEntertainmentBannerUrl(eb.value ? String(eb.value) : null);
   }, [set.data]);
 
   const addAnn = useMutation({
@@ -74,6 +83,9 @@ function AdminSettings() {
         { key: "downloads_count", value: downloadsCount },
         { key: "studios_icon_url", value: studiosIconUrl },
         { key: "entertainment_icon_url", value: entertainmentIconUrl },
+        { key: "hero_banner_url", value: heroBannerUrl },
+        { key: "studios_banner_url", value: studiosBannerUrl },
+        { key: "entertainment_banner_url", value: entertainmentBannerUrl },
       ]);
       if (error) throw error;
     },
@@ -142,6 +154,18 @@ function AdminSettings() {
           <div>
             <Label>RFL Entertainment Icon Image</Label>
             <ImageUpload value={entertainmentIconUrl} onChange={setEntertainmentIconUrl} folder="icons" label="Entertainment Icon" useCase="icon" />
+          </div>
+          <div>
+            <Label>Hero Banner (Right side of homepage)</Label>
+            <ImageUpload value={heroBannerUrl} onChange={setHeroBannerUrl} folder="banners" label="Hero Banner" aspect="aspect-video" useCase="banner" />
+          </div>
+          <div>
+            <Label>Studios Page Banner</Label>
+            <ImageUpload value={studiosBannerUrl} onChange={setStudiosBannerUrl} folder="banners" label="Studios Banner" aspect="aspect-video" useCase="banner" />
+          </div>
+          <div>
+            <Label>Entertainment Page Banner</Label>
+            <ImageUpload value={entertainmentBannerUrl} onChange={setEntertainmentBannerUrl} folder="banners" label="Entertainment Banner" aspect="aspect-video" useCase="banner" />
           </div>
           <Button onClick={() => updateStats.mutate()} className="bg-gradient-brand text-brand-foreground shadow-glow">Update Stats</Button>
         </div>

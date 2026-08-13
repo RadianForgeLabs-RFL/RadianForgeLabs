@@ -210,6 +210,9 @@ export const homeCountsQuery = () =>
       const entertainmentIcon = settings?.find((s: any) => s.key === "entertainment_icon")?.value ?? "Gamepad2";
       const studiosIconUrl = settings?.find((s: any) => s.key === "studios_icon_url")?.value ?? null;
       const entertainmentIconUrl = settings?.find((s: any) => s.key === "entertainment_icon_url")?.value ?? null;
+      const heroBannerUrl = settings?.find((s: any) => s.key === "hero_banner_url")?.value ?? null;
+      const studiosBannerUrl = settings?.find((s: any) => s.key === "studios_banner_url")?.value ?? null;
+      const entertainmentBannerUrl = settings?.find((s: any) => s.key === "entertainment_banner_url")?.value ?? null;
       
       return {
         apps: rows.filter((r: any) => r.kind === "app").length,
@@ -221,6 +224,9 @@ export const homeCountsQuery = () =>
         entertainmentIcon,
         studiosIconUrl,
         entertainmentIconUrl,
+        heroBannerUrl,
+        studiosBannerUrl,
+        entertainmentBannerUrl,
       };
     },
     staleTime: 5 * 60 * 1000, // 5 minutes

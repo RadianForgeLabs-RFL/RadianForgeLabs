@@ -32,27 +32,35 @@ function Entertainment() {
   const games = useQuery(productListQuery("game"));
   const comingSoon = useQuery(comingSoonQuery("game"));
   const counts = useQuery(homeCountsQuery());
+  const c = counts.data ?? { entertainmentBannerUrl: null };
 
   return (
     <div>
       {/* HERO */}
       <section className="relative overflow-hidden border-b border-rose-500/10 bg-gradient-to-b from-rose-500/5 via-transparent to-transparent">
         <div className="mx-auto max-w-7xl px-4 py-20 md:py-32">
-          <div className="max-w-3xl">
-            <h1 className="text-5xl font-bold leading-tight tracking-tight md:text-7xl">
-              <span className="bg-gradient-to-r from-rose-500 to-rose-400 bg-clip-text text-transparent">RFL Entertainment</span>
-            </h1>
-            <p className="mt-6 max-w-2xl text-xl text-muted-foreground">
-              Immersive gaming experiences for PC and Android. From casual play to epic adventures.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Button asChild size="lg" className="bg-gradient-to-r from-rose-500 to-rose-400 text-white hover:opacity-90">
-                <Link to="/games">Browse Games</Link>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="border-rose-500/30 text-rose-400 hover:bg-rose-500/10">
-                <Link to="/games">Coming Soon</Link>
-              </Button>
+          <div className="grid gap-8 md:grid-cols-2 items-center">
+            <div className="max-w-3xl">
+              <h1 className="text-5xl font-bold leading-tight tracking-tight md:text-7xl">
+                <span className="bg-gradient-to-r from-rose-500 to-rose-400 bg-clip-text text-transparent">RFL Entertainment</span>
+              </h1>
+              <p className="mt-6 max-w-2xl text-xl text-muted-foreground">
+                Immersive gaming experiences for PC and Android. From casual play to epic adventures.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Button asChild size="lg" className="bg-gradient-to-r from-rose-500 to-rose-400 text-white hover:opacity-90">
+                  <Link to="/games">Browse Games</Link>
+                </Button>
+                <Button asChild size="lg" variant="outline" className="border-rose-500/30 text-rose-400 hover:bg-rose-500/10">
+                  <Link to="/games">Coming Soon</Link>
+                </Button>
+              </div>
             </div>
+            {c.entertainmentBannerUrl && (
+              <div className="relative">
+                <img src={String(c.entertainmentBannerUrl)} alt="Entertainment Banner" className="rounded-2xl border border-white/10 shadow-2xl" />
+              </div>
+            )}
           </div>
         </div>
       </section>
