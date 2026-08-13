@@ -681,18 +681,24 @@ function CommunityPage() {
       );
     }
 
-    // Apply sorting
-    switch (sort) {
-      case 'newest':
-        filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        break;
-      case 'oldest':
-        filtered.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-        break;
-      case 'most_active':
-        filtered.sort((a, b) => b.commentCount - a.commentCount);
-        break;
-    }
+    // Apply sorting (pinned discussions always come first)
+    filtered.sort((a, b) => {
+      // Pinned discussions come first
+      if (a.pinned && !b.pinned) return -1;
+      if (!a.pinned && b.pinned) return 1;
+      
+      // Then apply the selected sort
+      switch (sort) {
+        case 'newest':
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        case 'oldest':
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        case 'most_active':
+          return b.commentCount - a.commentCount;
+        default:
+          return 0;
+      }
+    });
 
     setDiscussions(filtered);
   };
@@ -901,6 +907,30 @@ function CommunityPage() {
       alert('Failed to edit discussion');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handlePinDiscussion = async (discussionId: string, pin: boolean) => {
+    if (!hasGithubIdentity) {
+      setShowLinkGithub(true);
+      return;
+    }
+
+    try {
+      // GitHub doesn't have a direct pin mutation for discussions
+      // We'll simulate pinning by updating local state and sorting pinned discussions first
+      setDiscussions(discussions.map(d =>
+        d.id === discussionId ? { ...d, pinned: pin } : d
+      ));
+      setAllDiscussions(allDiscussions.map(d =>
+        d.id === discussionId ? { ...d, pinned: pin } : d
+      ));
+      
+      // Re-apply filters to show pinned discussions at top
+      applyFilters(selectedCategory, searchQuery, sortBy);
+    } catch (err) {
+      console.error('Error toggling discussion pin:', err);
+      alert('Failed to update discussion pin status');
     }
   };
 
@@ -1766,6 +1796,7 @@ function CommunityPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        {disc.pinned && <Pin className="h-4 w-4 text-purple-500" />}
                         {disc.categoryName && (
                           <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-500">{disc.categoryName}</span>
                         )}
@@ -1796,6 +1827,27 @@ function CommunityPage() {
                       </div>
                       {hasGithubIdentity && (
                         <div className="flex items-center gap-2 mt-2">
+                          {disc.pinned ? (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 text-xs text-purple-600 hover:text-purple-500"
+                              onClick={() => handlePinDiscussion(disc.id, false)}
+                            >
+                              <Pin className="h-3 w-3 mr-1" />
+                              Unpin
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 text-xs text-purple-600 hover:text-purple-500"
+                              onClick={() => handlePinDiscussion(disc.id, true)}
+                            >
+                              <Pin className="h-3 w-3 mr-1" />
+                              Pin
+                            </Button>
+                          )}
                           <Button
                             variant="ghost"
                             size="sm"
