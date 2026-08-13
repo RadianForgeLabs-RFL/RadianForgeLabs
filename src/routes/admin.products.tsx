@@ -17,6 +17,7 @@ import { ImageUpload, MultiImageUpload } from "@/components/admin/MediaUpload";
 const PLAY_MODES = ["single_player", "multiplayer", "lan", "online", "offline", "cross_platform"];
 const PLATFORM_OPTIONS = ["Windows", "Linux", "Mac", "Android", "iOS", "Web"];
 const ARCHITECTURE_OPTIONS = ["x86_64", "arm64", "universal", "x86", "arm", "other"];
+const LICENSE_OPTIONS = ["MIT", "Apache-2.0", "GPL-3.0", "GPL-2.0", "BSD-3-Clause", "BSD-2-Clause", "LGPL-3.0", "LGPL-2.1", "MPL-2.0", "Unlicense", "Proprietary", "Custom"];
 
 export const Route = createFileRoute("/admin/products")({
   component: AdminProducts,
@@ -99,7 +100,6 @@ function ProductDialog({ product, trigger }: { product?: any; trigger: React.Rea
   const [banner_url, setBannerUrl] = useState<string | null>(product?.banner_url ?? null);
   const [banner_opacity, setBannerOpacity] = useState<number>(product?.banner_opacity ?? 0.4);
   const [productId, setProductId] = useState<string | null>(product?.id ?? null);
-  const [categoryId, setCategoryId] = useState(product?.category_id ?? "");
   const [developerId, setDeveloperId] = useState(product?.developer_id ?? "");
   const [license, setLicense] = useState(product?.license ?? "");
   const [publisher, setPublisher] = useState(product?.publisher ?? "");
@@ -127,7 +127,6 @@ function ProductDialog({ product, trigger }: { product?: any; trigger: React.Rea
     setBannerUrl(product?.banner_url ?? null);
     setBannerOpacity(product?.banner_opacity ?? 0.4);
     setExtraGuidance(product?.extra_guidance ?? "");
-    setCategoryId(product?.category_id ?? "");
     setDeveloperId(product?.developer_id ?? "");
     setLicense(product?.license ?? "");
     setPublisher(product?.publisher ?? "");
@@ -153,7 +152,6 @@ function ProductDialog({ product, trigger }: { product?: any; trigger: React.Rea
       const payload: any = {
         name, slug: slug || slugify(name), tagline, description, extra_guidance, kind, status, source_type,
         latest_version, coming_soon, published, icon_url, banner_url, banner_opacity,
-        category_id: categoryId || null,
         developer_id: developerId || null,
         license: license || null,
         publisher: publisher || null,
@@ -229,23 +227,14 @@ function ProductDialog({ product, trigger }: { product?: any; trigger: React.Rea
               </F>
               
               {/* Organization */}
-              <F label="Category">
-                <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className="w-full rounded-md border border-white/10 bg-transparent px-3 py-2 text-sm">
-                  <option value="">Select category...</option>
-                  <option value="apps">Apps</option>
-                  <option value="games">Games</option>
-                </select>
-              </F>
-              <F label="Developer">
-                <select value={developerId} onChange={(e) => setDeveloperId(e.target.value)} className="w-full rounded-md border border-white/10 bg-transparent px-3 py-2 text-sm">
-                  <option value="">Select developer...</option>
-                  <option value="rfl-studios">RFL Studios</option>
-                  <option value="radian-forge-labs">Radian Forge Labs</option>
-                  <option value="community">Community</option>
-                </select>
-              </F>
+              <F label="Developer"><Input value={developerId} onChange={(e) => setDeveloperId(e.target.value)} placeholder="e.g. RFL Studios" /></F>
               <F label="Publisher"><Input value={publisher} onChange={(e) => setPublisher(e.target.value)} placeholder="e.g. RFL Studios" /></F>
-              <F label="License"><Input value={license} onChange={(e) => setLicense(e.target.value)} placeholder="e.g. MIT, GPL-3.0, Proprietary" /></F>
+              <F label="License">
+                <select value={license} onChange={(e) => setLicense(e.target.value)} className="w-full rounded-md border border-white/10 bg-transparent px-3 py-2 text-sm">
+                  <option value="">Select license...</option>
+                  {LICENSE_OPTIONS.map((l) => <option key={l} value={l}>{l}</option>)}
+                </select>
+              </F>
               
               {/* Release Info */}
               <F label="Release Date"><Input type="date" value={releaseDate} onChange={(e) => setReleaseDate(e.target.value)} /></F>
