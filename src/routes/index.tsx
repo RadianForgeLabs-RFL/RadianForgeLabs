@@ -43,9 +43,9 @@ function DivisionCard({
         <div className="relative p-8 md:p-12">
           <div className={`mb-6 inline-flex rounded-full bg-${color}-500/10 p-6`}>
             {iconUrl ? (
-              <img src={iconUrl} alt={title} className="h-20 w-20 rounded-full object-cover" />
+              <img src={iconUrl} alt={title} className="h-32 w-32 rounded-full object-cover" />
             ) : (
-              <Icon className={`h-20 w-20 text-${color}-500`} />
+              <Icon className={`h-32 w-32 text-${color}-500`} />
             )}
           </div>
           <h2 className="text-3xl font-bold md:text-4xl">{title}</h2>
