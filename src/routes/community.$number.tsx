@@ -490,6 +490,109 @@ function DiscussionPage() {
     }
   };
 
+  const handleMarkAsAnswer = async (commentId: string) => {
+    if (!hasGithubIdentity) {
+      setShowLinkGithub(true);
+      return;
+    }
+
+    if (!confirm('Are you sure you want to mark this comment as the answer?')) return;
+
+    if (!discussion) {
+      alert('Discussion not found');
+      return;
+    }
+
+    try {
+      const mutation = `
+        mutation($discussionId: ID!, $commentId: ID!) {
+          markDiscussionCommentAsAnswer(input: {discussionId: $discussionId, commentId: $commentId}) {
+            discussion {
+              id
+              answer {
+                id
+              }
+            }
+          }
+        }
+      `;
+
+      await fetch('/api/github-graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: mutation,
+          variables: {
+            discussionId: discussion.id,
+            commentId: commentId,
+          },
+        }),
+      });
+
+      // Update local state to mark as answer
+      setComments(comments.map(c => 
+        c.id === commentId 
+          ? { ...c, isAnswer: true }
+          : { ...c, isAnswer: false }
+      ));
+    } catch (err) {
+      console.error('Error marking as answer:', err);
+      alert('Failed to mark as answer');
+    }
+  };
+
+  const handleUnmarkAsAnswer = async (commentId: string) => {
+    if (!hasGithubIdentity) {
+      setShowLinkGithub(true);
+      return;
+    }
+
+    if (!discussion) {
+      alert('Discussion not found');
+      return;
+    }
+
+    try {
+      const mutation = `
+        mutation($discussionId: ID!) {
+          unmarkDiscussionCommentAsAnswer(input: {discussionId: $discussionId}) {
+            discussion {
+              id
+              answer {
+                id
+              }
+            }
+          }
+        }
+      `;
+
+      await fetch('/api/github-graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: mutation,
+          variables: {
+            discussionId: discussion.id,
+          },
+        }),
+      });
+
+      // Update local state to unmark as answer
+      setComments(comments.map(c => 
+        c.id === commentId 
+          ? { ...c, isAnswer: false }
+          : c
+      ));
+    } catch (err) {
+      console.error('Error unmarking as answer:', err);
+      alert('Failed to unmark as answer');
+    }
+  };
+
   const emojis = ['👍', '👎', '😄', '🎉', '❤️', '🔥', '🚀', '💡', '👀', '✅'];
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -903,6 +1006,27 @@ function DiscussionPage() {
                                   >
                                     <EyeOff className="h-3 w-3 mr-1" />
                                     Hide
+                                  </Button>
+                                )}
+                                {comment.isAnswer ? (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-6 text-xs text-green-600 hover:text-green-500"
+                                    onClick={() => handleUnmarkAsAnswer(comment.id)}
+                                  >
+                                    <CheckCircle className="h-3 w-3 mr-1" />
+                                    Unmark Answer
+                                  </Button>
+                                ) : (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-6 text-xs text-purple-600 hover:text-purple-500"
+                                    onClick={() => handleMarkAsAnswer(comment.id)}
+                                  >
+                                    <CheckCircle className="h-3 w-3 mr-1" />
+                                    Mark Answer
                                   </Button>
                                 )}
                               </>

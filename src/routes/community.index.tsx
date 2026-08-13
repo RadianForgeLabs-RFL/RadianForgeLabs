@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MessageSquare, ExternalLink, Loader2, AlertCircle, Users, Clock, CheckCircle, X, Plus, Github, Eye, Smile, RefreshCw, ThumbsUp } from "lucide-react";
+import { MessageSquare, ExternalLink, Loader2, AlertCircle, Users, Clock, CheckCircle, X, Plus, Github, Eye, Smile, RefreshCw, ThumbsUp, Lock, Unlock, Pin, Trash2, Edit2, Archive, ArchiveRestore } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,6 +35,12 @@ interface Discussion {
   commentCount: number;
   categoryName?: string;
   categoryId?: string;
+  body?: string;
+  closed?: boolean;
+  locked?: boolean;
+  pinned?: boolean;
+  updatedAt?: string;
+  authorAvatar?: string;
 }
 
 function CommunityPage() {
@@ -66,16 +72,24 @@ function CommunityPage() {
             organization(login: "RadianForgeLabs") {
               repositories(first: 10) {
                 nodes {
-                  discussions(first: 20, orderBy: {field: CREATED_AT, direction: DESC}) {
+                  discussions(first: 50, orderBy: {field: CREATED_AT, direction: DESC}) {
                     nodes {
                       id
                       number
                       title
+                      body
                       createdAt
+                      updatedAt
+                      closedAt
+                      locked
                       author {
                         login
+                        avatarUrl
                       }
                       answerChosenAt
+                      answer {
+                        id
+                      }
                       reactions {
                         totalCount
                       }
@@ -130,13 +144,19 @@ function CommunityPage() {
                   id: d.id,
                   number: d.number,
                   title: d.title,
+                  body: d.body,
                   author: d.author?.login || 'Unknown',
+                  authorAvatar: d.author?.avatarUrl || '',
                   createdAt: d.createdAt,
+                  updatedAt: d.updatedAt,
                   isAnswered: d.answerChosenAt !== null,
                   upvoteCount: d.reactions?.totalCount || 0,
                   commentCount: d.comments?.totalCount || 0,
                   categoryName: d.category?.name || 'General',
-                  categoryId: d.category?.id || ''
+                  categoryId: d.category?.id || '',
+                  closed: d.closedAt !== null,
+                  locked: d.locked || false,
+                  pinned: false // GitHub doesn't expose pinned in discussions API
                 });
                 
                 // Add to categories if not exists
@@ -573,6 +593,139 @@ function CommunityPage() {
       setDiscussions(allDiscussions);
     } else {
       setDiscussions(allDiscussions.filter(d => d.categoryId === categoryId));
+    }
+  };
+
+  const handleCloseDiscussion = async (discussionId: string, close: boolean) => {
+    if (!hasGithubIdentity) {
+      setShowLinkGithub(true);
+      return;
+    }
+
+    try {
+      const mutation = close
+        ? `
+          mutation($discussionId: ID!) {
+            closeDiscussion(input: {discussionId: $discussionId}) {
+              discussion {
+                id
+                closedAt
+              }
+            }
+          }
+        `
+        : `
+          mutation($discussionId: ID!) {
+            reopenDiscussion(input: {discussionId: $discussionId}) {
+              discussion {
+                id
+                closedAt
+              }
+            }
+          }
+        `;
+
+      await fetch('/api/github-graphql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: mutation,
+          variables: { discussionId }
+        }),
+      });
+
+      // Update local state
+      setDiscussions(discussions.map(d =>
+        d.id === discussionId ? { ...d, closed: close } : d
+      ));
+    } catch (err) {
+      console.error('Error toggling discussion status:', err);
+      alert('Failed to update discussion status');
+    }
+  };
+
+  const handleLockDiscussion = async (discussionId: string, lock: boolean) => {
+    if (!hasGithubIdentity) {
+      setShowLinkGithub(true);
+      return;
+    }
+
+    try {
+      const mutation = lock
+        ? `
+          mutation($discussionId: ID!) {
+            lockDiscussion(input: {discussionId: $discussionId}) {
+              discussion {
+                id
+                locked
+              }
+            }
+          }
+        `
+        : `
+          mutation($discussionId: ID!) {
+            unlockDiscussion(input: {discussionId: $discussionId}) {
+              discussion {
+                id
+                locked
+              }
+            }
+          }
+        `;
+
+      await fetch('/api/github-graphql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: mutation,
+          variables: { discussionId }
+        }),
+      });
+
+      // Update local state
+      setDiscussions(discussions.map(d =>
+        d.id === discussionId ? { ...d, locked: lock } : d
+      ));
+    } catch (err) {
+      console.error('Error toggling discussion lock:', err);
+      alert('Failed to update discussion lock status');
+    }
+  };
+
+  const handleDeleteDiscussion = async (discussionId: string) => {
+    if (!hasGithubIdentity) {
+      setShowLinkGithub(true);
+      return;
+    }
+
+    if (!confirm('Are you sure you want to delete this discussion? This cannot be undone.')) return;
+
+    try {
+      const mutation = `
+        mutation($discussionId: ID!) {
+          deleteDiscussion(input: {discussionId: $discussionId}) {
+            discussion {
+              id
+            }
+          }
+        }
+      `;
+
+      await fetch('/api/github-graphql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: mutation,
+          variables: { discussionId }
+        }),
+      });
+
+      // Remove from local state
+      setDiscussions(discussions.filter(d => d.id !== discussionId));
+      setAllDiscussions(allDiscussions.filter(d => d.id !== discussionId));
+    } catch (err) {
+      console.error('Error deleting discussion:', err);
+      alert('Failed to delete discussion');
     }
   };
 
@@ -1216,57 +1369,106 @@ function CommunityPage() {
           ) : (
             <div className="space-y-3">
               {discussions.map((disc) => (
-                <Card key={disc.id} className="border border-white/5 bg-white/5 p-4 hover:bg-white/10 transition-colors">
-                  <a href={`/community/${disc.number}`}>
-                    <div className="flex items-start gap-4">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-500/20 text-purple-500">
+                <Card key={disc.id} className={`border border-white/5 bg-white/5 p-4 hover:bg-white/10 transition-colors ${disc.closed ? 'opacity-70' : ''}`}>
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-500/20 text-purple-500">
+                      {disc.authorAvatar ? (
+                        <img src={disc.authorAvatar} alt={disc.author} className="h-10 w-10 rounded-full" />
+                      ) : (
                         <MessageSquare className="h-5 w-5" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          {disc.categoryName && (
-                            <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-500">{disc.categoryName}</span>
-                          )}
-                          {disc.isAnswered && <CheckCircle className="h-4 w-4 text-green-500" />}
-                        </div>
-                        <h3 className="font-semibold text-foreground mb-1 hover:text-purple-400 transition-colors">{disc.title}</h3>
-                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Users className="h-3 w-3" />
-                            {disc.author}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {new Date(disc.createdAt).toLocaleDateString()}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <ThumbsUp className="h-3 w-3" />
-                            {disc.upvoteCount} reactions
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <MessageSquare className="h-3 w-3" />
-                            {disc.commentCount} replies
-                          </span>
-                        </div>
-                      </div>
+                      )}
                     </div>
-                  </a>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        {disc.categoryName && (
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-500">{disc.categoryName}</span>
+                        )}
+                        {disc.isAnswered && <CheckCircle className="h-4 w-4 text-green-500" />}
+                        {disc.closed && <span className="text-xs px-2 py-0.5 rounded-full bg-red-500/20 text-red-500">Closed</span>}
+                        {disc.locked && <Lock className="h-4 w-4 text-yellow-500" />}
+                      </div>
+                      <a href={`/community/${disc.number}`} className="block">
+                        <h3 className="font-semibold text-foreground mb-1 hover:text-purple-400 transition-colors">{disc.title}</h3>
+                      </a>
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Users className="h-3 w-3" />
+                          {disc.author}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {new Date(disc.createdAt).toLocaleDateString()}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <ThumbsUp className="h-3 w-3" />
+                          {disc.upvoteCount} reactions
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <MessageSquare className="h-3 w-3" />
+                          {disc.commentCount} comments
+                        </span>
+                      </div>
+                      {hasGithubIdentity && (
+                        <div className="flex items-center gap-2 mt-2">
+                          {disc.closed ? (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 text-xs text-green-600 hover:text-green-500"
+                              onClick={() => handleCloseDiscussion(disc.id, false)}
+                            >
+                              <ArchiveRestore className="h-3 w-3 mr-1" />
+                              Reopen
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 text-xs text-red-600 hover:text-red-500"
+                              onClick={() => handleCloseDiscussion(disc.id, true)}
+                            >
+                              <Archive className="h-3 w-3 mr-1" />
+                              Close
+                            </Button>
+                          )}
+                          {disc.locked ? (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 text-xs text-green-600 hover:text-green-500"
+                              onClick={() => handleLockDiscussion(disc.id, false)}
+                            >
+                              <Unlock className="h-3 w-3 mr-1" />
+                              Unlock
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 text-xs text-yellow-600 hover:text-yellow-500"
+                              onClick={() => handleLockDiscussion(disc.id, true)}
+                            >
+                              <Lock className="h-3 w-3 mr-1" />
+                              Lock
+                            </Button>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 text-xs text-red-500 hover:text-red-400"
+                            onClick={() => handleDeleteDiscussion(disc.id)}
+                          >
+                            <Trash2 className="h-3 w-3 mr-1" />
+                            Delete
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </Card>
               ))}
             </div>
           )}
-
-          <div className="mt-6 text-center">
-            <p className="text-sm text-muted-foreground mb-4">
-              Sign in with GitHub to participate in discussions.
-            </p>
-            <Button variant="outline" asChild>
-              <a href="https://github.com/orgs/RadianForgeLabs/discussions" target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="mr-2 h-4 w-4" />
-                View All on GitHub
-              </a>
-            </Button>
-          </div>
         </div>
       </div>
     </div>
