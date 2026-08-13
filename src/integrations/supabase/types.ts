@@ -38,39 +38,6 @@ export type Database = {
         }
         Relationships: []
       }
-      categories: {
-        Row: {
-          created_at: string | null
-          description: string | null
-          icon: string | null
-          id: string
-          kind: Database["public"]["Enums"]["product_kind"] | null
-          name: string
-          slug: string
-          sort_order: number | null
-        }
-        Insert: {
-          created_at?: string | null
-          description?: string | null
-          icon?: string | null
-          id?: string
-          kind?: Database["public"]["Enums"]["product_kind"] | null
-          name: string
-          slug: string
-          sort_order?: number | null
-        }
-        Update: {
-          created_at?: string | null
-          description?: string | null
-          icon?: string | null
-          id?: string
-          kind?: Database["public"]["Enums"]["product_kind"] | null
-          name?: string
-          slug?: string
-          sort_order?: number | null
-        }
-        Relationships: []
-      }
       community_categories: {
         Row: {
           created_at: string
@@ -377,7 +344,6 @@ export type Database = {
           architectures: string[] | null
           banner_opacity: number
           banner_url: string | null
-          category_id: string | null
           changelog: string | null
           coming_soon: boolean
           created_at: string
@@ -418,7 +384,6 @@ export type Database = {
           architectures?: string[] | null
           banner_opacity?: number
           banner_url?: string | null
-          category_id?: string | null
           changelog?: string | null
           coming_soon?: boolean
           created_at?: string
@@ -459,7 +424,6 @@ export type Database = {
           architectures?: string[] | null
           banner_opacity?: number
           banner_url?: string | null
-          category_id?: string | null
           changelog?: string | null
           coming_soon?: boolean
           created_at?: string
@@ -495,15 +459,7 @@ export type Database = {
           trailer_url?: string | null
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "products_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "categories"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       profiles: {
         Row: {
