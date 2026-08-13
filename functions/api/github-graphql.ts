@@ -5,7 +5,10 @@ export async function onRequest(context: { request: Request; env: any }) {
 
   // Only allow POST requests
   if (request.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 });
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), { 
+      status: 405,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 
   try {
@@ -13,14 +16,24 @@ export async function onRequest(context: { request: Request; env: any }) {
     const { query, variables } = body;
 
     if (!query) {
-      return new Response('Query is required', { status: 400 });
+      return new Response(JSON.stringify({ error: 'Query is required' }), { 
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
     // Use server-side GitHub token from environment variables
     const githubToken = env.GITHUB_TOKEN;
     if (!githubToken) {
       console.error('GITHUB_TOKEN not found in environment. Available env keys:', Object.keys(env));
-      return new Response('GitHub token not configured. Please add GITHUB_TOKEN to Cloudflare Pages environment variables.', { status: 500 });
+      return new Response(JSON.stringify({ 
+        error: 'GitHub token not configured',
+        message: 'Please add GITHUB_TOKEN to Cloudflare Pages environment variables.',
+        availableKeys: Object.keys(env)
+      }), { 
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
     const requestBody: any = { query };
@@ -41,7 +54,14 @@ export async function onRequest(context: { request: Request; env: any }) {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('GitHub API error:', response.status, errorText);
-      return new Response(`GitHub API error: ${response.status} - ${errorText}`, { status: response.status });
+      return new Response(JSON.stringify({ 
+        error: 'GitHub API error',
+        status: response.status,
+        details: errorText
+      }), { 
+        status: response.status,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
     const data = await response.json();
@@ -53,6 +73,12 @@ export async function onRequest(context: { request: Request; env: any }) {
     });
   } catch (error) {
     console.error('Error in github-graphql function:', error);
-    return new Response(`Error: ${error instanceof Error ? error.message : String(error)}`, { status: 500 });
+    return new Response(JSON.stringify({ 
+      error: 'Internal server error',
+      message: error instanceof Error ? error.message : String(error)
+    }), { 
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 }
