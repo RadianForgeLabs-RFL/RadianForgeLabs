@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { adminProductListQuery, categoriesQuery } from "@/lib/data";
+import { adminProductListQuery, categoriesQuery, developersQuery } from "@/lib/data";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +30,7 @@ function AdminProducts() {
   const qc = useQueryClient();
   const { data } = useQuery(adminProductListQuery());
   const { data: categories } = useQuery(categoriesQuery());
+  const { data: developers } = useQuery(developersQuery());
 
   const del = useMutation({
     mutationFn: async (id: string) => {
@@ -56,7 +57,7 @@ function AdminProducts() {
           <h1 className="text-3xl font-bold">Products</h1>
           <p className="text-muted-foreground">Manage apps and games.</p>
         </div>
-        <ProductDialog categories={categories} trigger={<Button className="bg-gradient-brand text-brand-foreground shadow-glow"><Plus className="mr-2 h-4 w-4" />New product</Button>} />
+        <ProductDialog categories={categories} developers={developers} trigger={<Button className="bg-gradient-brand text-brand-foreground shadow-glow"><Plus className="mr-2 h-4 w-4" />New product</Button>} />
       </div>
 
       <div className="mt-6 space-y-3">
@@ -71,7 +72,7 @@ function AdminProducts() {
                 <div className="text-xs text-muted-foreground">{p.slug} · v{p.latest_version} · {p.status}</div>
               </div>
               <div className="flex gap-2">
-                <ProductDialog product={p} categories={categories} trigger={<Button size="sm" variant="outline" className="border-white/10"><Pencil className="h-4 w-4" /></Button>} />
+                <ProductDialog product={p} categories={categories} developers={developers} trigger={<Button size="sm" variant="outline" className="border-white/10"><Pencil className="h-4 w-4" /></Button>} />
                 <Button size="sm" variant="outline" className="border-white/10 text-destructive" onClick={() => { if (confirm("Delete?")) del.mutate(p.id); }}>
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -84,7 +85,7 @@ function AdminProducts() {
   );
 }
 
-function ProductDialog({ product, categories, trigger }: { product?: any; categories?: any[]; trigger: React.ReactNode }) {
+function ProductDialog({ product, categories, developers, trigger }: { product?: any; categories?: any[]; developers?: any[]; trigger: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(product?.name ?? "");
   const [slug, setSlug] = useState(product?.slug ?? "");
@@ -240,7 +241,12 @@ function ProductDialog({ product, categories, trigger }: { product?: any; catego
                   {categories?.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </F>
-              <F label="Developer"><Input value={developerId} onChange={(e) => setDeveloperId(e.target.value)} placeholder="e.g. RFL Studios" /></F>
+              <F label="Developer">
+                <select value={developerId} onChange={(e) => setDeveloperId(e.target.value)} className="w-full rounded-md border border-white/10 bg-transparent px-3 py-2 text-sm">
+                  <option value="">Select developer...</option>
+                  {developers?.map((d: any) => <option key={d.id} value={d.id}>{d.name}</option>)}
+                </select>
+              </F>
               <F label="Publisher"><Input value={publisher} onChange={(e) => setPublisher(e.target.value)} placeholder="e.g. RFL Studios" /></F>
               <F label="License">
                 <select value={license} onChange={(e) => setLicense(e.target.value)} className="w-full rounded-md border border-white/10 bg-transparent px-3 py-2 text-sm">

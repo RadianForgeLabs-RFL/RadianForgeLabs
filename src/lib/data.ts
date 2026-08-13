@@ -161,6 +161,18 @@ export const categoriesQuery = () =>
     gcTime: 60 * 60 * 1000, // 1 hour
   });
 
+export const developersQuery = () =>
+  queryOptions({
+    queryKey: ["developers"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("developers").select("*").order("name");
+      if (error) throw error;
+      return data ?? [];
+    },
+    staleTime: 30 * 60 * 1000, // 30 minutes
+    gcTime: 60 * 60 * 1000, // 1 hour
+  });
+
 export const newsQuery = () =>
   queryOptions({
     queryKey: ["news"],
