@@ -106,6 +106,7 @@ function CommunityAdmin() {
         ':desktop_computer:': '🖥️',
         ':keyboard:': '⌨️',
         ':mouse:': '🖱️',
+        ':lady_beetle:': '🐞',
       };
       
       if (data.data?.organization?.repositories?.nodes) {
