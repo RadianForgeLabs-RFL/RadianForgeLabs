@@ -71,9 +71,10 @@ export async function uploadToBucket(file: File, folder: string, useCase: string
     contentType: "image/webp",
   });
   if (error) throw error;
-  const { data, error: sErr } = await supabase.storage.from(BUCKET).createSignedUrl(path, SIGNED_EXPIRY);
-  if (sErr) throw sErr;
-  return data.signedUrl;
+  
+  // Use public URL for public bucket instead of signed URL
+  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
+  return data.publicUrl;
 }
 
 export function ImageUpload({
