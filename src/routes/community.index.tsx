@@ -66,6 +66,8 @@ function CommunityPage() {
   const [itemsPerPage] = useState(10);
   const [showMentionDropdown, setShowMentionDropdown] = useState(false);
   const [mentionQuery, setMentionQuery] = useState('');
+  const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
+  const [uploadingFiles, setUploadingFiles] = useState(false);
   const { user } = useAuth();
   const router = useRouter();
 
@@ -518,6 +520,15 @@ function CommunityPage() {
     fetchDiscussions();
   }, []);
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    setAttachedFiles([...attachedFiles, ...files]);
+  };
+
+  const handleRemoveFile = (index: number) => {
+    setAttachedFiles(attachedFiles.filter((_, i) => i !== index));
+  };
+
   const handleCreateDiscussion = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -530,6 +541,42 @@ function CommunityPage() {
     setIsSubmitting(true);
 
     try {
+      // Upload files to Supabase storage if any
+      let fileUrls: string[] = [];
+      if (attachedFiles.length > 0) {
+        setUploadingFiles(true);
+        for (const file of attachedFiles) {
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+          const filePath = `discussion-attachments/${fileName}`;
+          
+          const { error: uploadError } = await supabase.storage
+            .from('attachments')
+            .upload(filePath, file);
+          
+          if (uploadError) {
+            console.error('Error uploading file:', uploadError);
+            continue;
+          }
+          
+          const { data: { publicUrl } } = supabase.storage
+            .from('attachments')
+            .getPublicUrl(filePath);
+          
+          fileUrls.push(publicUrl);
+        }
+        setUploadingFiles(false);
+      }
+
+      // Append file URLs to discussion body
+      let bodyContent = newDiscussion.body;
+      if (fileUrls.length > 0) {
+        bodyContent += '\n\n**Attachments:**\n';
+        fileUrls.forEach((url, index) => {
+          bodyContent += `[${attachedFiles[index].name}](${url})\n`;
+        });
+      }
+
       // Use GraphQL to create discussion
       const query = `
         mutation($repositoryId: ID!, $categoryId: ID!, $title: String!, $body: String!) {
@@ -557,7 +604,7 @@ function CommunityPage() {
             repositoryId: repoId,
             categoryId: newDiscussion.categoryId,
             title: newDiscussion.title,
-            body: newDiscussion.body,
+            body: bodyContent,
           },
         }),
       });
@@ -571,6 +618,7 @@ function CommunityPage() {
       // Refresh discussions
       setShowNewDiscussion(false);
       setNewDiscussion({ title: '', body: '', categoryId: '' });
+      setAttachedFiles([]);
       
       // Reload the page to show new discussion
       window.location.reload();
@@ -579,6 +627,7 @@ function CommunityPage() {
       alert('Failed to create discussion. Please try again.');
     } finally {
       setIsSubmitting(false);
+      setUploadingFiles(false);
     }
   };
 
@@ -1418,6 +1467,42 @@ function CommunityPage() {
                         ))}
                       </SelectContent>
                     </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="files">Attachments</Label>
+                    <div className="space-y-2">
+                      <Input
+                        id="files"
+                        type="file"
+                        multiple
+                        onChange={handleFileSelect}
+                        className="border-white/10 bg-white/5"
+                      />
+                      {attachedFiles.length > 0 && (
+                        <div className="space-y-2">
+                          {attachedFiles.map((file, index) => (
+                            <div key={index} className="flex items-center justify-between p-2 rounded bg-white/5 border border-white/10">
+                              <span className="text-sm truncate">{file.name}</span>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleRemoveFile(index)}
+                                className="h-6 w-6 p-0"
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {uploadingFiles && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Uploading files...
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div>
                     <div className="flex items-center justify-between mb-2">
