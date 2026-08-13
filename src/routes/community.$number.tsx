@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, MessageSquare, ExternalLink, Loader2, AlertCircle, Send, ThumbsUp, CheckCircle, Clock, User, Edit2, Eye, EyeOff, Smile, Paperclip, Upload, Trash2, Bell, BellOff } from "lucide-react";
+import { ArrowLeft, MessageSquare, ExternalLink, Loader2, AlertCircle, Send, ThumbsUp, CheckCircle, Clock, User, Edit2, Eye, EyeOff, Smile, Paperclip, Upload, Trash2, Bell, BellOff, Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -319,13 +319,18 @@ function DiscussionPage() {
         
         // Check follow status from Supabase
         if (user?.id) {
-          const { data: followData } = await (supabase as any)
-            .from('discussion_follows')
-            .select('*')
-            .eq('discussion_id', foundDiscussion.id)
-            .eq('user_id', user.id)
-            .single();
-          setIsFollowing(!!followData);
+          try {
+            const { data: followData, error: followError } = await (supabase as any)
+              .from('discussion_follows')
+              .select('*')
+              .eq('discussion_id', foundDiscussion.id)
+              .eq('user_id', user.id)
+              .maybeSingle();
+            setIsFollowing(!!followData);
+          } catch (followErr) {
+            console.error('Error checking follow status:', followErr);
+            setIsFollowing(false);
+          }
         }
       } catch (err) {
         console.error('Error fetching discussion:', err);
