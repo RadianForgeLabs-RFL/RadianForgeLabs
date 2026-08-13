@@ -19,6 +19,7 @@ interface Comment {
   createdAt: string;
   isAnswer?: boolean;
   upvoteCount: number;
+  isHidden?: boolean;
 }
 
 interface DiscussionDetail {
@@ -63,6 +64,7 @@ function DiscussionPage() {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [uploadingFile, setUploadingFile] = useState(false);
   const [showDiscussionEmojiPicker, setShowDiscussionEmojiPicker] = useState(false);
+  const [showHiddenContent, setShowHiddenContent] = useState(false);
 
   // Check if user has GitHub identity linked
   const hasGithubIdentity = user?.identities?.some((identity: any) => identity.provider === 'github');
@@ -407,15 +409,84 @@ function DiscussionPage() {
   };
 
   const handleHideComment = async (commentId: string) => {
+    if (!hasGithubIdentity) {
+      setShowLinkGithub(true);
+      return;
+    }
+
     if (!confirm('Are you sure you want to hide this comment?')) return;
 
     try {
-      // For now, we'll just remove it from local state
-      // In a real implementation, this would call an API to hide the comment
-      setComments(comments.filter(c => c.id !== commentId));
+      const mutation = `
+        mutation($commentId: ID!) {
+          hideDiscussionComment(input: {commentId: $commentId}) {
+            clientMutationId
+          }
+        }
+      `;
+
+      await fetch('/api/github-graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: mutation,
+          variables: {
+            commentId: commentId,
+          },
+        }),
+      });
+
+      // Update local state to mark as hidden
+      setComments(comments.map(c => 
+        c.id === commentId 
+          ? { ...c, isHidden: true }
+          : c
+      ));
     } catch (err) {
       console.error('Error hiding comment:', err);
       alert('Failed to hide comment');
+    }
+  };
+
+  const handleUnhideComment = async (commentId: string) => {
+    if (!hasGithubIdentity) {
+      setShowLinkGithub(true);
+      return;
+    }
+
+    try {
+      const mutation = `
+        mutation($commentId: ID!) {
+          unhideDiscussionComment(input: {commentId: $commentId}) {
+            clientMutationId
+          }
+        }
+      `;
+
+      await fetch('/api/github-graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: mutation,
+          variables: {
+            commentId: commentId,
+          },
+        }),
+      });
+
+      // Update local state to mark as visible
+      setComments(comments.map(c => 
+        c.id === commentId 
+          ? { ...c, isHidden: false }
+          : c
+      ));
+    } catch (err) {
+      console.error('Error unhiding comment:', err);
+      alert('Failed to unhide comment');
     }
   };
 
@@ -715,7 +786,7 @@ function DiscussionPage() {
         {/* Comments List */}
         <div className="space-y-4">
           {comments.map((comment) => (
-            <Card key={comment.id} className={`border border-white/5 bg-white/5 p-4 ${comment.isAnswer ? 'border-green-500/30 bg-green-500/5' : ''}`}>
+            <Card key={comment.id} className={`border border-white/5 bg-white/5 p-4 ${comment.isAnswer ? 'border-green-500/30 bg-green-500/5' : ''} ${comment.isHidden ? 'opacity-50' : ''}`}>
               <div className="flex items-start gap-3">
                 <img
                   src={comment.avatar}
@@ -733,79 +804,112 @@ function DiscussionPage() {
                         ✓ Answer
                       </span>
                     )}
+                    {comment.isHidden && (
+                      <span className="px-2 py-0.5 rounded-full text-xs bg-yellow-500/20 text-yellow-500">
+                        Hidden
+                      </span>
+                    )}
                   </div>
                   
-                  {editingCommentId === comment.id ? (
-                    <div className="space-y-3">
-                      <Textarea
-                        value={editText}
-                        onChange={(e) => setEditText(e.target.value)}
-                        rows={4}
-                        className="mb-2"
-                      />
-                      <div className="flex gap-2">
-                        <Button size="sm" onClick={() => handleEditComment(comment.id)}>
-                          Save
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={() => { setEditingCommentId(null); setEditText(''); }}>
-                          Cancel
-                        </Button>
-                      </div>
+                  {comment.isHidden && !showHiddenContent ? (
+                    <div className="text-sm text-muted-foreground italic mb-3">
+                      This comment has been hidden. 
+                      <Button 
+                        variant="link" 
+                        size="sm" 
+                        className="h-auto p-0 ml-2"
+                        onClick={() => setShowHiddenContent(true)}
+                      >
+                        Show content
+                      </Button>
                     </div>
                   ) : (
                     <>
-                      <div className="prose prose-invert max-w-none text-sm mb-3">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{comment.body}</ReactMarkdown>
-                      </div>
-                      <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <ThumbsUp className="h-3 w-3" />
-                          <span>{comment.upvoteCount}</span>
+                      {editingCommentId === comment.id ? (
+                        <div className="space-y-3">
+                          <Textarea
+                            value={editText}
+                            onChange={(e) => setEditText(e.target.value)}
+                            rows={4}
+                            className="mb-2"
+                          />
+                          <div className="flex gap-2">
+                            <Button size="sm" onClick={() => handleEditComment(comment.id)}>
+                              Save
+                            </Button>
+                            <Button size="sm" variant="outline" onClick={() => { setEditingCommentId(null); setEditText(''); }}>
+                              Cancel
+                            </Button>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-1">
-                          {emojis.slice(0, 5).map((emoji) => (
-                            <button
-                              key={emoji}
-                              onClick={() => handleAddReaction(comment.id, emoji)}
-                              className="hover:scale-125 transition-transform"
-                              title={`React with ${emoji}`}
-                            >
-                              {emoji}
-                            </button>
-                          ))}
-                        </div>
-                        {hasGithubIdentity && (
-                          <>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-6 text-xs"
-                              onClick={() => { setEditingCommentId(comment.id); setEditText(comment.body); }}
-                            >
-                              <Edit2 className="h-3 w-3 mr-1" />
-                              Edit
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-6 text-xs text-red-500 hover:text-red-400"
-                              onClick={() => handleDeleteComment(comment.id)}
-                            >
-                              <Trash2 className="h-3 w-3 mr-1" />
-                              Delete
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-6 text-xs text-yellow-600 hover:text-yellow-500"
-                              onClick={() => handleHideComment(comment.id)}
-                            >
-                              <EyeOff className="h-3 w-3 mr-1" />
-                              Hide
-                            </Button>
-                          </>
-                        )}
-                      </div>
+                      ) : (
+                        <>
+                          <div className="prose prose-invert max-w-none text-sm mb-3">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{comment.body}</ReactMarkdown>
+                          </div>
+                          <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <ThumbsUp className="h-3 w-3" />
+                              <span>{comment.upvoteCount}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              {emojis.slice(0, 5).map((emoji) => (
+                                <button
+                                  key={emoji}
+                                  onClick={() => handleAddReaction(comment.id, emoji)}
+                                  className="hover:scale-125 transition-transform"
+                                  title={`React with ${emoji}`}
+                                >
+                                  {emoji}
+                                </button>
+                              ))}
+                            </div>
+                            {hasGithubIdentity && (
+                              <>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 text-xs"
+                                  onClick={() => { setEditingCommentId(comment.id); setEditText(comment.body); }}
+                                >
+                                  <Edit2 className="h-3 w-3 mr-1" />
+                                  Edit
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 text-xs text-red-500 hover:text-red-400"
+                                  onClick={() => handleDeleteComment(comment.id)}
+                                >
+                                  <Trash2 className="h-3 w-3 mr-1" />
+                                  Delete
+                                </Button>
+                                {comment.isHidden ? (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-6 text-xs text-green-600 hover:text-green-500"
+                                    onClick={() => handleUnhideComment(comment.id)}
+                                  >
+                                    <Eye className="h-3 w-3 mr-1" />
+                                    Unhide
+                                  </Button>
+                                ) : (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-6 text-xs text-yellow-600 hover:text-yellow-500"
+                                    onClick={() => handleHideComment(comment.id)}
+                                  >
+                                    <EyeOff className="h-3 w-3 mr-1" />
+                                    Hide
+                                  </Button>
+                                )}
+                              </>
+                            )}
+                          </div>
+                        </>
+                      )}
                     </>
                   )}
                 </div>
