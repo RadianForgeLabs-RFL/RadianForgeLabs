@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { adminProductListQuery } from "@/lib/data";
+import { adminProductListQuery, categoriesQuery } from "@/lib/data";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +29,7 @@ const slugify = (s: string) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-"
 function AdminProducts() {
   const qc = useQueryClient();
   const { data } = useQuery(adminProductListQuery());
+  const { data: categories } = useQuery(categoriesQuery());
 
   const del = useMutation({
     mutationFn: async (id: string) => {
@@ -39,7 +40,6 @@ function AdminProducts() {
       await supabase.from("product_tags").delete().eq("product_id", id);
       await supabase.from("favorites").delete().eq("product_id", id);
       await supabase.from("preorders").delete().eq("product_id", id);
-      await supabase.from("requests").delete().eq("product_id", id);
       
       // Finally delete the product
       const { error } = await supabase.from("products").delete().eq("id", id);
@@ -56,7 +56,7 @@ function AdminProducts() {
           <h1 className="text-3xl font-bold">Products</h1>
           <p className="text-muted-foreground">Manage apps and games.</p>
         </div>
-        <ProductDialog trigger={<Button className="bg-gradient-brand text-brand-foreground shadow-glow"><Plus className="mr-2 h-4 w-4" />New product</Button>} />
+        <ProductDialog categories={categories} trigger={<Button className="bg-gradient-brand text-brand-foreground shadow-glow"><Plus className="mr-2 h-4 w-4" />New product</Button>} />
       </div>
 
       <div className="mt-6 space-y-3">
@@ -71,7 +71,7 @@ function AdminProducts() {
                 <div className="text-xs text-muted-foreground">{p.slug} · v{p.latest_version} · {p.status}</div>
               </div>
               <div className="flex gap-2">
-                <ProductDialog product={p} trigger={<Button size="sm" variant="outline" className="border-white/10"><Pencil className="h-4 w-4" /></Button>} />
+                <ProductDialog product={p} categories={categories} trigger={<Button size="sm" variant="outline" className="border-white/10"><Pencil className="h-4 w-4" /></Button>} />
                 <Button size="sm" variant="outline" className="border-white/10 text-destructive" onClick={() => { if (confirm("Delete?")) del.mutate(p.id); }}>
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -84,7 +84,7 @@ function AdminProducts() {
   );
 }
 
-function ProductDialog({ product, trigger }: { product?: any; trigger: React.ReactNode }) {
+function ProductDialog({ product, categories, trigger }: { product?: any; categories?: any[]; trigger: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(product?.name ?? "");
   const [slug, setSlug] = useState(product?.slug ?? "");
@@ -101,6 +101,7 @@ function ProductDialog({ product, trigger }: { product?: any; trigger: React.Rea
   const [banner_url, setBannerUrl] = useState<string | null>(product?.banner_url ?? null);
   const [banner_opacity, setBannerOpacity] = useState<number>(product?.banner_opacity ?? 0.4);
   const [productId, setProductId] = useState<string | null>(product?.id ?? null);
+  const [categoryId, setCategoryId] = useState(product?.category_id ?? "");
   const [developerId, setDeveloperId] = useState(product?.developer_id ?? "");
   const [license, setLicense] = useState(product?.license ?? "");
   const [publisher, setPublisher] = useState(product?.publisher ?? "");
@@ -129,6 +130,7 @@ function ProductDialog({ product, trigger }: { product?: any; trigger: React.Rea
     setBannerUrl(product?.banner_url ?? null);
     setBannerOpacity(product?.banner_opacity ?? 0.4);
     setExtraGuidance(product?.extra_guidance ?? "");
+    setCategoryId(product?.category_id ?? "");
     setDeveloperId(product?.developer_id ?? "");
     setLicense(product?.license ?? "");
     setPublisher(product?.publisher ?? "");
@@ -155,6 +157,7 @@ function ProductDialog({ product, trigger }: { product?: any; trigger: React.Rea
       const payload: any = {
         name, slug: slug || slugify(name), tagline, description, extra_guidance, kind, status, source_type,
         latest_version, coming_soon, published, icon_url, banner_url, banner_opacity,
+        category_id: categoryId || null,
         developer_id: developerId || null,
         license: license || null,
         publisher: publisher || null,
@@ -231,6 +234,12 @@ function ProductDialog({ product, trigger }: { product?: any; trigger: React.Rea
               </F>
               
               {/* Organization */}
+              <F label="Category">
+                <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className="w-full rounded-md border border-white/10 bg-transparent px-3 py-2 text-sm">
+                  <option value="">Select category...</option>
+                  {categories?.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              </F>
               <F label="Developer"><Input value={developerId} onChange={(e) => setDeveloperId(e.target.value)} placeholder="e.g. RFL Studios" /></F>
               <F label="Publisher"><Input value={publisher} onChange={(e) => setPublisher(e.target.value)} placeholder="e.g. RFL Studios" /></F>
               <F label="License">

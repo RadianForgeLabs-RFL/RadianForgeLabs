@@ -12,6 +12,7 @@ export type Product = {
   features: string[] | null;
   requirements: string | null;
   kind: ProductKind;
+  category_id: string | null;
   developer_id: string | null;
   publisher: string | null;
   license: string | null;
@@ -138,7 +139,7 @@ export const productBySlugQuery = (slug: string) =>
     queryFn: async () => {
       const { data, error } = await supabase
         .from("products")
-        .select("*, screenshots(*), downloads(*), versions(*)")
+        .select("*, developer:developers(*), category:categories(*), screenshots(*), downloads(*), versions(*), tags:product_tags(tag:tags(*))")
         .eq("slug", slug)
         .maybeSingle();
       if (error) throw error;
@@ -146,6 +147,18 @@ export const productBySlugQuery = (slug: string) =>
     },
     staleTime: 10 * 60 * 1000, // 10 minutes
     gcTime: 30 * 60 * 1000, // 30 minutes
+  });
+
+export const categoriesQuery = () =>
+  queryOptions({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("categories").select("*").order("sort_order");
+      if (error) throw error;
+      return data ?? [];
+    },
+    staleTime: 30 * 60 * 1000, // 30 minutes
+    gcTime: 60 * 60 * 1000, // 1 hour
   });
 
 export const newsQuery = () =>
