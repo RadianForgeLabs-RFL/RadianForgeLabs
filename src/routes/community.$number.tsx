@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, MessageSquare, ExternalLink, Loader2, AlertCircle, Send, ThumbsUp, CheckCircle, Clock, User, Edit2, Eye, EyeOff, Smile, Paperclip, Upload } from "lucide-react";
+import { ArrowLeft, MessageSquare, ExternalLink, Loader2, AlertCircle, Send, ThumbsUp, CheckCircle, Clock, User, Edit2, Eye, EyeOff, Smile, Paperclip, Upload, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -406,6 +406,19 @@ function DiscussionPage() {
     }
   };
 
+  const handleHideComment = async (commentId: string) => {
+    if (!confirm('Are you sure you want to hide this comment?')) return;
+
+    try {
+      // For now, we'll just remove it from local state
+      // In a real implementation, this would call an API to hide the comment
+      setComments(comments.filter(c => c.id !== commentId));
+    } catch (err) {
+      console.error('Error hiding comment:', err);
+      alert('Failed to hide comment');
+    }
+  };
+
   const emojis = ['👍', '👎', '😄', '🎉', '❤️', '🔥', '🚀', '💡', '👀', '✅'];
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -778,8 +791,17 @@ function DiscussionPage() {
                               className="h-6 text-xs text-red-500 hover:text-red-400"
                               onClick={() => handleDeleteComment(comment.id)}
                             >
-                              <EyeOff className="h-3 w-3 mr-1" />
+                              <Trash2 className="h-3 w-3 mr-1" />
                               Delete
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 text-xs text-yellow-600 hover:text-yellow-500"
+                              onClick={() => handleHideComment(comment.id)}
+                            >
+                              <EyeOff className="h-3 w-3 mr-1" />
+                              Hide
                             </Button>
                           </>
                         )}
