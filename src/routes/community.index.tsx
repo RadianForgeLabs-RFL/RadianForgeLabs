@@ -57,6 +57,8 @@ function CommunityPage() {
   const [showMarkdownPreview, setShowMarkdownPreview] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'most_active'>('newest');
   const { user } = useAuth();
   const router = useRouter();
 
@@ -589,11 +591,51 @@ function CommunityPage() {
 
   const handleCategoryFilter = (categoryId: string | null) => {
     setSelectedCategory(categoryId);
-    if (categoryId === null) {
-      setDiscussions(allDiscussions);
-    } else {
-      setDiscussions(allDiscussions.filter(d => d.categoryId === categoryId));
+    applyFilters(categoryId, searchQuery, sortBy);
+  };
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    applyFilters(selectedCategory, query, sortBy);
+  };
+
+  const handleSort = (sort: 'newest' | 'oldest' | 'most_active') => {
+    setSortBy(sort);
+    applyFilters(selectedCategory, searchQuery, sort);
+  };
+
+  const applyFilters = (category: string | null, search: string, sort: 'newest' | 'oldest' | 'most_active') => {
+    let filtered = allDiscussions;
+
+    // Apply category filter
+    if (category !== null) {
+      filtered = filtered.filter(d => d.categoryId === category);
     }
+
+    // Apply search filter
+    if (search.trim()) {
+      const searchLower = search.toLowerCase();
+      filtered = filtered.filter(d => 
+        d.title.toLowerCase().includes(searchLower) ||
+        (d.body && d.body.toLowerCase().includes(searchLower)) ||
+        d.author.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Apply sorting
+    switch (sort) {
+      case 'newest':
+        filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        break;
+      case 'oldest':
+        filtered.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        break;
+      case 'most_active':
+        filtered.sort((a, b) => b.commentCount - a.commentCount);
+        break;
+    }
+
+    setDiscussions(filtered);
   };
 
   const handleCloseDiscussion = async (discussionId: string, close: boolean) => {
@@ -1181,21 +1223,45 @@ function CommunityPage() {
 
         {/* Main Content */}
         <div>
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex items-center justify-between flex-wrap gap-4">
             <h2 className="text-xl font-semibold">Recent Discussions</h2>
-            {user ? (
-              <Button size="sm" onClick={() => setShowNewDiscussion(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                New Discussion
-              </Button>
-            ) : (
-              <Button asChild size="sm">
-                <a href="/auth">
-                  <MessageSquare className="mr-2 h-4 w-4" />
-                  Login
-                </a>
-              </Button>
-            )}
+            <div className="flex items-center gap-2">
+              {user ? (
+                <Button size="sm" onClick={() => setShowNewDiscussion(true)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  New Discussion
+                </Button>
+              ) : (
+                <Button asChild size="sm">
+                  <a href="/auth">
+                    <MessageSquare className="mr-2 h-4 w-4" />
+                    Login
+                  </a>
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* Search and Sort Bar */}
+          <div className="mb-4 flex items-center gap-4 flex-wrap">
+            <div className="flex-1 min-w-[200px]">
+              <Input
+                placeholder="Search discussions..."
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
+                className="border-white/10 bg-white/5"
+              />
+            </div>
+            <Select value={sortBy} onValueChange={(value: any) => handleSort(value)}>
+              <SelectTrigger className="w-[180px] border-white/10 bg-white/5">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest First</SelectItem>
+                <SelectItem value="oldest">Oldest First</SelectItem>
+                <SelectItem value="most_active">Most Active</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {showNewDiscussion && (
