@@ -234,14 +234,6 @@ function ProductDialog({ product, trigger }: { product?: any; trigger: React.Rea
                   <option value="">Select category...</option>
                   <option value="apps">Apps</option>
                   <option value="games">Games</option>
-                  <option value="ai">AI Tools</option>
-                  <option value="developer-tools">Developer Tools</option>
-                  <option value="utilities">Utilities</option>
-                  <option value="media">Media</option>
-                  <option value="internet">Internet</option>
-                  <option value="security">Security</option>
-                  <option value="education">Education</option>
-                  <option value="system">System</option>
                 </select>
               </F>
               <F label="Developer">
