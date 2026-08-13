@@ -4,11 +4,8 @@ import { useAuth } from "@/lib/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Heart, Github, CheckCircle, AlertCircle, Mail, LogOut, Trash2 } from "lucide-react";
+import { Heart, Github, CheckCircle, LogOut, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { useState } from "react";
 
 export const Route = createFileRoute("/_authenticated/account")({
   head: () => ({ meta: [{ title: "Account — RFL Studios" }, { name: "robots", content: "noindex" }] }),
@@ -18,10 +15,6 @@ export const Route = createFileRoute("/_authenticated/account")({
 function Account() {
   const { user } = useAuth();
   const qc = useQueryClient();
-  const [newPassword, setNewPassword] = useState("");
-  const [newEmail, setNewEmail] = useState("");
-  const [isChangingPassword, setIsChangingPassword] = useState(false);
-  const [isChangingEmail, setIsChangingEmail] = useState(false);
 
   const favs = useQuery({
     queryKey: ["favorites", user?.id],
@@ -46,37 +39,7 @@ function Account() {
   // Check linked providers
   const hasGithubIdentity = user?.identities?.some((identity: any) => identity.provider === 'github');
   const hasGoogleIdentity = user?.identities?.some((identity: any) => identity.provider === 'google');
-  const hasEmailIdentity = user?.identities?.some((identity: any) => identity.provider === 'email');
 
-  const changePasswordMutation = useMutation({
-    mutationFn: async (password: string) => {
-      const { error } = await supabase.auth.updateUser({ password });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast.success("Password updated successfully");
-      setNewPassword("");
-      setIsChangingPassword(false);
-    },
-    onError: (error: any) => {
-      toast.error(error.message);
-    },
-  });
-
-  const changeEmailMutation = useMutation({
-    mutationFn: async (email: string) => {
-      const { error } = await supabase.auth.updateUser({ email });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast.success("Email update initiated - check your inbox for verification");
-      setNewEmail("");
-      setIsChangingEmail(false);
-    },
-    onError: (error: any) => {
-      toast.error(error.message);
-    },
-  });
 
   const handleLinkGithub = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
@@ -182,96 +145,8 @@ function Account() {
           </div>
         </div>
 
-        {/* Email */}
-        <div>
-          <div className="flex items-center justify-between p-4 rounded-lg border border-white/5 bg-white/5">
-            <div className="flex items-center gap-3">
-              <Mail className="h-5 w-5" />
-              <div>
-                <p className="font-medium">Email & Password</p>
-                <p className="text-sm text-muted-foreground">
-                  {hasEmailIdentity ? 'Connected' : 'Not connected'}
-                </p>
-              </div>
-            </div>
-            {hasEmailIdentity ? (
-              <CheckCircle className="h-6 w-6 text-green-500" />
-            ) : (
-              <span className="text-sm text-muted-foreground">Set up via sign up</span>
-            )}
-          </div>
-        </div>
       </Card>
 
-      {/* Change Password */}
-      {hasEmailIdentity && (
-        <Card className="mt-6 glass border-white/5 bg-transparent p-6">
-          <h2 className="text-xl font-semibold mb-4">Change Password</h2>
-          {!isChangingPassword ? (
-            <Button onClick={() => setIsChangingPassword(true)} variant="outline">
-              Change Password
-            </Button>
-          ) : (
-            <div className="space-y-4">
-              <div>
-                <Label>New Password</Label>
-                <Input
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Min 8 characters"
-                  className="glass border-white/10 bg-transparent"
-                />
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  onClick={() => changePasswordMutation.mutate(newPassword)}
-                  disabled={changePasswordMutation.isPending || newPassword.length < 8}
-                >
-                  {changePasswordMutation.isPending ? 'Updating...' : 'Update Password'}
-                </Button>
-                <Button onClick={() => setIsChangingPassword(false)} variant="outline">
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          )}
-        </Card>
-      )}
-
-      {/* Change Email */}
-      <Card className="mt-6 glass border-white/5 bg-transparent p-6">
-        <h2 className="text-xl font-semibold mb-4">Change Email</h2>
-        {!isChangingEmail ? (
-          <Button onClick={() => setIsChangingEmail(true)} variant="outline">
-            Change Email
-          </Button>
-        ) : (
-          <div className="space-y-4">
-            <div>
-              <Label>New Email</Label>
-              <Input
-                type="email"
-                value={newEmail}
-                onChange={(e) => setNewEmail(e.target.value)}
-                placeholder="your@email.com"
-                className="glass border-white/10 bg-transparent"
-              />
-            </div>
-            <div className="flex gap-2">
-              <Button
-                onClick={() => changeEmailMutation.mutate(newEmail)}
-                disabled={changeEmailMutation.isPending || !newEmail.includes('@')}
-              >
-                {changeEmailMutation.isPending ? 'Sending...' : 'Send Verification'}
-              </Button>
-              <Button onClick={() => setIsChangingEmail(false)} variant="outline">
-                Cancel
-              </Button>
-            </div>
-          </div>
-        )}
-      </Card>
 
       {/* Account Actions */}
       <Card className="mt-6 glass border-white/5 bg-transparent p-6">
