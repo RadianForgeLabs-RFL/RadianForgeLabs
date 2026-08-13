@@ -75,6 +75,9 @@ function DiscussionPage() {
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [replyToText, setReplyToText] = useState('');
   const [isSubmittingReply, setIsSubmittingReply] = useState(false);
+  const [showReplyMarkdownPreview, setShowReplyMarkdownPreview] = useState(false);
+  const [showReplyEmojiPicker, setShowReplyEmojiPicker] = useState(false);
+  const [uploadingReplyFile, setUploadingReplyFile] = useState(false);
 
   // Check if user has GitHub identity linked
   const hasGithubIdentity = user?.identities?.some((identity: any) => identity.provider === 'github');
@@ -214,6 +217,12 @@ function DiscussionPage() {
                         }
                       }
                     }
+                    answer {
+                      id
+                      author {
+                        login
+                      }
+                    }
                   }
                 }
               }
@@ -257,13 +266,14 @@ function DiscussionPage() {
               };
               
               if (repo.discussion.comments?.nodes) {
+                const answerId = repo.discussion.answer?.id;
                 foundComments = repo.discussion.comments.nodes.map((c: any) => ({
                   id: c.id,
                   author: c.author?.login || 'Unknown',
                   avatar: c.author?.avatarUrl || '',
                   body: c.body,
                   createdAt: c.createdAt,
-                  isAnswer: c.isAnswer || false,
+                  isAnswer: c.id === answerId || c.isAnswer || false,
                   upvoteCount: c.reactions?.totalCount || 0,
                   replyTo: c.replyTo?.id || null,
                   replies: [],
@@ -888,11 +898,49 @@ function DiscussionPage() {
       setReplyToText('');
       setReplyingTo(null);
       setShowReplyForm(false);
+      setShowReplyMarkdownPreview(false);
+      setShowReplyEmojiPicker(false);
     } catch (err) {
       console.error('Error posting reply:', err);
       alert('Failed to post reply. Please try again.');
     } finally {
       setIsSubmittingReply(false);
+    }
+  };
+
+  const handleReplyFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingReplyFile(true);
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `community-uploads/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('product-media')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-media')
+        .getPublicUrl(filePath);
+
+      // Insert markdown image syntax into reply
+      const imageMarkdown = `
+![${file.name}](${publicUrl})
+`;
+      setReplyToText(replyToText + imageMarkdown);
+    } catch (err) {
+      console.error('Error uploading file:', err);
+      alert('Failed to upload file. Please try again.');
+    } finally {
+      setUploadingReplyFile(false);
     }
   };
 
@@ -1405,13 +1453,89 @@ function DiscussionPage() {
                 <Card className="border border-white/10 bg-white/5 p-4 ml-11 mt-3">
                   <form onSubmit={handleReplyToComment}>
                     <div className="space-y-3">
-                      <Textarea
-                        value={replyToText}
-                        onChange={(e) => setReplyToText(e.target.value)}
-                        placeholder="Write your reply..."
-                        rows={3}
-                        className="border-white/10 bg-white/5"
-                      />
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="reply-to">Your reply</Label>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setShowReplyMarkdownPreview(!showReplyMarkdownPreview)}
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            Preview
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setShowReplyEmojiPicker(!showReplyEmojiPicker)}
+                          >
+                            <Smile className="h-4 w-4 mr-1" />
+                            Emoji
+                          </Button>
+                          <div className="relative">
+                            <input
+                              type="file"
+                              id="reply-file-upload"
+                              className="hidden"
+                              onChange={handleReplyFileUpload}
+                              accept="image/*,.pdf,.doc,.docx"
+                              disabled={uploadingReplyFile}
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => document.getElementById('reply-file-upload')?.click()}
+                              disabled={uploadingReplyFile}
+                            >
+                              {uploadingReplyFile ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                                  Uploading...
+                                </>
+                              ) : (
+                                <>
+                                  <Paperclip className="h-4 w-4 mr-1" />
+                                  Attach File
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {showReplyEmojiPicker && (
+                        <div className="flex flex-wrap gap-2 p-3 border border-white/10 rounded-lg glass shadow-xl">
+                          {emojis.map((emoji) => (
+                            <button
+                              key={emoji}
+                              type="button"
+                              onClick={() => setReplyToText(replyToText + emoji)}
+                              className="text-2xl hover:scale-125 transition-transform"
+                            >
+                              {emoji}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {showReplyMarkdownPreview ? (
+                        <div className="prose prose-invert max-w-none p-4 border border-white/10 rounded-lg bg-white/5 min-h-[100px]">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{replyToText || '*Preview will appear here*'}</ReactMarkdown>
+                        </div>
+                      ) : (
+                        <Textarea
+                          id="reply-to"
+                          value={replyToText}
+                          onChange={(e) => setReplyToText(e.target.value)}
+                          placeholder="Write your reply... (Markdown supported)"
+                          rows={3}
+                          className="border-white/10 bg-white/5"
+                        />
+                      )}
+                      
                       <div className="flex gap-2">
                         <Button type="submit" size="sm" disabled={isSubmittingReply || !replyToText.trim()}>
                           {isSubmittingReply ? (
@@ -1426,7 +1550,7 @@ function DiscussionPage() {
                             </>
                           )}
                         </Button>
-                        <Button type="button" size="sm" variant="outline" onClick={() => { setShowReplyForm(false); setReplyingTo(null); setReplyToText(''); }}>
+                        <Button type="button" size="sm" variant="outline" onClick={() => { setShowReplyForm(false); setReplyingTo(null); setReplyToText(''); setShowReplyMarkdownPreview(false); setShowReplyEmojiPicker(false); }}>
                           Cancel
                         </Button>
                       </div>
