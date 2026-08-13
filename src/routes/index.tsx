@@ -41,11 +41,11 @@ function DivisionCard({
       <Card className={`relative overflow-hidden border-white/10 bg-gradient-to-br from-white/5 to-transparent transition-all duration-300 hover:border-${color}-500/40 md:hover:shadow-xl md:hover:shadow-${color}-500/20`}>
         <div className={`absolute inset-0 bg-gradient-to-br from-${color}-500/10 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100`} />
         <div className="relative p-8 md:p-12">
-          <div className={`mb-6 inline-flex rounded-2xl border border-${color}-500/30 bg-${color}-500/10 p-4`}>
+          <div className={`mb-6 inline-flex rounded-full bg-${color}-500/10 p-6`}>
             {iconUrl ? (
-              <img src={iconUrl} alt={title} className="h-12 w-12 object-cover" />
+              <img src={iconUrl} alt={title} className="h-20 w-20 object-cover" />
             ) : (
-              <Icon className={`h-12 w-12 text-${color}-500`} />
+              <Icon className={`h-20 w-20 text-${color}-500`} />
             )}
           </div>
           <h2 className="text-3xl font-bold md:text-4xl">{title}</h2>

@@ -15,6 +15,7 @@ import { Pencil, Plus, Trash2 } from "lucide-react";
 import { ImageUpload, MultiImageUpload } from "@/components/admin/MediaUpload";
 
 const PLAY_MODES = ["single_player", "multiplayer", "lan", "online", "offline", "cross_platform"];
+const APP_MODES = ["offline", "online", "sync", "local_only", "cloud_based", "hybrid"];
 const PLATFORM_OPTIONS = ["Windows", "Linux", "Mac", "Android", "iOS", "Web"];
 const ARCHITECTURE_OPTIONS = ["x86_64", "arm64", "universal", "x86", "arm", "other"];
 const LICENSE_OPTIONS = ["MIT", "Apache-2.0", "GPL-3.0", "GPL-2.0", "BSD-3-Clause", "BSD-2-Clause", "LGPL-3.0", "LGPL-2.1", "MPL-2.0", "Unlicense", "Proprietary", "Custom"];
@@ -113,6 +114,7 @@ function ProductDialog({ product, trigger }: { product?: any; trigger: React.Rea
   const [featured, setFeatured] = useState(product?.featured ?? false);
   const [homepageOrder, setHomepageOrder] = useState(product?.homepage_order ?? 0);
   const [playModes, setPlayModes] = useState(product?.play_modes?.join(", ") ?? "");
+  const [appModes, setAppModes] = useState(product?.app_modes?.join(", ") ?? "");
   const [platforms, setPlatforms] = useState(product?.platforms?.join(", ") ?? "");
   const [architectures, setArchitectures] = useState(product?.architectures?.join(", ") ?? "");
   const [dependencies, setDependencies] = useState(product?.dependencies?.join(", ") ?? "");
@@ -140,6 +142,7 @@ function ProductDialog({ product, trigger }: { product?: any; trigger: React.Rea
     setFeatured(product?.featured ?? false);
     setHomepageOrder(product?.homepage_order ?? 0);
     setPlayModes(product?.play_modes?.join(", ") ?? "");
+    setAppModes(product?.app_modes?.join(", ") ?? "");
     setPlatforms(product?.platforms?.join(", ") ?? "");
     setArchitectures(product?.architectures?.join(", ") ?? "");
     setDependencies(product?.dependencies?.join(", ") ?? "");
@@ -164,7 +167,8 @@ function ProductDialog({ product, trigger }: { product?: any; trigger: React.Rea
         trailer_url: trailerUrl || null,
         featured,
         homepage_order: homepageOrder,
-        play_modes: playModes ? playModes.split(",").map((p: string) => p.trim()).filter(Boolean) : [],
+        play_modes: kind === "game" ? (playModes ? playModes.split(",").map((p: string) => p.trim()).filter(Boolean) : []) : null,
+        app_modes: kind === "app" ? (appModes ? appModes.split(",").map((a: string) => a.trim()).filter(Boolean) : []) : null,
         platforms: platforms ? platforms.split(",").map((p: string) => p.trim()).filter(Boolean) : [],
         architectures: architectures ? architectures.split(",").map((a: string) => a.trim()).filter(Boolean) : [],
         dependencies: dependencies ? dependencies.split(",").map((d: string) => d.trim()).filter(Boolean) : [],
@@ -305,27 +309,51 @@ function ProductDialog({ product, trigger }: { product?: any; trigger: React.Rea
                   ))}
                 </div>
               </F>
-              <F label="Play Modes" className="md:col-span-2">
-                <div className="flex flex-wrap gap-2">
-                  {PLAY_MODES.map((pm) => (
-                    <label key={pm} className="flex items-center gap-2 text-sm">
-                      <input
-                        type="checkbox"
-                        checked={playModes.split(", ").includes(pm)}
-                        onChange={(e) => {
-                          const current = playModes.split(", ").filter(Boolean);
-                          if (e.target.checked) {
-                            setPlayModes([...current, pm].join(", "));
-                          } else {
-                            setPlayModes(current.filter((x: string) => x !== pm).join(", "));
-                          }
-                        }}
-                      />
-                      {pm.replace("_", " ").replace(/\b\w/g, l => l.toUpperCase())}
-                    </label>
-                  ))}
-                </div>
-              </F>
+              {kind === "game" ? (
+                <F label="Play Modes" className="md:col-span-2">
+                  <div className="flex flex-wrap gap-2">
+                    {PLAY_MODES.map((pm) => (
+                      <label key={pm} className="flex items-center gap-2 text-sm">
+                        <input
+                          type="checkbox"
+                          checked={playModes.split(", ").includes(pm)}
+                          onChange={(e) => {
+                            const current = playModes.split(", ").filter(Boolean);
+                            if (e.target.checked) {
+                              setPlayModes([...current, pm].join(", "));
+                            } else {
+                              setPlayModes(current.filter((x: string) => x !== pm).join(", "));
+                            }
+                          }}
+                        />
+                        {pm.replace("_", " ").replace(/\b\w/g, l => l.toUpperCase())}
+                      </label>
+                    ))}
+                  </div>
+                </F>
+              ) : (
+                <F label="App Modes" className="md:col-span-2">
+                  <div className="flex flex-wrap gap-2">
+                    {APP_MODES.map((am) => (
+                      <label key={am} className="flex items-center gap-2 text-sm">
+                        <input
+                          type="checkbox"
+                          checked={appModes.split(", ").includes(am)}
+                          onChange={(e) => {
+                            const current = appModes.split(", ").filter(Boolean);
+                            if (e.target.checked) {
+                              setAppModes([...current, am].join(", "));
+                            } else {
+                              setAppModes(current.filter((x: string) => x !== am).join(", "));
+                            }
+                          }}
+                        />
+                        {am.replace("_", " ").replace(/\b\w/g, l => l.toUpperCase())}
+                      </label>
+                    ))}
+                  </div>
+                </F>
+              )}
               
               {/* Display Options */}
               <F label="Homepage Order"><Input type="number" value={homepageOrder} onChange={(e) => setHomepageOrder(parseInt(e.target.value) || 0)} placeholder="0 = top" /></F>
