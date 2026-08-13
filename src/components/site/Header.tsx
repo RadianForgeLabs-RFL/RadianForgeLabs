@@ -4,7 +4,7 @@ import { useAuth, useIsAdmin } from "@/lib/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { LogOut, ShieldCheck, User as UserIcon, Menu, Coffee, Github } from "lucide-react";
+import { LogOut, ShieldCheck, User as UserIcon, Menu, Coffee } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ThemeToggle } from "./ThemeToggle";
@@ -64,12 +64,6 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Button asChild size="sm" variant="ghost" className="hidden gap-1.5 md:inline-flex">
-            <a href="https://github.com/RadianForgeLabs-RFL" target="_blank" rel="noopener noreferrer">
-              <Github className="h-4 w-4" />
-              <span className="hidden md:inline">GitHub</span>
-            </a>
-          </Button>
           <SupportModal
             title={getSupportTitle()}
             trigger={
