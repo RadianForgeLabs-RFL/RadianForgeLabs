@@ -57,6 +57,23 @@ export default defineConfig({
       fs: {
         strict: false,
       },
+      proxy: {
+        '/api/github-graphql': {
+          target: 'https://api.github.com',
+          changeOrigin: true,
+          rewrite: (path) => path.replace('/api/github-graphql', '/graphql'),
+          configure: (proxy, options) => {
+            proxy.on('proxyReq', (proxyReq, req, res) => {
+              // Add GitHub token from environment variable
+              const githubToken = process.env.GITHUB_TOKEN;
+              if (githubToken) {
+                proxyReq.setHeader('Authorization', `Bearer ${githubToken}`);
+              }
+              proxyReq.setHeader('User-Agent', 'RadianForgeLabs-Community');
+            });
+          },
+        },
+      },
     },
   },
 });

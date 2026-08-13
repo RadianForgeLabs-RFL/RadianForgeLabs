@@ -105,10 +105,17 @@ function CommunityPage() {
         });
 
         if (!response.ok) {
-          throw new Error(`GitHub GraphQL API error: ${response.status}`);
+          const errorText = await response.text();
+          console.error('GitHub API error response:', errorText);
+          throw new Error(`GitHub GraphQL API error: ${response.status} - ${errorText}`);
         }
 
         const data = await response.json();
+        
+        if (data.errors) {
+          console.error('GraphQL errors:', data.errors);
+          throw new Error(`GraphQL error: ${data.errors[0].message}`);
+        }
         
         // Extract discussions and categories from all repositories
         let allDiscussions: Discussion[] = [];
@@ -455,7 +462,13 @@ function CommunityPage() {
         }
       } catch (err) {
         console.error('Error fetching discussions:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load discussions');
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load discussions';
+        setError(errorMessage);
+        
+        // Show helpful error message if it's a token issue
+        if (errorMessage.includes('GitHub token not configured') || errorMessage.includes('GitHub API error: 401') || errorMessage.includes('GitHub API error: 403')) {
+          setError('GitHub API authentication failed. Please contact the administrator to configure the GitHub token.');
+        }
         
         // Set fallback categories on error
         setCategories([
