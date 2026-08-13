@@ -67,6 +67,13 @@ function DiscussionPage() {
   const [showHiddenContent, setShowHiddenContent] = useState(false);
   const [isMaintainer, setIsMaintainer] = useState(false);
   const [userPermissions, setUserPermissions] = useState<string[]>([]);
+  const [showPollCreator, setShowPollCreator] = useState(false);
+  const [pollQuestion, setPollQuestion] = useState('');
+  const [pollOptions, setPollOptions] = useState<string[]>(['', '']);
+  const [pollMultipleChoice, setPollMultipleChoice] = useState(false);
+  const [pollAllowAddOptions, setPollAllowAddOptions] = useState(false);
+  const [polls, setPolls] = useState<any[]>([]);
+  const [userVotes, setUserVotes] = useState<Record<string, string>>({});
 
   // Check if user has GitHub identity linked
   const hasGithubIdentity = user?.identities?.some((identity: any) => identity.provider === 'github');
@@ -117,6 +124,49 @@ function DiscussionPage() {
 
     fetchUserPermissions();
   }, [hasGithubIdentity, user]);
+
+  // Fetch polls for this discussion
+  useEffect(() => {
+    async function fetchPolls() {
+      if (!discussion) return;
+
+      try {
+        const { data: pollsData, error: pollsError } = await supabase
+          .from('polls')
+          .select(`
+            *,
+            poll_options (*),
+            poll_votes (user_id, option_id)
+          `)
+          .eq('discussion_id', discussion.id);
+
+        if (pollsError) {
+          console.error('Error fetching polls:', pollsError);
+          return;
+        }
+
+        // Get user's votes
+        if (user?.id) {
+          const { data: userVotesData } = await supabase
+            .from('poll_votes')
+            .select('poll_id, option_id')
+            .eq('user_id', user.id);
+
+          const votesMap: Record<string, string> = {};
+          userVotesData?.forEach((vote: any) => {
+            votesMap[vote.poll_id] = vote.option_id;
+          });
+
+          setUserVotes(votesMap);
+        }
+        setPolls(pollsData || []);
+      } catch (err) {
+        console.error('Error fetching polls:', err);
+      }
+    }
+
+    fetchPolls();
+  }, [discussion, user]);
 
   useEffect(() => {
     async function fetchDiscussion() {
@@ -662,6 +712,165 @@ function DiscussionPage() {
     }
   };
 
+  const handleCreatePoll = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!user) {
+      alert('You must be logged in to create a poll');
+      return;
+    }
+
+    if (!discussion) return;
+
+    const validOptions = pollOptions.filter(opt => opt.trim() !== '');
+    if (validOptions.length < 2) {
+      alert('Please provide at least 2 options');
+      return;
+    }
+
+    try {
+      // Create poll
+      const { data: pollData, error: pollError } = await supabase
+        .from('polls')
+        .insert({
+          discussion_id: discussion.id,
+          question: pollQuestion,
+          multiple_choice: pollMultipleChoice,
+          allow_add_options: pollAllowAddOptions,
+          created_by: user.id,
+        })
+        .select()
+        .single();
+
+      if (pollError) {
+        console.error('Error creating poll:', pollError);
+        alert('Failed to create poll');
+        return;
+      }
+
+      // Create poll options
+      const optionsToInsert = validOptions.map(option => ({
+        poll_id: pollData.id,
+        option_text: option,
+      }));
+
+      const { error: optionsError } = await supabase
+        .from('poll_options')
+        .insert(optionsToInsert);
+
+      if (optionsError) {
+        console.error('Error creating poll options:', optionsError);
+        alert('Failed to create poll options');
+        return;
+      }
+
+      // Reset form
+      setPollQuestion('');
+      setPollOptions(['', '']);
+      setPollMultipleChoice(false);
+      setPollAllowAddOptions(false);
+      setShowPollCreator(false);
+
+      // Refresh polls
+      const { data: refreshedPolls } = await supabase
+        .from('polls')
+        .select(`
+          *,
+          poll_options (*)
+        `)
+        .eq('discussion_id', discussion.id);
+
+      setPolls(refreshedPolls || []);
+    } catch (err) {
+      console.error('Error creating poll:', err);
+      alert('Failed to create poll');
+    }
+  };
+
+  const handleVote = async (pollId: string, optionId: string) => {
+    if (!user) {
+      alert('You must be logged in to vote');
+      return;
+    }
+
+    try {
+      // Check if user already voted
+      const existingVote = userVotes[pollId];
+      
+      if (existingVote) {
+        // Update existing vote
+        const { error } = await supabase
+          .from('poll_votes')
+          .update({ option_id: optionId })
+          .eq('poll_id', pollId)
+          .eq('user_id', user.id);
+
+        if (error) {
+          console.error('Error updating vote:', error);
+          alert('Failed to update vote');
+          return;
+        }
+
+        // Update vote counts
+        await supabase.rpc('decrement_vote_count', { option_id: existingVote });
+        await supabase.rpc('increment_vote_count', { option_id: optionId });
+      } else {
+        // Create new vote
+        const { error } = await supabase
+          .from('poll_votes')
+          .insert({
+            poll_id: pollId,
+            option_id: optionId,
+            user_id: user.id,
+          });
+
+        if (error) {
+          console.error('Error casting vote:', error);
+          alert('Failed to cast vote');
+          return;
+        }
+
+        // Increment vote count
+        await supabase.rpc('increment_vote_count', { option_id: optionId });
+      }
+
+      // Update local state
+      setUserVotes({ ...userVotes, [pollId]: optionId });
+
+      // Refresh polls
+      if (discussion?.id) {
+        const { data: refreshedPolls } = await supabase
+          .from('polls')
+          .select(`
+            *,
+            poll_options (*)
+          `)
+          .eq('discussion_id', discussion.id);
+
+        setPolls(refreshedPolls || []);
+      }
+    } catch (err) {
+      console.error('Error voting:', err);
+      alert('Failed to vote');
+    }
+  };
+
+  const handleAddPollOption = () => {
+    setPollOptions([...pollOptions, '']);
+  };
+
+  const handleRemovePollOption = (index: number) => {
+    if (pollOptions.length > 2) {
+      setPollOptions(pollOptions.filter((_, i) => i !== index));
+    }
+  };
+
+  const handlePollOptionChange = (index: number, value: string) => {
+    const newOptions = [...pollOptions];
+    newOptions[index] = value;
+    setPollOptions(newOptions);
+  };
+
   const emojis = ['👍', '👎', '😄', '🎉', '❤️', '🔥', '🚀', '💡', '👀', '✅'];
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -770,6 +979,168 @@ function DiscussionPage() {
         <div className="prose prose-invert max-w-none mb-4">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{discussion.body}</ReactMarkdown>
         </div>
+
+        {/* Polls Section */}
+        {polls.length > 0 && (
+          <div className="space-y-4 mb-4">
+            {polls.map((poll) => {
+              const totalVotes = poll.poll_options?.reduce((sum: number, opt: any) => sum + opt.vote_count, 0) || 0;
+              const userVote = userVotes[poll.id];
+
+              return (
+                <Card key={poll.id} className="border border-white/10 bg-white/5 p-4">
+                  <h3 className="font-semibold mb-3">{poll.question}</h3>
+                  <div className="space-y-2">
+                    {poll.poll_options?.map((option: any) => {
+                      const percentage = totalVotes > 0 ? Math.round((option.vote_count / totalVotes) * 100) : 0;
+                      const isVoted = userVote === option.id;
+
+                      return (
+                        <button
+                          key={option.id}
+                          onClick={() => handleVote(poll.id, option.id)}
+                          disabled={!user || poll.closed}
+                          className={`w-full text-left p-3 rounded-lg border transition-all ${
+                            isVoted
+                              ? 'border-purple-500 bg-purple-500/20'
+                              : 'border-white/10 bg-white/5 hover:bg-white/10'
+                          } ${!user ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        >
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="text-sm">{option.option_text}</span>
+                            <span className="text-xs text-muted-foreground">{percentage}%</span>
+                          </div>
+                          <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full transition-all ${isVoted ? 'bg-purple-500' : 'bg-blue-500'}`}
+                              style={{ width: `${percentage}%` }}
+                            />
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-1">
+                            {option.vote_count} votes
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="flex justify-between items-center mt-3 text-xs text-muted-foreground">
+                    <span>{totalVotes} total votes</span>
+                    {poll.closed && <span className="text-red-400">Closed</span>}
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Create Poll Button */}
+        {user && (
+          <div className="mb-4">
+            {!showPollCreator ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowPollCreator(true)}
+                className="border-white/10"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Create Poll
+              </Button>
+            ) : (
+              <Card className="border border-white/10 bg-white/5 p-4">
+                <form onSubmit={handleCreatePoll}>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="pollQuestion">Poll Question</Label>
+                      <Input
+                        id="pollQuestion"
+                        value={pollQuestion}
+                        onChange={(e) => setPollQuestion(e.target.value)}
+                        placeholder="What would you like to ask?"
+                        required
+                        className="border-white/10 bg-white/5"
+                      />
+                    </div>
+                    <div>
+                      <Label>Options</Label>
+                      <div className="space-y-2 mt-2">
+                        {pollOptions.map((option, index) => (
+                          <div key={index} className="flex gap-2">
+                            <Input
+                              value={option}
+                              onChange={(e) => handlePollOptionChange(index, e.target.value)}
+                              placeholder={`Option ${index + 1}`}
+                              required
+                              className="border-white/10 bg-white/5 flex-1"
+                            />
+                            {pollOptions.length > 2 && (
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleRemovePollOption(index)}
+                                className="text-red-500 hover:text-red-400"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                        ))}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={handleAddPollOption}
+                          className="border-white/10"
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Option
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <label className="flex items-center gap-2 text-sm">
+                        <input
+                          type="checkbox"
+                          checked={pollMultipleChoice}
+                          onChange={(e) => setPollMultipleChoice(e.target.checked)}
+                          className="rounded"
+                        />
+                        Allow multiple choices
+                      </label>
+                      <label className="flex items-center gap-2 text-sm">
+                        <input
+                          type="checkbox"
+                          checked={pollAllowAddOptions}
+                          onChange={(e) => setPollAllowAddOptions(e.target.checked)}
+                          className="rounded"
+                        />
+                        Allow users to add options
+                      </label>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button type="submit">Create Poll</Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setShowPollCreator(false);
+                          setPollQuestion('');
+                          setPollOptions(['', '']);
+                          setPollMultipleChoice(false);
+                          setPollAllowAddOptions(false);
+                        }}
+                        className="border-white/10"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                </form>
+              </Card>
+            )}
+          </div>
+        )}
 
         <div className="flex items-center gap-4 pt-4 border-t border-white/5">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">

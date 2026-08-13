@@ -276,6 +276,137 @@ export type Database = {
         }
         Relationships: []
       }
+      pinned_discussions: {
+        Row: {
+          created_at: string | null
+          discussion_id: string
+          id: string
+          organization: string
+          pinned_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          discussion_id: string
+          id?: string
+          organization?: string
+          pinned_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          discussion_id?: string
+          id?: string
+          organization?: string
+          pinned_by?: string | null
+        }
+        Relationships: []
+      }
+      poll_options: {
+        Row: {
+          created_at: string | null
+          id: string
+          option_text: string
+          poll_id: string
+          vote_count: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          option_text: string
+          poll_id: string
+          vote_count?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          option_text?: string
+          poll_id?: string
+          vote_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_options_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      poll_votes: {
+        Row: {
+          created_at: string | null
+          id: string
+          option_id: string
+          poll_id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          option_id: string
+          poll_id: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          option_id?: string
+          poll_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_votes_option_id_fkey"
+            columns: ["option_id"]
+            isOneToOne: false
+            referencedRelation: "poll_options"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "poll_votes_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      polls: {
+        Row: {
+          allow_add_options: boolean
+          closed: boolean
+          created_at: string | null
+          created_by: string | null
+          discussion_id: string
+          id: string
+          multiple_choice: boolean
+          question: string
+          updated_at: string | null
+        }
+        Insert: {
+          allow_add_options?: boolean
+          closed?: boolean
+          created_at?: string | null
+          created_by?: string | null
+          discussion_id: string
+          id?: string
+          multiple_choice?: boolean
+          question: string
+          updated_at?: string | null
+        }
+        Update: {
+          allow_add_options?: boolean
+          closed?: boolean
+          created_at?: string | null
+          created_by?: string | null
+          discussion_id?: string
+          id?: string
+          multiple_choice?: boolean
+          question?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       preorders: {
         Row: {
           created_at: string | null
@@ -626,6 +757,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      decrement_vote_count: { Args: { option_id: string }; Returns: undefined }
       demote_from_admin: { Args: { target_user_id: string }; Returns: boolean }
       has_role: {
         Args: {
@@ -634,6 +766,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_vote_count: { Args: { option_id: string }; Returns: undefined }
       promote_to_admin: { Args: { target_user_id: string }; Returns: boolean }
     }
     Enums: {
