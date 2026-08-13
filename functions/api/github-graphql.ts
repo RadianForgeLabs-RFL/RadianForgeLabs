@@ -19,7 +19,8 @@ export async function onRequest(context: { request: Request; env: any }) {
     // Use server-side GitHub token from environment variables
     const githubToken = env.GITHUB_TOKEN;
     if (!githubToken) {
-      return new Response('GitHub token not configured', { status: 500 });
+      console.error('GITHUB_TOKEN not found in environment. Available env keys:', Object.keys(env));
+      return new Response('GitHub token not configured. Please add GITHUB_TOKEN to Cloudflare Pages environment variables.', { status: 500 });
     }
 
     const requestBody: any = { query };
@@ -38,7 +39,9 @@ export async function onRequest(context: { request: Request; env: any }) {
     });
 
     if (!response.ok) {
-      return new Response(`GitHub API error: ${response.status}`, { status: response.status });
+      const errorText = await response.text();
+      console.error('GitHub API error:', response.status, errorText);
+      return new Response(`GitHub API error: ${response.status} - ${errorText}`, { status: response.status });
     }
 
     const data = await response.json();
@@ -49,6 +52,7 @@ export async function onRequest(context: { request: Request; env: any }) {
       },
     });
   } catch (error) {
-    return new Response(`Error: ${error}`, { status: 500 });
+    console.error('Error in github-graphql function:', error);
+    return new Response(`Error: ${error instanceof Error ? error.message : String(error)}`, { status: 500 });
   }
 }
