@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
+const ADMIN_EMAILS = ['krishnaramalesh8838@gmail.com', 'radianforgelabs@gmail.com'];
+
 export const Route = createFileRoute("/auth/callback")({
   validateSearch: (s: Record<string, unknown>) => ({ 
     error: typeof s.error === "string" ? s.error : undefined,
@@ -41,6 +43,15 @@ function AuthCallback() {
         if (data.session) {
           const user = data.session.user;
           const provider = user.app_metadata.provider;
+          const userEmail = user.email?.toLowerCase();
+
+          // Check if user email is in admin list (case-insensitive)
+          if (!userEmail || !ADMIN_EMAILS.includes(userEmail)) {
+            await supabase.auth.signOut();
+            toast.error('Access denied: Only authorized admin emails are allowed');
+            nav({ to: '/auth', search: { redirect: undefined } });
+            return;
+          }
           
           // Ensure profile exists
           const { error: profileError } = await supabase
