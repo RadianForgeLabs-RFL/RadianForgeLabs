@@ -62,8 +62,8 @@ function AuthPage() {
   return (
     <div className="mx-auto flex max-w-md flex-col items-center px-4 py-16">
       <Link to="/" className="mb-8 flex items-center gap-2.5">
-        <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-brand font-bold text-brand-foreground shadow-glow">RFL</div>
-        <div><div className="font-bold">RadianForgeLabs</div></div>
+        <div className="grid h-12 w-12 place-items-center rounded-xl bg-gradient-brand font-bold text-brand-foreground shadow-glow text-lg">RFL</div>
+        <div><div className="font-bold text-lg">RadianForgeLabs</div></div>
       </Link>
       <Card className="glass-strong w-full border-white/5 bg-transparent p-6">
         <div className="space-y-4">
