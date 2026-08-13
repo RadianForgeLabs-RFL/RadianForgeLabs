@@ -63,8 +63,12 @@ export default {
           }
 
           // Get GitHub token from environment
-          const githubToken = (env as any)?.GITHUB_TOKEN;
+          // Try both env parameter and process.env for Cloudflare Pages compatibility
+          const githubToken = (env as any)?.GITHUB_TOKEN || process.env.GITHUB_TOKEN;
           if (!githubToken) {
+            console.error('GITHUB_TOKEN not found in env or process.env');
+            console.error('env keys:', env ? Object.keys(env) : 'env is null/undefined');
+            console.error('process.env keys:', Object.keys(process.env).filter(k => k.includes('GITHUB')));
             return new Response(JSON.stringify({ 
               error: 'GitHub token not configured',
               message: 'Please add GITHUB_TOKEN to Cloudflare Pages environment variables.'
