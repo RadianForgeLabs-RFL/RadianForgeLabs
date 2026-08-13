@@ -83,7 +83,7 @@ export function PreorderButton({
       variant={preordered ? "outline" : "default"}
     >
       {preordered ? <BellRing className="mr-2 h-4 w-4" /> : <Bell className="mr-2 h-4 w-4" />}
-      {preordered ? "Notify cancelled" : "Pre-order · Notify me"}
+      {preordered ? "Cancel notify" : "Pre-order · Notify me"}
     </Button>
   );
 }
