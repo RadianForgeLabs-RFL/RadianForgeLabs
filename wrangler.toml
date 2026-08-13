@@ -7,9 +7,10 @@ SUPABASE_URL = "https://zndizxgtyigkjrqmpsqe.supabase.co"
 SUPABASE_PUBLISHABLE_KEY = "sb_publishable_k3Wu2nWZPLygGAua7wDupQ_EspyYhmr"
 SUPABASE_JWKS_URL = "https://zndizxgtyigkjrqmpsqe.supabase.co/auth/v1/.well-known/jwks.json"
 
-# Secrets (these should be set in Cloudflare Dashboard as Secrets, but also listed here for wrangler)
-# In Cloudflare Dashboard: Settings > Variables and Secrets > Add > Secret type
-[secrets]
-GITHUB_TOKEN = ""
-SUPABASE_SECRET_KEY = ""
-SESSION_SECRET = ""
+# IMPORTANT: The following must be set as Environment Variables (not Secrets) in Cloudflare Dashboard
+# Go to Cloudflare Dashboard > Settings > Variables and Secrets > Add > Environment variable type
+# 
+# Required environment variables:
+# - GITHUB_TOKEN: Your GitHub personal access token
+# - SUPABASE_SECRET_KEY: Your Supabase secret key  
+# - SESSION_SECRET: Your session secret
