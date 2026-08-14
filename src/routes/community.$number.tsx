@@ -2154,7 +2154,9 @@ function DiscussionPage() {
               onClick={(e) => {
                 e.stopPropagation();
                 console.log('React button clicked, current state:', showDiscussionEmojiPicker);
+                console.log('Setting to:', !showDiscussionEmojiPicker);
                 setShowDiscussionEmojiPicker(!showDiscussionEmojiPicker);
+                console.log('After set, state should be:', !showDiscussionEmojiPicker);
               }}
               className="text-muted-foreground hover:text-foreground"
             >
@@ -2162,12 +2164,13 @@ function DiscussionPage() {
               React
             </Button>
             {showDiscussionEmojiPicker && (
-              <div className="absolute right-0 top-full mt-2 flex flex-wrap gap-2 p-3 border border-white/10 rounded-lg glass z-10 w-48 shadow-xl">
+              <div className="absolute right-0 top-full mt-2 flex flex-wrap gap-2 p-3 border border-white/10 rounded-lg glass z-50 w-48 shadow-xl bg-black/80">
                 {emojis.map((emoji) => (
                   <button
                     key={emoji}
                     onClick={(e) => {
                       e.stopPropagation();
+                      console.log('Emoji clicked:', emoji);
                       handleAddReaction(discussion.id, emoji);
                       setShowDiscussionEmojiPicker(false);
                     }}
