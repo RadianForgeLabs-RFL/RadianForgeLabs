@@ -279,8 +279,14 @@ function DiscussionPage() {
         let foundDiscussion = null;
         let foundComments: Comment[] = [];
         
+        console.log('Checking for organization:', data.data?.organization);
+        console.log('Checking for repositories:', data.data?.organization?.repositories);
+        console.log('Checking for repositories nodes:', data.data?.organization?.repositories?.nodes);
+        
         if (data.data?.organization?.repositories?.nodes) {
+          console.log('Found repositories nodes, iterating...');
           for (const repo of data.data.organization.repositories.nodes) {
+            console.log('Checking repo for discussion:', repo.discussion ? 'Found discussion' : 'No discussion');
             if (repo.discussion) {
               foundDiscussion = {
                 id: repo.discussion.id,
