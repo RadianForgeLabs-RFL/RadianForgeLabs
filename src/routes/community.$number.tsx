@@ -2416,19 +2416,10 @@ function DiscussionPage() {
                                   variant="ghost"
                                   size="sm"
                                   className="h-6 text-xs"
-                                  onClick={() => window.open(`https://github.com/orgs/RadianForgeLabs/discussions/${discussion.number}`, '_blank')}
+                                  onClick={() => handleMarkAsAnswer(comment.id)}
                                 >
                                   <CheckCircle className="h-3 w-3 mr-1" />
-                                  Mark Answer on GitHub
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-6 text-xs"
-                                  onClick={() => window.open(`https://github.com/orgs/RadianForgeLabs/discussions/${discussion.number}`, '_blank')}
-                                >
-                                  <Edit2 className="h-3 w-3 mr-1" />
-                                  Edit on GitHub
+                                  MARK(GITHUB_LOGO)
                                 </Button>
                                 <Button
                                   variant="ghost"
