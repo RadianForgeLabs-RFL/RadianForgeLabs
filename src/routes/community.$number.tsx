@@ -281,21 +281,36 @@ function DiscussionPage() {
 
                 // Organize comments into nested structure
                 const topLevelComments: Comment[] = [];
-                const commentsMap = new Map(foundComments.map(c => [c.id, c]));
+                const commentsMap = new Map<string, Comment>(foundComments.map(c => [c.id, c]));
 
-                foundComments.forEach(comment => {
-                  if (comment.replyTo) {
-                    const parentComment = commentsMap.get(comment.replyTo);
-                    if (parentComment) {
-                      (parentComment as any).replies = (parentComment as any).replies || [];
-                      (parentComment as any).replies.push(comment);
-                    }
+                // Helper function to recursively add replies
+                const addReplyToParent = (comment: Comment, allComments: Comment[]): void => {
+                  if (!comment.replyTo) {
+                    topLevelComments.push(comment);
+                    return;
+                  }
+
+                  const parentComment = commentsMap.get(comment.replyTo);
+                  if (parentComment) {
+                    (parentComment as any).replies = (parentComment as any).replies || [];
+                    (parentComment as any).replies.push(comment);
                   } else {
+                    // Parent not found, add as top-level
                     topLevelComments.push(comment);
                   }
+                };
+
+                foundComments.forEach(comment => {
+                  addReplyToParent(comment, foundComments);
                 });
 
                 foundComments = topLevelComments;
+
+                // Debug: Log comment structure
+                console.log('Top-level comments:', topLevelComments.length);
+                topLevelComments.forEach(c => {
+                  console.log(`Comment ${c.id} has ${(c as any).replies?.length || 0} replies`);
+                });
               }
               break;
             }
