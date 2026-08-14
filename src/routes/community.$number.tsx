@@ -195,7 +195,7 @@ function DiscussionPage() {
                     reactions {
                       totalCount
                     }
-                    comments(first: 100) {
+                    comments(first: 50) {
                       totalCount
                       nodes {
                         id
@@ -215,7 +215,7 @@ function DiscussionPage() {
                             login
                           }
                         }
-                        replies(first: 50) {
+                        replies(first: 20) {
                           nodes {
                             id
                             body
@@ -225,13 +225,7 @@ function DiscussionPage() {
                               avatarUrl
                             }
                             isAnswer
-                            reactions(first: 100) {
-                              nodes {
-                                content
-                                user {
-                                  login
-                                }
-                              }
+                            reactions {
                               totalCount
                             }
                             replyTo {
