@@ -929,13 +929,29 @@ function DiscussionPage() {
               nodes {
                 discussion(number: ${number}) {
                   id
+                  answerChosenAt
                   answer {
                     id
                   }
                   comments(first: 50) {
                     nodes {
                       id
+                      body
+                      createdAt
+                      author {
+                        login
+                        avatarUrl
+                      }
                       isAnswer
+                      reactions {
+                        totalCount
+                      }
+                      replyTo {
+                        id
+                        author {
+                          login
+                        }
+                      }
                     }
                   }
                 }
@@ -953,14 +969,50 @@ function DiscussionPage() {
 
       if (fetchResponse.ok) {
         const fetchData = await fetchResponse.json();
-        const answerId = fetchData.data?.organization?.repositories?.nodes
-          .find((r: any) => r.discussion)?.discussion?.answer?.id;
+        const discussionData = fetchData.data?.organization?.repositories?.nodes
+          .find((r: any) => r.discussion)?.discussion;
 
-        setComments(comments.map((c) =>
-          c.id === commentId
-            ? { ...c, isAnswer: true }
-            : { ...c, isAnswer: c.id === answerId || false }
-        ));
+        if (discussionData) {
+          // Update discussion answered status
+          setDiscussion((prev) => prev ? {
+            ...prev,
+            isAnswered: discussionData.answerChosenAt !== null,
+          } : prev);
+
+          // Update comments
+          if (discussionData.comments?.nodes) {
+            const answerId = discussionData.answer?.id;
+            const fetchedComments = discussionData.comments.nodes.map((c: any) => ({
+              id: c.id,
+              author: c.author?.login || 'Unknown',
+              avatar: c.author?.avatarUrl || '',
+              body: c.body,
+              createdAt: c.createdAt,
+              isAnswer: c.id === answerId || c.isAnswer || false,
+              upvoteCount: c.reactions?.totalCount || 0,
+              replyTo: c.replyTo?.id || null,
+              replies: [],
+            }));
+
+            // Organize comments into nested structure
+            const topLevelComments: Comment[] = [];
+            const commentsMap = new Map(fetchedComments.map((c: Comment) => [c.id, c]));
+
+            fetchedComments.forEach((comment: Comment) => {
+              if (comment.replyTo) {
+                const parentComment = commentsMap.get(comment.replyTo);
+                if (parentComment) {
+                  (parentComment as any).replies = (parentComment as any).replies || [];
+                  (parentComment as any).replies.push(comment);
+                }
+              } else {
+                topLevelComments.push(comment);
+              }
+            });
+
+            setComments(topLevelComments);
+          }
+        }
       }
     } catch (err) {
       console.error('Error marking as answer:', err);
@@ -1019,13 +1071,29 @@ function DiscussionPage() {
               nodes {
                 discussion(number: ${number}) {
                   id
+                  answerChosenAt
                   answer {
                     id
                   }
                   comments(first: 50) {
                     nodes {
                       id
+                      body
+                      createdAt
+                      author {
+                        login
+                        avatarUrl
+                      }
                       isAnswer
+                      reactions {
+                        totalCount
+                      }
+                      replyTo {
+                        id
+                        author {
+                          login
+                        }
+                      }
                     }
                   }
                 }
@@ -1043,10 +1111,50 @@ function DiscussionPage() {
 
       if (fetchResponse.ok) {
         const fetchData = await fetchResponse.json();
-        const answerId = fetchData.data?.organization?.repositories?.nodes
-          .find((r: any) => r.discussion)?.discussion?.answer?.id;
+        const discussionData = fetchData.data?.organization?.repositories?.nodes
+          .find((r: any) => r.discussion)?.discussion;
 
-        setComments(comments.map((c) => ({ ...c, isAnswer: c.id === answerId || false })));
+        if (discussionData) {
+          // Update discussion answered status
+          setDiscussion((prev) => prev ? {
+            ...prev,
+            isAnswered: discussionData.answerChosenAt !== null,
+          } : prev);
+
+          // Update comments
+          if (discussionData.comments?.nodes) {
+            const answerId = discussionData.answer?.id;
+            const fetchedComments = discussionData.comments.nodes.map((c: any) => ({
+              id: c.id,
+              author: c.author?.login || 'Unknown',
+              avatar: c.author?.avatarUrl || '',
+              body: c.body,
+              createdAt: c.createdAt,
+              isAnswer: c.id === answerId || c.isAnswer || false,
+              upvoteCount: c.reactions?.totalCount || 0,
+              replyTo: c.replyTo?.id || null,
+              replies: [],
+            }));
+
+            // Organize comments into nested structure
+            const topLevelComments: Comment[] = [];
+            const commentsMap = new Map(fetchedComments.map((c: Comment) => [c.id, c]));
+
+            fetchedComments.forEach((comment: Comment) => {
+              if (comment.replyTo) {
+                const parentComment = commentsMap.get(comment.replyTo);
+                if (parentComment) {
+                  (parentComment as any).replies = (parentComment as any).replies || [];
+                  (parentComment as any).replies.push(comment);
+                }
+              } else {
+                topLevelComments.push(comment);
+              }
+            });
+
+            setComments(topLevelComments);
+          }
+        }
       }
     } catch (err) {
       console.error('Error unmarking as answer:', err);
