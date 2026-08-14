@@ -1275,23 +1275,82 @@ function DiscussionPage() {
         throw new Error('Failed to post reply');
       }
 
-      const data = await response.json();
-      
-      // Add new reply to local state (flat structure)
-      if (data.data?.addDiscussionComment?.comment) {
-        const newReply = data.data.addDiscussionComment.comment;
-        const replyObj = {
-          id: newReply.id,
-          author: newReply.author?.login || user?.user_metadata?.user_name || 'Unknown',
-          avatar: newReply.author?.avatarUrl || user?.user_metadata?.avatar_url || '',
-          body: newReply.body,
-          createdAt: newReply.createdAt,
-          upvoteCount: 0,
-          replyTo: newReply.replyTo?.id || replyingTo,
-          replies: [],
-        };
+      // Refetch all comments from GitHub to ensure UI is in sync
+      const fetchQuery = `
+        query {
+          organization(login: "RadianForgeLabs") {
+            repositories(first: 10) {
+              nodes {
+                discussion(number: ${number}) {
+                  id
+                  answerChosenAt
+                  answer {
+                    id
+                  }
+                  comments(first: 100) {
+                    nodes {
+                      id
+                      body
+                      createdAt
+                      author {
+                        login
+                        avatarUrl
+                      }
+                      isAnswer
+                      reactions {
+                        totalCount
+                      }
+                      replyTo {
+                        id
+                        author {
+                          login
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      `;
 
-        setComments(prevComments => [...prevComments, replyObj]);
+      const fetchResponse = await fetch('/api/github-graphql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: fetchQuery }),
+      });
+
+      if (fetchResponse.ok) {
+        const fetchData = await fetchResponse.json();
+        const discussionData = fetchData.data?.organization?.repositories?.nodes
+          .find((r: any) => r.discussion)?.discussion;
+
+        if (discussionData) {
+          // Update discussion answered status
+          setDiscussion((prev) => prev ? {
+            ...prev,
+            isAnswered: discussionData.answerChosenAt !== null,
+          } : prev);
+
+          // Update comments
+          if (discussionData.comments?.nodes) {
+            const answerId = discussionData.answer?.id;
+            const fetchedComments = discussionData.comments.nodes.map((c: any) => ({
+              id: c.id,
+              author: c.author?.login || 'Unknown',
+              avatar: c.author?.avatarUrl || '',
+              body: c.body,
+              createdAt: c.createdAt,
+              isAnswer: c.id === answerId || c.isAnswer || false,
+              upvoteCount: c.reactions?.totalCount || 0,
+              replyTo: c.replyTo?.id || null,
+              replies: [],
+            }));
+
+            setComments(fetchedComments);
+          }
+        }
       }
       
       setReplyToText('');
