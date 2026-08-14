@@ -265,11 +265,15 @@ function DiscussionPage() {
           body: JSON.stringify({ query }),
         });
 
+        console.log('Initial fetch response status:', response.status);
         if (!response.ok) {
-          throw new Error(`GitHub GraphQL API error: ${response.status}`);
+          const errorText = await response.text();
+          console.log('Initial fetch error response:', errorText);
+          throw new Error(`GitHub GraphQL API error: ${response.status} - ${errorText}`);
         }
 
         const data = await response.json();
+        console.log('Initial fetch data:', JSON.stringify(data, null, 2));
         
         // Find the discussion in the response
         let foundDiscussion = null;
