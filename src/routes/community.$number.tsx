@@ -517,15 +517,137 @@ function DiscussionPage() {
         }),
       });
 
-      // Check if this is the main discussion or a comment
-      if (commentId === discussion?.id) {
-        setDiscussion({ ...discussion, upvoteCount: discussion.upvoteCount + 1 });
-      } else {
-        setComments(comments.map(c => 
-          c.id === commentId 
-            ? { ...c, upvoteCount: c.upvoteCount + 1 }
-            : c
-        ));
+      // Refetch discussion to sync with GitHub state
+      const fetchQuery = `
+        query {
+          organization(login: "RadianForgeLabs") {
+            repositories(first: 10) {
+              nodes {
+                discussion(number: ${number}) {
+                  id
+                  reactions {
+                    totalCount
+                  }
+                  comments(first: 100) {
+                    nodes {
+                      id
+                      body
+                      createdAt
+                      author {
+                        login
+                        avatarUrl
+                      }
+                      isAnswer
+                      reactions {
+                        totalCount
+                      }
+                      replyTo {
+                        id
+                        author {
+                          login
+                        }
+                      }
+                      replies(first: 50) {
+                        nodes {
+                          id
+                          body
+                          createdAt
+                          author {
+                            login
+                            avatarUrl
+                          }
+                          isAnswer
+                          reactions {
+                            totalCount
+                          }
+                          replyTo {
+                            id
+                            author {
+                              login
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      `;
+
+      const fetchResponse = await fetch('/api/github-graphql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: fetchQuery }),
+      });
+
+      if (fetchResponse.ok) {
+        const fetchData = await fetchResponse.json();
+        const discussionData = fetchData.data?.organization?.repositories?.nodes
+          .find((r: any) => r.discussion)?.discussion;
+
+        if (discussionData) {
+          // Update discussion upvote count
+          setDiscussion((prev) => prev ? {
+            ...prev,
+            upvoteCount: discussionData.reactions?.totalCount || 0,
+          } : prev);
+
+          // Update comments
+          if (discussionData.comments?.nodes) {
+            const answerId = discussionData.answer?.id;
+            const fetchedComments = discussionData.comments.nodes.map((c: any) => ({
+              id: c.id,
+              author: c.author?.login || 'Unknown',
+              avatar: c.author?.avatarUrl || '',
+              body: c.body,
+              createdAt: c.createdAt,
+              isAnswer: c.id === answerId || c.isAnswer || false,
+              upvoteCount: c.reactions?.totalCount || 0,
+              replyTo: c.replyTo?.id || null,
+              replies: [],
+            }));
+
+            // Process nested replies from the API
+            discussionData.comments.nodes.forEach((c: any) => {
+              if (c.replies?.nodes) {
+                c.replies.nodes.forEach((reply: any) => {
+                  fetchedComments.push({
+                    id: reply.id,
+                    author: reply.author?.login || 'Unknown',
+                    avatar: reply.author?.avatarUrl || '',
+                    body: reply.body,
+                    createdAt: reply.createdAt,
+                    isAnswer: reply.id === answerId || reply.isAnswer || false,
+                    upvoteCount: reply.reactions?.totalCount || 0,
+                    replyTo: reply.replyTo?.id || c.id,
+                    replies: [],
+                  });
+                });
+              }
+            });
+
+            // Organize comments into nested structure
+            const topLevelComments: Comment[] = [];
+            const commentsMap = new Map(fetchedComments.map((c: Comment) => [c.id, c]));
+
+            fetchedComments.forEach((comment: Comment) => {
+              if (comment.replyTo) {
+                const parentComment = commentsMap.get(comment.replyTo);
+                if (parentComment) {
+                  (parentComment as any).replies = (parentComment as any).replies || [];
+                  (parentComment as any).replies.push(comment);
+                }
+              } else {
+                topLevelComments.push(comment);
+              }
+            });
+
+            setComments(topLevelComments);
+          }
+        }
       }
     } catch (err) {
       console.error('Error adding reaction:', err);
@@ -567,12 +689,140 @@ function DiscussionPage() {
         }),
       });
 
-      // Update local state instead of reloading
-      setComments(comments.map(c => 
-        c.id === commentId 
-          ? { ...c, body: editText }
-          : c
-      ));
+      // Refetch discussion to sync with GitHub state
+      const fetchQuery = `
+        query {
+          organization(login: "RadianForgeLabs") {
+            repositories(first: 10) {
+              nodes {
+                discussion(number: ${number}) {
+                  id
+                  answerChosenAt
+                  answer {
+                    id
+                  }
+                  comments(first: 100) {
+                    nodes {
+                      id
+                      body
+                      createdAt
+                      author {
+                        login
+                        avatarUrl
+                      }
+                      isAnswer
+                      reactions {
+                        totalCount
+                      }
+                      replyTo {
+                        id
+                        author {
+                          login
+                        }
+                      }
+                      replies(first: 50) {
+                        nodes {
+                          id
+                          body
+                          createdAt
+                          author {
+                            login
+                            avatarUrl
+                          }
+                          isAnswer
+                          reactions {
+                            totalCount
+                          }
+                          replyTo {
+                            id
+                            author {
+                              login
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      `;
+
+      const fetchResponse = await fetch('/api/github-graphql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: fetchQuery }),
+      });
+
+      if (fetchResponse.ok) {
+        const fetchData = await fetchResponse.json();
+        const discussionData = fetchData.data?.organization?.repositories?.nodes
+          .find((r: any) => r.discussion)?.discussion;
+
+        if (discussionData) {
+          // Update discussion answered status
+          setDiscussion((prev) => prev ? {
+            ...prev,
+            isAnswered: discussionData.answerChosenAt !== null,
+          } : prev);
+
+          // Update comments
+          if (discussionData.comments?.nodes) {
+            const answerId = discussionData.answer?.id;
+            const fetchedComments = discussionData.comments.nodes.map((c: any) => ({
+              id: c.id,
+              author: c.author?.login || 'Unknown',
+              avatar: c.author?.avatarUrl || '',
+              body: c.body,
+              createdAt: c.createdAt,
+              isAnswer: c.id === answerId || c.isAnswer || false,
+              upvoteCount: c.reactions?.totalCount || 0,
+              replyTo: c.replyTo?.id || null,
+              replies: [],
+            }));
+
+            // Process nested replies from the API
+            discussionData.comments.nodes.forEach((c: any) => {
+              if (c.replies?.nodes) {
+                c.replies.nodes.forEach((reply: any) => {
+                  fetchedComments.push({
+                    id: reply.id,
+                    author: reply.author?.login || 'Unknown',
+                    avatar: reply.author?.avatarUrl || '',
+                    body: reply.body,
+                    createdAt: reply.createdAt,
+                    isAnswer: reply.id === answerId || reply.isAnswer || false,
+                    upvoteCount: reply.reactions?.totalCount || 0,
+                    replyTo: reply.replyTo?.id || c.id,
+                    replies: [],
+                  });
+                });
+              }
+            });
+
+            // Organize comments into nested structure
+            const topLevelComments: Comment[] = [];
+            const commentsMap = new Map(fetchedComments.map((c: Comment) => [c.id, c]));
+
+            fetchedComments.forEach((comment: Comment) => {
+              if (comment.replyTo) {
+                const parentComment = commentsMap.get(comment.replyTo);
+                if (parentComment) {
+                  (parentComment as any).replies = (parentComment as any).replies || [];
+                  (parentComment as any).replies.push(comment);
+                }
+              } else {
+                topLevelComments.push(comment);
+              }
+            });
+
+            setComments(topLevelComments);
+          }
+        }
+      }
+
       setEditingCommentId(null);
       setEditText('');
     } catch (err) {
