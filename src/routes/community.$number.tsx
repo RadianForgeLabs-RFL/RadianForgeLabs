@@ -2171,7 +2171,7 @@ function DiscussionPage() {
             className="text-muted-foreground hover:text-foreground"
           >
             <Bell className="h-4 w-4 mr-1" />
-            Follow on GitHub
+            Follow <GitHubLogo />
           </Button>
           <Button
             variant="ghost"
@@ -2180,7 +2180,7 @@ function DiscussionPage() {
             className="text-muted-foreground hover:text-foreground"
           >
             <Smile className="h-4 w-4 mr-1" />
-            React on GitHub
+            React <GitHubLogo />
           </Button>
         </div>
       </Card>
@@ -2399,7 +2399,7 @@ function DiscussionPage() {
                                 className="h-6 text-xs"
                               >
                                 <Smile className="h-3 w-3 mr-1" />
-                                React on GitHub
+                                React <GitHubLogo />
                               </Button>
                             </div>
                             {/* Only show Reply button for bug reports/Q&A categories */}
@@ -2426,7 +2426,7 @@ function DiscussionPage() {
                                   onClick={() => handleMarkAsAnswer(comment.id)}
                                 >
                                   <CheckCircle className="h-3 w-3 mr-1" />
-                                  MARK AS ANSWER <GitHubLogo />
+                                  Answered <GitHubLogo />
                                 </Button>
                                 <Button
                                   variant="ghost"
