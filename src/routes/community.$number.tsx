@@ -2518,27 +2518,91 @@ function DiscussionPage() {
                               </span>
                             )}
                           </div>
-                          <div className="prose prose-invert max-w-none text-xs">
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{reply.body}</ReactMarkdown>
-                          </div>
-                          <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                              <ThumbsUp className="h-3 w-3" />
-                              <span>{reply.upvoteCount}</span>
+                          {editingCommentId === reply.id ? (
+                            <div className="space-y-3">
+                              <Textarea
+                                value={editText}
+                                onChange={(e) => setEditText(e.target.value)}
+                                rows={3}
+                                className="mb-2 text-sm"
+                              />
+                              <div className="flex gap-2">
+                                <Button size="sm" onClick={() => handleEditComment(reply.id)}>
+                                  Save
+                                </Button>
+                                <Button size="sm" variant="outline" onClick={() => { setEditingCommentId(null); setEditText(''); }}>
+                                  Cancel
+                                </Button>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-1">
-                              {emojis.slice(0, 3).map((emoji) => (
-                                <button
-                                  key={emoji}
-                                  onClick={() => handleAddReaction(reply.id, emoji)}
-                                  className="hover:scale-125 transition-transform"
-                                  title={`React with ${emoji}`}
-                                >
-                                  {emoji}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
+                          ) : (
+                            <>
+                              <div className="prose prose-invert max-w-none text-xs mb-2">
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>{reply.body}</ReactMarkdown>
+                              </div>
+                              <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                                <div className="flex items-center gap-1">
+                                  <ThumbsUp className="h-3 w-3" />
+                                  <span>{reply.upvoteCount}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  {emojis.slice(0, 3).map((emoji) => (
+                                    <button
+                                      key={emoji}
+                                      onClick={() => handleAddReaction(reply.id, emoji)}
+                                      className="hover:scale-125 transition-transform"
+                                      title={`React with ${emoji}`}
+                                    >
+                                      {emoji}
+                                    </button>
+                                  ))}
+                                </div>
+                                {hasGithubIdentity && isMaintainer && (
+                                  <>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-5 text-xs"
+                                      onClick={() => { setEditingCommentId(reply.id); setEditText(reply.body); }}
+                                    >
+                                      <Edit2 className="h-2.5 w-2.5 mr-1" />
+                                      Edit
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-5 text-xs text-red-500 hover:text-red-400"
+                                      onClick={() => handleDeleteComment(reply.id)}
+                                    >
+                                      <Trash2 className="h-2.5 w-2.5 mr-1" />
+                                      Delete
+                                    </Button>
+                                    {reply.isHidden ? (
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-5 text-xs text-green-600 hover:text-green-500"
+                                        onClick={() => handleUnhideComment(reply.id)}
+                                      >
+                                        <Eye className="h-2.5 w-2.5 mr-1" />
+                                        Unhide
+                                      </Button>
+                                    ) : (
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-5 text-xs"
+                                        onClick={() => handleHideComment(reply.id)}
+                                      >
+                                        <EyeOff className="h-2.5 w-2.5 mr-1" />
+                                        Hide
+                                      </Button>
+                                    )}
+                                  </>
+                                )}
+                              </div>
+                            </>
+                          )}
                         </div>
                       </div>
                     </Card>
