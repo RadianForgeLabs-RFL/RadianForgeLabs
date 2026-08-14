@@ -402,6 +402,10 @@ function DiscussionPage() {
         }
       } catch (err) {
         console.error('Error fetching discussion:', err);
+        console.error('Error details:', JSON.stringify(err, null, 2));
+        console.error('Error name:', err instanceof Error ? err.name : 'Unknown');
+        console.error('Error message:', err instanceof Error ? err.message : 'Unknown');
+        console.error('Error stack:', err instanceof Error ? err.stack : 'Unknown');
         setError(err instanceof Error ? err.message : 'Failed to load discussion');
       } finally {
         setIsLoading(false);
