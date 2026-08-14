@@ -549,8 +549,86 @@ function DiscussionPage() {
         }),
       });
 
-      // Update local state instead of reloading
-      setComments(comments.filter(c => c.id !== commentId));
+      // Refetch discussion to sync with GitHub state
+      const fetchQuery = `
+        query {
+          organization(login: "RadianForgeLabs") {
+            repositories(first: 10) {
+              nodes {
+                discussion(number: ${number}) {
+                  id
+                  comments(first: 50) {
+                    nodes {
+                      id
+                      body
+                      createdAt
+                      author {
+                        login
+                        avatarUrl
+                      }
+                      isAnswer
+                      reactions {
+                        totalCount
+                      }
+                      replyTo {
+                        id
+                        author {
+                          login
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      `;
+
+      const fetchResponse = await fetch('/api/github-graphql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: fetchQuery }),
+      });
+
+      if (fetchResponse.ok) {
+        const fetchData = await fetchResponse.json();
+        const discussionData = fetchData.data?.organization?.repositories?.nodes
+          .find((r: any) => r.discussion)?.discussion;
+
+        if (discussionData?.comments?.nodes) {
+          const answerId = discussionData.answer?.id;
+          const fetchedComments = discussionData.comments.nodes.map((c: any) => ({
+            id: c.id,
+            author: c.author?.login || 'Unknown',
+            avatar: c.author?.avatarUrl || '',
+            body: c.body,
+            createdAt: c.createdAt,
+            isAnswer: c.id === answerId || c.isAnswer || false,
+            upvoteCount: c.reactions?.totalCount || 0,
+            replyTo: c.replyTo?.id || null,
+            replies: [],
+          }));
+
+          // Organize comments into nested structure
+          const topLevelComments: Comment[] = [];
+          const commentsMap = new Map(fetchedComments.map((c: Comment) => [c.id, c]));
+
+          fetchedComments.forEach((comment: Comment) => {
+            if (comment.replyTo) {
+              const parentComment = commentsMap.get(comment.replyTo);
+              if (parentComment) {
+                (parentComment as any).replies = (parentComment as any).replies || [];
+                (parentComment as any).replies.push(comment);
+              }
+            } else {
+              topLevelComments.push(comment);
+            }
+          });
+
+          setComments(topLevelComments);
+        }
+      }
     } catch (err) {
       console.error('Error deleting comment:', err);
       alert('Failed to delete comment');
@@ -592,12 +670,86 @@ function DiscussionPage() {
         }),
       });
 
-      // Update local state to mark as hidden
-      setComments(comments.map(c => 
-        c.id === commentId 
-          ? { ...c, isHidden: true }
-          : c
-      ));
+      // Refetch discussion to sync with GitHub state
+      const fetchQuery = `
+        query {
+          organization(login: "RadianForgeLabs") {
+            repositories(first: 10) {
+              nodes {
+                discussion(number: ${number}) {
+                  id
+                  comments(first: 50) {
+                    nodes {
+                      id
+                      body
+                      createdAt
+                      author {
+                        login
+                        avatarUrl
+                      }
+                      isAnswer
+                      reactions {
+                        totalCount
+                      }
+                      replyTo {
+                        id
+                        author {
+                          login
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      `;
+
+      const fetchResponse = await fetch('/api/github-graphql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: fetchQuery }),
+      });
+
+      if (fetchResponse.ok) {
+        const fetchData = await fetchResponse.json();
+        const discussionData = fetchData.data?.organization?.repositories?.nodes
+          .find((r: any) => r.discussion)?.discussion;
+
+        if (discussionData?.comments?.nodes) {
+          const answerId = discussionData.answer?.id;
+          const fetchedComments = discussionData.comments.nodes.map((c: any) => ({
+            id: c.id,
+            author: c.author?.login || 'Unknown',
+            avatar: c.author?.avatarUrl || '',
+            body: c.body,
+            createdAt: c.createdAt,
+            isAnswer: c.id === answerId || c.isAnswer || false,
+            upvoteCount: c.reactions?.totalCount || 0,
+            replyTo: c.replyTo?.id || null,
+            replies: [],
+          }));
+
+          // Organize comments into nested structure
+          const topLevelComments: Comment[] = [];
+          const commentsMap = new Map(fetchedComments.map((c: Comment) => [c.id, c]));
+
+          fetchedComments.forEach((comment: Comment) => {
+            if (comment.replyTo) {
+              const parentComment = commentsMap.get(comment.replyTo);
+              if (parentComment) {
+                (parentComment as any).replies = (parentComment as any).replies || [];
+                (parentComment as any).replies.push(comment);
+              }
+            } else {
+              topLevelComments.push(comment);
+            }
+          });
+
+          setComments(topLevelComments);
+        }
+      }
     } catch (err) {
       console.error('Error hiding comment:', err);
       alert('Failed to hide comment');
@@ -637,12 +789,86 @@ function DiscussionPage() {
         }),
       });
 
-      // Update local state to mark as visible
-      setComments(comments.map(c => 
-        c.id === commentId 
-          ? { ...c, isHidden: false }
-          : c
-      ));
+      // Refetch discussion to sync with GitHub state
+      const fetchQuery = `
+        query {
+          organization(login: "RadianForgeLabs") {
+            repositories(first: 10) {
+              nodes {
+                discussion(number: ${number}) {
+                  id
+                  comments(first: 50) {
+                    nodes {
+                      id
+                      body
+                      createdAt
+                      author {
+                        login
+                        avatarUrl
+                      }
+                      isAnswer
+                      reactions {
+                        totalCount
+                      }
+                      replyTo {
+                        id
+                        author {
+                          login
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      `;
+
+      const fetchResponse = await fetch('/api/github-graphql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: fetchQuery }),
+      });
+
+      if (fetchResponse.ok) {
+        const fetchData = await fetchResponse.json();
+        const discussionData = fetchData.data?.organization?.repositories?.nodes
+          .find((r: any) => r.discussion)?.discussion;
+
+        if (discussionData?.comments?.nodes) {
+          const answerId = discussionData.answer?.id;
+          const fetchedComments = discussionData.comments.nodes.map((c: any) => ({
+            id: c.id,
+            author: c.author?.login || 'Unknown',
+            avatar: c.author?.avatarUrl || '',
+            body: c.body,
+            createdAt: c.createdAt,
+            isAnswer: c.id === answerId || c.isAnswer || false,
+            upvoteCount: c.reactions?.totalCount || 0,
+            replyTo: c.replyTo?.id || null,
+            replies: [],
+          }));
+
+          // Organize comments into nested structure
+          const topLevelComments: Comment[] = [];
+          const commentsMap = new Map(fetchedComments.map((c: Comment) => [c.id, c]));
+
+          fetchedComments.forEach((comment: Comment) => {
+            if (comment.replyTo) {
+              const parentComment = commentsMap.get(comment.replyTo);
+              if (parentComment) {
+                (parentComment as any).replies = (parentComment as any).replies || [];
+                (parentComment as any).replies.push(comment);
+              }
+            } else {
+              topLevelComments.push(comment);
+            }
+          });
+
+          setComments(topLevelComments);
+        }
+      }
     } catch (err) {
       console.error('Error unhiding comment:', err);
       alert('Failed to unhide comment');
@@ -742,7 +968,7 @@ function DiscussionPage() {
     }
   };
 
-  const handleUnmarkAsAnswer = async (commentId: string) => {
+  const handleUnmarkAsAnswer = async (commentId?: string) => {
     if (!hasGithubIdentity) {
       setShowLinkGithub(true);
       return;
@@ -1149,6 +1375,21 @@ function DiscussionPage() {
             <div className="flex items-center gap-2 text-sm text-green-500">
               <CheckCircle className="h-4 w-4" />
               <span>Answered</span>
+              {/* Only show Unmark Answer button for bug reports/Q&A categories */}
+              {(discussion.categoryName.toLowerCase().includes('bug') || 
+                discussion.categoryName.toLowerCase().includes('q&a') ||
+                discussion.categoryName.toLowerCase().includes('question') ||
+                discussion.categoryName.toLowerCase().includes('help')) && hasGithubIdentity && isMaintainer && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 text-xs text-green-600 hover:text-green-500"
+                  onClick={() => handleUnmarkAsAnswer(discussion.id)}
+                >
+                  <CheckCircle className="h-3 w-3 mr-1" />
+                  Unmark Answer
+                </Button>
+              )}
             </div>
           )}
           <div className="flex-1" />
