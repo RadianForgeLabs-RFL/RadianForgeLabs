@@ -195,7 +195,7 @@ function DiscussionPage() {
                     reactions {
                       totalCount
                     }
-                    comments(first: 50) {
+                    comments(first: 100) {
                       totalCount
                       nodes {
                         id
@@ -287,8 +287,8 @@ function DiscussionPage() {
                   if (comment.replyTo) {
                     const parentComment = commentsMap.get(comment.replyTo);
                     if (parentComment) {
-                      parentComment.replies = parentComment.replies || [];
-                      parentComment.replies.push(comment);
+                      (parentComment as any).replies = (parentComment as any).replies || [];
+                      (parentComment as any).replies.push(comment);
                     }
                   } else {
                     topLevelComments.push(comment);
