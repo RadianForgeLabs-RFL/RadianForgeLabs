@@ -1993,9 +1993,9 @@ function DiscussionPage() {
               )}
 
               {/* Nested Replies */}
-              {comment.replies && comment.replies.length > 0 && (
+              {(comment as any).replies && (comment as any).replies.length > 0 && (
                 <div className="ml-11 mt-4 space-y-3">
-                  {comment.replies.map((reply) => (
+                  {(comment as any).replies.map((reply: Comment) => (
                     <Card key={reply.id} className={`border border-white/5 bg-white/5 p-3 ${reply.isAnswer ? 'border-green-500/30 bg-green-500/5' : ''}`}>
                       <div className="flex items-start gap-2">
                         <img
