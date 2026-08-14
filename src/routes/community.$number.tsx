@@ -2435,7 +2435,7 @@ function DiscussionPage() {
                                   onClick={() => window.open(`https://github.com/orgs/RadianForgeLabs/discussions/${discussion.number}`, '_blank')}
                                 >
                                   <Trash2 className="h-3 w-3 mr-1" />
-                                  Delete on GitHub <GitHubLogo />
+                                  Delete <GitHubLogo />
                                 </Button>
                                 <Button
                                   variant="ghost"
@@ -2444,7 +2444,7 @@ function DiscussionPage() {
                                   onClick={() => window.open(`https://github.com/orgs/RadianForgeLabs/discussions/${discussion.number}`, '_blank')}
                                 >
                                   <Eye className="h-3 w-3 mr-1" />
-                                  Hide on GitHub <GitHubLogo />
+                                  Hide <GitHubLogo />
                                 </Button>
                               </>
                             )}
