@@ -1348,6 +1348,13 @@ function DiscussionPage() {
               replies: [],
             }));
 
+            console.log('After refetch - Total comments:', fetchedComments.length);
+            console.log('After refetch - Comments with replyTo:', fetchedComments.filter((c: any) => c.replyTo).length);
+            console.log('After refetch - Comments without replyTo:', fetchedComments.filter((c: any) => !c.replyTo).length);
+            fetchedComments.forEach((c: any) => {
+              console.log(`Comment ${c.id}: replyTo=${c.replyTo}, author=${c.author}`);
+            });
+
             setComments(fetchedComments);
           }
         }
@@ -2033,7 +2040,10 @@ function DiscussionPage() {
               )}
 
               {/* Nested Replies - Render all comments with indentation */}
-              {comments.filter((c: any) => (c as any).replyTo === comment.id).map((reply: Comment) => (
+              {(() => {
+                const replies = comments.filter((c: any) => (c as any).replyTo === comment.id);
+                console.log(`Comment ${comment.id} has ${replies.length} replies`);
+                return replies.map((reply: Comment) => (
                 <Card key={reply.id} className={`border border-white/5 bg-white/5 p-3 ml-8 ${reply.isAnswer ? 'border-green-500/30 bg-green-500/5' : ''}`}>
                   <div className="flex items-start gap-2">
                     <img
@@ -2077,7 +2087,7 @@ function DiscussionPage() {
                     </div>
                   </div>
                 </Card>
-              ))}
+              ))})()}
             </Card>
           ))}
           
