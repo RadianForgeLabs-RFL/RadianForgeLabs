@@ -1465,6 +1465,25 @@ function DiscussionPage() {
               replies: [],
             }));
 
+            // Process nested replies from the API
+            discussionData.comments.nodes.forEach((c: any) => {
+              if (c.replies?.nodes) {
+                c.replies.nodes.forEach((reply: any) => {
+                  fetchedComments.push({
+                    id: reply.id,
+                    author: reply.author?.login || 'Unknown',
+                    avatar: reply.author?.avatarUrl || '',
+                    body: reply.body,
+                    createdAt: reply.createdAt,
+                    isAnswer: reply.id === answerId || reply.isAnswer || false,
+                    upvoteCount: reply.reactions?.totalCount || 0,
+                    replyTo: reply.replyTo?.id || c.id,
+                    replies: [],
+                  });
+                });
+              }
+            });
+
             // Organize comments into nested structure
             const topLevelComments: Comment[] = [];
             const commentsMap = new Map(fetchedComments.map((c: Comment) => [c.id, c]));
@@ -1637,6 +1656,25 @@ function DiscussionPage() {
               replies: [],
             }));
 
+            // Process nested replies from the API
+            discussionData.comments.nodes.forEach((c: any) => {
+              if (c.replies?.nodes) {
+                c.replies.nodes.forEach((reply: any) => {
+                  fetchedComments.push({
+                    id: reply.id,
+                    author: reply.author?.login || 'Unknown',
+                    avatar: reply.author?.avatarUrl || '',
+                    body: reply.body,
+                    createdAt: reply.createdAt,
+                    isAnswer: reply.id === answerId || reply.isAnswer || false,
+                    upvoteCount: reply.reactions?.totalCount || 0,
+                    replyTo: reply.replyTo?.id || c.id,
+                    replies: [],
+                  });
+                });
+              }
+            });
+
             // Organize comments into nested structure
             const topLevelComments: Comment[] = [];
             const commentsMap = new Map(fetchedComments.map((c: Comment) => [c.id, c]));
@@ -1808,6 +1846,27 @@ function DiscussionPage() {
                         id
                         author {
                           login
+                        }
+                      }
+                      replies(first: 50) {
+                        nodes {
+                          id
+                          body
+                          createdAt
+                          author {
+                            login
+                            avatarUrl
+                          }
+                          isAnswer
+                          reactions {
+                            totalCount
+                          }
+                          replyTo {
+                            id
+                            author {
+                              login
+                            }
+                          }
                         }
                       }
                     }
@@ -2092,7 +2151,8 @@ function DiscussionPage() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 console.log('React button clicked, current state:', showDiscussionEmojiPicker);
                 setShowDiscussionEmojiPicker(!showDiscussionEmojiPicker);
               }}
@@ -2106,7 +2166,8 @@ function DiscussionPage() {
                 {emojis.map((emoji) => (
                   <button
                     key={emoji}
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       handleAddReaction(discussion.id, emoji);
                       setShowDiscussionEmojiPicker(false);
                     }}
