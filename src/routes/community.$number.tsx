@@ -695,12 +695,47 @@ function DiscussionPage() {
         }),
       });
 
-      // Update local state to mark as answer
-      setComments(comments.map(c => 
-        c.id === commentId 
-          ? { ...c, isAnswer: true }
-          : { ...c, isAnswer: false }
-      ));
+      // Refetch discussion to sync with GitHub state
+      const fetchQuery = `
+        query {
+          organization(login: "RadianForgeLabs") {
+            repositories(first: 10) {
+              nodes {
+                discussion(number: ${number}) {
+                  id
+                  answer {
+                    id
+                  }
+                  comments(first: 50) {
+                    nodes {
+                      id
+                      isAnswer
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      `;
+
+      const fetchResponse = await fetch('/api/github-graphql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: fetchQuery }),
+      });
+
+      if (fetchResponse.ok) {
+        const fetchData = await fetchResponse.json();
+        const answerId = fetchData.data?.organization?.repositories?.nodes
+          .find((r: any) => r.discussion)?.discussion?.answer?.id;
+
+        setComments(comments.map((c) =>
+          c.id === commentId
+            ? { ...c, isAnswer: true }
+            : { ...c, isAnswer: c.id === answerId || false }
+        ));
+      }
     } catch (err) {
       console.error('Error marking as answer:', err);
       alert('Failed to mark as answer');
@@ -750,12 +785,43 @@ function DiscussionPage() {
         }),
       });
 
-      // Update local state to unmark as answer
-      setComments(comments.map(c => 
-        c.id === commentId 
-          ? { ...c, isAnswer: false }
-          : c
-      ));
+      // Refetch discussion to sync with GitHub state
+      const fetchQuery = `
+        query {
+          organization(login: "RadianForgeLabs") {
+            repositories(first: 10) {
+              nodes {
+                discussion(number: ${number}) {
+                  id
+                  answer {
+                    id
+                  }
+                  comments(first: 50) {
+                    nodes {
+                      id
+                      isAnswer
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      `;
+
+      const fetchResponse = await fetch('/api/github-graphql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: fetchQuery }),
+      });
+
+      if (fetchResponse.ok) {
+        const fetchData = await fetchResponse.json();
+        const answerId = fetchData.data?.organization?.repositories?.nodes
+          .find((r: any) => r.discussion)?.discussion?.answer?.id;
+
+        setComments(comments.map((c) => ({ ...c, isAnswer: c.id === answerId || false })));
+      }
     } catch (err) {
       console.error('Error unmarking as answer:', err);
       alert('Failed to unmark as answer');
