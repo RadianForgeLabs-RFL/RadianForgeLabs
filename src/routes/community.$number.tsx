@@ -2158,84 +2158,27 @@ function DiscussionPage() {
             <div className="flex items-center gap-2 text-sm text-green-500">
               <CheckCircle className="h-4 w-4" />
               <span>Answered</span>
-              {/* Only show Unmark Answer button for bug reports/Q&A categories */}
-              {(discussion.categoryName.toLowerCase().includes('bug') || 
-                discussion.categoryName.toLowerCase().includes('q&a') ||
-                discussion.categoryName.toLowerCase().includes('question') ||
-                discussion.categoryName.toLowerCase().includes('help')) && hasGithubIdentity && isMaintainer && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 text-xs text-green-600 hover:text-green-500"
-                  onClick={() => handleUnmarkAsAnswer(discussion.id)}
-                >
-                  <CheckCircle className="h-3 w-3 mr-1" />
-                  Unmark Answer
-                </Button>
-              )}
             </div>
           )}
           <div className="flex-1" />
           <Button
             variant="ghost"
             size="sm"
-            onClick={handleFollowDiscussion}
+            onClick={() => window.open(`https://github.com/orgs/RadianForgeLabs/discussions/${discussion.number}`, '_blank')}
             className="text-muted-foreground hover:text-foreground"
           >
-            {isFollowing ? (
-              <>
-                <BellOff className="h-4 w-4 mr-1" />
-                Unfollow
-              </>
-            ) : (
-              <>
-                <Bell className="h-4 w-4 mr-1" />
-                Follow
-              </>
-            )}
+            <Bell className="h-4 w-4 mr-1" />
+            Follow on GitHub
           </Button>
-          <div className="relative">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                console.log('React button clicked, current state:', showDiscussionEmojiPicker);
-                console.log('Setting to:', !showDiscussionEmojiPicker);
-                setShowDiscussionEmojiPicker(!showDiscussionEmojiPicker);
-                console.log('After set, state should be:', !showDiscussionEmojiPicker);
-              }}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <Smile className="h-4 w-4 mr-1" />
-              React
-            </Button>
-            {showDiscussionEmojiPicker && (
-              <div 
-                className="absolute right-0 top-full mt-2 flex flex-wrap gap-2 p-3 border border-white/10 rounded-lg glass z-50 w-48 shadow-xl bg-black/80"
-                onClick={(e) => e.stopPropagation()}
-                onMouseDown={(e) => e.stopPropagation()}
-              >
-                {emojis.map((emoji) => (
-                  <button
-                    key={emoji}
-                    onMouseDown={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      console.log('Emoji clicked:', emoji);
-                      handleAddReaction(discussion.id, emoji);
-                      setShowDiscussionEmojiPicker(false);
-                    }}
-                    className="text-2xl hover:scale-125 transition-transform"
-                    title={`React with ${emoji}`}
-                  >
-                    {emoji}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => window.open(`https://github.com/orgs/RadianForgeLabs/discussions/${discussion.number}`, '_blank')}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <Smile className="h-4 w-4 mr-1" />
+            React on GitHub
+          </Button>
         </div>
       </Card>
 
@@ -2446,16 +2389,15 @@ function DiscussionPage() {
                               <span>{comment.upvoteCount}</span>
                             </div>
                             <div className="flex items-center gap-1">
-                              {emojis.slice(0, 5).map((emoji) => (
-                                <button
-                                  key={emoji}
-                                  onClick={() => handleAddReaction(comment.id, emoji)}
-                                  className="hover:scale-125 transition-transform"
-                                  title={`React with ${emoji}`}
-                                >
-                                  {emoji}
-                                </button>
-                              ))}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => window.open(`https://github.com/orgs/RadianForgeLabs/discussions/${discussion.number}`, '_blank')}
+                                className="h-6 text-xs"
+                              >
+                                <Smile className="h-3 w-3 mr-1" />
+                                React on GitHub
+                              </Button>
                             </div>
                             {/* Only show Reply button for bug reports/Q&A categories */}
                             {(discussion.categoryName.toLowerCase().includes('bug') || 
@@ -2478,70 +2420,38 @@ function DiscussionPage() {
                                   variant="ghost"
                                   size="sm"
                                   className="h-6 text-xs"
-                                  onClick={() => { setEditingCommentId(comment.id); setEditText(comment.body); }}
+                                  onClick={() => window.open(`https://github.com/orgs/RadianForgeLabs/discussions/${discussion.number}`, '_blank')}
+                                >
+                                  <CheckCircle className="h-3 w-3 mr-1" />
+                                  Mark Answer on GitHub
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 text-xs"
+                                  onClick={() => window.open(`https://github.com/orgs/RadianForgeLabs/discussions/${discussion.number}`, '_blank')}
                                 >
                                   <Edit2 className="h-3 w-3 mr-1" />
-                                  Edit
+                                  Edit on GitHub
                                 </Button>
                                 <Button
                                   variant="ghost"
                                   size="sm"
                                   className="h-6 text-xs text-red-500 hover:text-red-400"
-                                  onClick={() => handleDeleteComment(comment.id)}
+                                  onClick={() => window.open(`https://github.com/orgs/RadianForgeLabs/discussions/${discussion.number}`, '_blank')}
                                 >
                                   <Trash2 className="h-3 w-3 mr-1" />
-                                  Delete
+                                  Delete on GitHub
                                 </Button>
-                                {comment.isHidden ? (
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-6 text-xs text-green-600 hover:text-green-500"
-                                    onClick={() => handleUnhideComment(comment.id)}
-                                  >
-                                    <Eye className="h-3 w-3 mr-1" />
-                                    Unhide
-                                  </Button>
-                                ) : (
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-6 text-xs text-yellow-600 hover:text-yellow-500"
-                                    onClick={() => handleHideComment(comment.id)}
-                                  >
-                                    <EyeOff className="h-3 w-3 mr-1" />
-                                    Hide
-                                  </Button>
-                                )}
-                                {/* Only show Mark Answer for bug reports/Q&A categories */}
-                                {(discussion.categoryName.toLowerCase().includes('bug') || 
-                                  discussion.categoryName.toLowerCase().includes('q&a') ||
-                                  discussion.categoryName.toLowerCase().includes('question') ||
-                                  discussion.categoryName.toLowerCase().includes('help')) && (
-                                  <>
-                                    {comment.isAnswer ? (
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="h-6 text-xs text-green-600 hover:text-green-500"
-                                        onClick={() => handleUnmarkAsAnswer(comment.id)}
-                                      >
-                                        <CheckCircle className="h-3 w-3 mr-1" />
-                                        Unmark Answer
-                                      </Button>
-                                    ) : (
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="h-6 text-xs text-purple-600 hover:text-purple-500"
-                                        onClick={() => handleMarkAsAnswer(comment.id)}
-                                      >
-                                        <CheckCircle className="h-3 w-3 mr-1" />
-                                        Mark Answer
-                                      </Button>
-                                    )}
-                                  </>
-                                )}
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 text-xs"
+                                  onClick={() => window.open(`https://github.com/orgs/RadianForgeLabs/discussions/${discussion.number}`, '_blank')}
+                                >
+                                  <Eye className="h-3 w-3 mr-1" />
+                                  Hide on GitHub
+                                </Button>
                               </>
                             )}
                           </div>
