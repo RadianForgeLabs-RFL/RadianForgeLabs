@@ -1728,31 +1728,39 @@ function DiscussionPage() {
         .select('*')
         .eq('discussion_id', discussion.id)
         .eq('user_id', user?.id)
-        .single();
+        .maybeSingle(); // Use maybeSingle instead of single to handle no rows gracefully
 
       console.log('Existing follow check:', existingFollow, checkError);
 
       if (existingFollow) {
+        console.log('Follow: Existing follow found, attempting to unfollow.');
         const { error: deleteError } = await (supabase as any)
           .from('discussion_follows')
           .delete()
           .eq('discussion_id', discussion.id)
           .eq('user_id', user?.id);
-        
+
         console.log('Delete follow error:', deleteError);
         if (!deleteError) {
           setIsFollowing(false);
+          console.log('Follow: Successfully unfollowed discussion.');
         }
       } else {
+        console.log('Follow: No existing follow found, attempting to follow.');
         const { error: insertError } = await (supabase as any)
           .from('discussion_follows')
           .insert({
             discussion_id: discussion.id,
             user_id: user?.id,
-          });
-        
+          }, { onConflict: 'discussion_id,user_id' }); // Handle duplicate key gracefully
+
         console.log('Insert follow error:', insertError);
         if (!insertError) {
+          setIsFollowing(true);
+          console.log('Follow: Successfully followed discussion.');
+        } else if (insertError?.code === '23505') {
+          // Duplicate key error - means we're already following
+          console.log('Follow: Already following (duplicate key), setting state to true');
           setIsFollowing(true);
         }
       }
@@ -2153,6 +2161,7 @@ function DiscussionPage() {
               size="sm"
               onClick={(e) => {
                 e.stopPropagation();
+                e.preventDefault();
                 console.log('React button clicked, current state:', showDiscussionEmojiPicker);
                 console.log('Setting to:', !showDiscussionEmojiPicker);
                 setShowDiscussionEmojiPicker(!showDiscussionEmojiPicker);
@@ -2164,12 +2173,17 @@ function DiscussionPage() {
               React
             </Button>
             {showDiscussionEmojiPicker && (
-              <div className="absolute right-0 top-full mt-2 flex flex-wrap gap-2 p-3 border border-white/10 rounded-lg glass z-50 w-48 shadow-xl bg-black/80">
+              <div 
+                className="absolute right-0 top-full mt-2 flex flex-wrap gap-2 p-3 border border-white/10 rounded-lg glass z-50 w-48 shadow-xl bg-black/80"
+                onClick={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
+              >
                 {emojis.map((emoji) => (
                   <button
                     key={emoji}
-                    onClick={(e) => {
+                    onMouseDown={(e) => {
                       e.stopPropagation();
+                      e.preventDefault();
                       console.log('Emoji clicked:', emoji);
                       handleAddReaction(discussion.id, emoji);
                       setShowDiscussionEmojiPicker(false);
