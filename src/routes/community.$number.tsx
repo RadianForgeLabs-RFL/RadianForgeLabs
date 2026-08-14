@@ -1745,9 +1745,9 @@ function DiscussionPage() {
           </Card>
         )}
 
-        {/* Comments List */}
+        {/* Comments List - Only show top-level comments */}
         <div className="space-y-4">
-          {comments.map((comment) => (
+          {comments.filter((c: any) => !(c as any).replyTo).map((comment) => (
             <Card key={comment.id} className={`border border-white/5 bg-white/5 p-4 ${comment.isAnswer ? 'border-green-500/30 bg-green-500/5' : ''} ${comment.isHidden ? 'opacity-50' : ''}`}>
               <div className="flex items-start gap-3">
                 <img
