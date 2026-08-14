@@ -22,6 +22,7 @@ interface Comment {
   isHidden?: boolean;
   replyTo?: string;
   replies?: Comment[];
+  reactions?: any[];
 }
 
 interface DiscussionDetail {
@@ -35,6 +36,7 @@ interface DiscussionDetail {
   categoryName: string;
   isAnswered: boolean;
   upvoteCount: number;
+  reactions?: any[];
   commentCount: number;
 }
 
@@ -192,7 +194,13 @@ function DiscussionPage() {
                       name
                     }
                     answerChosenAt
-                    reactions {
+                    reactions(first: 100) {
+                      nodes {
+                        content
+                        user {
+                          login
+                        }
+                      }
                       totalCount
                     }
                     comments(first: 100) {
@@ -206,7 +214,13 @@ function DiscussionPage() {
                           avatarUrl
                         }
                         isAnswer
-                        reactions {
+                        reactions(first: 100) {
+                          nodes {
+                            content
+                            user {
+                              login
+                            }
+                          }
                           totalCount
                         }
                         replyTo {
@@ -225,7 +239,13 @@ function DiscussionPage() {
                               avatarUrl
                             }
                             isAnswer
-                            reactions {
+                            reactions(first: 100) {
+                              nodes {
+                                content
+                                user {
+                                  login
+                                }
+                              }
                               totalCount
                             }
                             replyTo {
@@ -283,6 +303,7 @@ function DiscussionPage() {
                 categoryName: repo.discussion.category?.name || 'General',
                 isAnswered: repo.discussion.answerChosenAt !== null,
                 upvoteCount: repo.discussion.reactions?.totalCount || 0,
+                reactions: repo.discussion.reactions?.nodes || [],
                 commentCount: repo.discussion.comments?.totalCount || 0,
               };
               
@@ -300,6 +321,7 @@ function DiscussionPage() {
                   createdAt: c.createdAt,
                   isAnswer: c.id === answerId || c.isAnswer || false,
                   upvoteCount: c.reactions?.totalCount || 0,
+                  reactions: c.reactions?.nodes || [],
                   replyTo: c.replyTo?.id || null,
                   replies: [],
                 }));
@@ -317,6 +339,7 @@ function DiscussionPage() {
                         createdAt: reply.createdAt,
                         isAnswer: reply.id === answerId || reply.isAnswer || false,
                         upvoteCount: reply.reactions?.totalCount || 0,
+                        reactions: reply.reactions?.nodes || [],
                         replyTo: reply.replyTo?.id || c.id,
                         replies: [],
                       });
