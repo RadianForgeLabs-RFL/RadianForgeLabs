@@ -215,6 +215,27 @@ function DiscussionPage() {
                             login
                           }
                         }
+                        replies(first: 50) {
+                          nodes {
+                            id
+                            body
+                            createdAt
+                            author {
+                              login
+                              avatarUrl
+                            }
+                            isAnswer
+                            reactions {
+                              totalCount
+                            }
+                            replyTo {
+                              id
+                              author {
+                                login
+                              }
+                            }
+                          }
+                        }
                       }
                     }
                     answer {
@@ -269,6 +290,7 @@ function DiscussionPage() {
                 const answerId = repo.discussion.answer?.id;
                 console.log('Fetched comments from GitHub:', repo.discussion.comments.nodes.length);
                 console.log('Comments with replyTo:', repo.discussion.comments.nodes.filter((c: any) => c.replyTo).length);
+                console.log('Comments with replies field:', repo.discussion.comments.nodes.filter((c: any) => c.replies?.nodes?.length > 0).length);
                 
                 foundComments = repo.discussion.comments.nodes.map((c: any) => ({
                   id: c.id,
@@ -281,6 +303,28 @@ function DiscussionPage() {
                   replyTo: c.replyTo?.id || null,
                   replies: [],
                 }));
+
+                // Process nested replies from the API
+                repo.discussion.comments.nodes.forEach((c: any) => {
+                  if (c.replies?.nodes) {
+                    console.log(`Comment ${c.id} has ${c.replies.nodes.length} nested replies from API`);
+                    c.replies.nodes.forEach((reply: any) => {
+                      foundComments.push({
+                        id: reply.id,
+                        author: reply.author?.login || 'Unknown',
+                        avatar: reply.author?.avatarUrl || '',
+                        body: reply.body,
+                        createdAt: reply.createdAt,
+                        isAnswer: reply.id === answerId || reply.isAnswer || false,
+                        upvoteCount: reply.reactions?.totalCount || 0,
+                        replyTo: reply.replyTo?.id || c.id,
+                        replies: [],
+                      });
+                    });
+                  }
+                });
+
+                console.log('Total comments after processing nested replies:', foundComments.length);
 
                 // Organize comments into nested structure
                 const topLevelComments: Comment[] = [];
@@ -575,7 +619,7 @@ function DiscussionPage() {
               nodes {
                 discussion(number: ${number}) {
                   id
-                  comments(first: 50) {
+                  comments(first: 100) {
                     nodes {
                       id
                       body
@@ -592,6 +636,27 @@ function DiscussionPage() {
                         id
                         author {
                           login
+                        }
+                      }
+                      replies(first: 50) {
+                        nodes {
+                          id
+                          body
+                          createdAt
+                          author {
+                            login
+                            avatarUrl
+                          }
+                          isAnswer
+                          reactions {
+                            totalCount
+                          }
+                          replyTo {
+                            id
+                            author {
+                              login
+                            }
+                          }
                         }
                       }
                     }
@@ -627,6 +692,25 @@ function DiscussionPage() {
             replyTo: c.replyTo?.id || null,
             replies: [],
           }));
+
+          // Process nested replies from the API
+          discussionData.comments.nodes.forEach((c: any) => {
+            if (c.replies?.nodes) {
+              c.replies.nodes.forEach((reply: any) => {
+                fetchedComments.push({
+                  id: reply.id,
+                  author: reply.author?.login || 'Unknown',
+                  avatar: reply.author?.avatarUrl || '',
+                  body: reply.body,
+                  createdAt: reply.createdAt,
+                  isAnswer: reply.id === answerId || reply.isAnswer || false,
+                  upvoteCount: reply.reactions?.totalCount || 0,
+                  replyTo: reply.replyTo?.id || c.id,
+                  replies: [],
+                });
+              });
+            }
+          });
 
           // Organize comments into nested structure
           const topLevelComments: Comment[] = [];
@@ -696,7 +780,7 @@ function DiscussionPage() {
               nodes {
                 discussion(number: ${number}) {
                   id
-                  comments(first: 50) {
+                  comments(first: 100) {
                     nodes {
                       id
                       body
@@ -713,6 +797,27 @@ function DiscussionPage() {
                         id
                         author {
                           login
+                        }
+                      }
+                      replies(first: 50) {
+                        nodes {
+                          id
+                          body
+                          createdAt
+                          author {
+                            login
+                            avatarUrl
+                          }
+                          isAnswer
+                          reactions {
+                            totalCount
+                          }
+                          replyTo {
+                            id
+                            author {
+                              login
+                            }
+                          }
                         }
                       }
                     }
@@ -748,6 +853,25 @@ function DiscussionPage() {
             replyTo: c.replyTo?.id || null,
             replies: [],
           }));
+
+          // Process nested replies from the API
+          discussionData.comments.nodes.forEach((c: any) => {
+            if (c.replies?.nodes) {
+              c.replies.nodes.forEach((reply: any) => {
+                fetchedComments.push({
+                  id: reply.id,
+                  author: reply.author?.login || 'Unknown',
+                  avatar: reply.author?.avatarUrl || '',
+                  body: reply.body,
+                  createdAt: reply.createdAt,
+                  isAnswer: reply.id === answerId || reply.isAnswer || false,
+                  upvoteCount: reply.reactions?.totalCount || 0,
+                  replyTo: reply.replyTo?.id || c.id,
+                  replies: [],
+                });
+              });
+            }
+          });
 
           // Organize comments into nested structure
           const topLevelComments: Comment[] = [];
@@ -815,7 +939,7 @@ function DiscussionPage() {
               nodes {
                 discussion(number: ${number}) {
                   id
-                  comments(first: 50) {
+                  comments(first: 100) {
                     nodes {
                       id
                       body
@@ -832,6 +956,27 @@ function DiscussionPage() {
                         id
                         author {
                           login
+                        }
+                      }
+                      replies(first: 50) {
+                        nodes {
+                          id
+                          body
+                          createdAt
+                          author {
+                            login
+                            avatarUrl
+                          }
+                          isAnswer
+                          reactions {
+                            totalCount
+                          }
+                          replyTo {
+                            id
+                            author {
+                              login
+                            }
+                          }
                         }
                       }
                     }
@@ -867,6 +1012,25 @@ function DiscussionPage() {
             replyTo: c.replyTo?.id || null,
             replies: [],
           }));
+
+          // Process nested replies from the API
+          discussionData.comments.nodes.forEach((c: any) => {
+            if (c.replies?.nodes) {
+              c.replies.nodes.forEach((reply: any) => {
+                fetchedComments.push({
+                  id: reply.id,
+                  author: reply.author?.login || 'Unknown',
+                  avatar: reply.author?.avatarUrl || '',
+                  body: reply.body,
+                  createdAt: reply.createdAt,
+                  isAnswer: reply.id === answerId || reply.isAnswer || false,
+                  upvoteCount: reply.reactions?.totalCount || 0,
+                  replyTo: reply.replyTo?.id || c.id,
+                  replies: [],
+                });
+              });
+            }
+          });
 
           // Organize comments into nested structure
           const topLevelComments: Comment[] = [];
@@ -951,7 +1115,7 @@ function DiscussionPage() {
                   answer {
                     id
                   }
-                  comments(first: 50) {
+                  comments(first: 100) {
                     nodes {
                       id
                       body
@@ -968,6 +1132,27 @@ function DiscussionPage() {
                         id
                         author {
                           login
+                        }
+                      }
+                      replies(first: 50) {
+                        nodes {
+                          id
+                          body
+                          createdAt
+                          author {
+                            login
+                            avatarUrl
+                          }
+                          isAnswer
+                          reactions {
+                            totalCount
+                          }
+                          replyTo {
+                            id
+                            author {
+                              login
+                            }
+                          }
                         }
                       }
                     }
@@ -1093,7 +1278,7 @@ function DiscussionPage() {
                   answer {
                     id
                   }
-                  comments(first: 50) {
+                  comments(first: 100) {
                     nodes {
                       id
                       body
@@ -1110,6 +1295,27 @@ function DiscussionPage() {
                         id
                         author {
                           login
+                        }
+                      }
+                      replies(first: 50) {
+                        nodes {
+                          id
+                          body
+                          createdAt
+                          author {
+                            login
+                            avatarUrl
+                          }
+                          isAnswer
+                          reactions {
+                            totalCount
+                          }
+                          replyTo {
+                            id
+                            author {
+                              login
+                            }
+                          }
                         }
                       }
                     }
