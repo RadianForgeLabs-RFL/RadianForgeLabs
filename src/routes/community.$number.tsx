@@ -561,6 +561,7 @@ function DiscussionPage() {
                     totalCount
                   }
                   comments(first: 100) {
+                    totalCount
                     nodes {
                       id
                       body
@@ -621,14 +622,22 @@ function DiscussionPage() {
         }
       `;
 
+      console.log('Executing refetch query for discussion:', number);
       const fetchResponse = await fetch('/api/github-graphql', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: fetchQuery }),
       });
 
+      console.log('Refetch response status:', fetchResponse.status);
+      if (!fetchResponse.ok) {
+        const errorText = await fetchResponse.text();
+        console.log('Refetch error response:', errorText);
+      }
+
       if (fetchResponse.ok) {
         const fetchData = await fetchResponse.json();
+        console.log('Full refetch response:', JSON.stringify(fetchData, null, 2));
         const discussionData = fetchData.data?.organization?.repositories?.nodes
           .find((r: any) => r.discussion)?.discussion;
 
