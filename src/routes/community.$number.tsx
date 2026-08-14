@@ -267,6 +267,9 @@ function DiscussionPage() {
               
               if (repo.discussion.comments?.nodes) {
                 const answerId = repo.discussion.answer?.id;
+                console.log('Fetched comments from GitHub:', repo.discussion.comments.nodes.length);
+                console.log('Comments with replyTo:', repo.discussion.comments.nodes.filter((c: any) => c.replyTo).length);
+                
                 foundComments = repo.discussion.comments.nodes.map((c: any) => ({
                   id: c.id,
                   author: c.author?.login || 'Unknown',
