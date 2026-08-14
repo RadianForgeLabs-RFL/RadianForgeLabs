@@ -588,8 +588,11 @@ function DiscussionPage() {
         const discussionData = fetchData.data?.organization?.repositories?.nodes
           .find((r: any) => r.discussion)?.discussion;
 
+        console.log('Refetch data received:', discussionData);
+
         if (discussionData) {
           // Update discussion upvote count
+          console.log('Updating discussion upvote count:', discussionData.reactions?.totalCount);
           setDiscussion((prev) => prev ? {
             ...prev,
             upvoteCount: discussionData.reactions?.totalCount || 0,
@@ -610,6 +613,8 @@ function DiscussionPage() {
               replies: [],
             }));
 
+            console.log('Fetched comments before nested processing:', fetchedComments.length);
+
             // Process nested replies from the API
             discussionData.comments.nodes.forEach((c: any) => {
               if (c.replies?.nodes) {
@@ -628,6 +633,8 @@ function DiscussionPage() {
                 });
               }
             });
+
+            console.log('Fetched comments after nested processing:', fetchedComments.length);
 
             // Organize comments into nested structure
             const topLevelComments: Comment[] = [];
@@ -651,12 +658,17 @@ function DiscussionPage() {
 
             console.log('After organization - Top-level comments:', topLevelComments.length);
             topLevelComments.forEach(c => {
-              console.log(`Comment ${c.id} has ${(c as any).replies?.length || 0} replies`);
+              console.log(`Comment ${c.id} has ${(c as any).replies?.length || 0} replies, upvoteCount: ${c.upvoteCount}`);
             });
 
+            console.log('Setting comments state with', topLevelComments.length, 'top-level comments');
             setComments(topLevelComments);
           }
+        } else {
+          console.log('No discussion data in refetch response');
         }
+      } else {
+        console.log('Refetch response not OK:', fetchResponse.status);
       }
     } catch (err) {
       console.error('Error adding reaction:', err);
