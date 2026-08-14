@@ -639,10 +639,19 @@ function DiscussionPage() {
                 if (parentComment) {
                   (parentComment as any).replies = (parentComment as any).replies || [];
                   (parentComment as any).replies.push(comment);
+                  console.log(`Added comment ${comment.id} as reply to parent ${comment.replyTo}`);
+                } else {
+                  console.log(`Parent ${comment.replyTo} not found for comment ${comment.id}, adding as top-level`);
+                  topLevelComments.push(comment);
                 }
               } else {
                 topLevelComments.push(comment);
               }
+            });
+
+            console.log('After organization - Top-level comments:', topLevelComments.length);
+            topLevelComments.forEach(c => {
+              console.log(`Comment ${c.id} has ${(c as any).replies?.length || 0} replies`);
             });
 
             setComments(topLevelComments);
@@ -812,10 +821,19 @@ function DiscussionPage() {
                 if (parentComment) {
                   (parentComment as any).replies = (parentComment as any).replies || [];
                   (parentComment as any).replies.push(comment);
+                  console.log(`Added comment ${comment.id} as reply to parent ${comment.replyTo}`);
+                } else {
+                  console.log(`Parent ${comment.replyTo} not found for comment ${comment.id}, adding as top-level`);
+                  topLevelComments.push(comment);
                 }
               } else {
                 topLevelComments.push(comment);
               }
+            });
+
+            console.log('After organization - Top-level comments:', topLevelComments.length);
+            topLevelComments.forEach(c => {
+              console.log(`Comment ${c.id} has ${(c as any).replies?.length || 0} replies`);
             });
 
             setComments(topLevelComments);
@@ -1457,10 +1475,19 @@ function DiscussionPage() {
                 if (parentComment) {
                   (parentComment as any).replies = (parentComment as any).replies || [];
                   (parentComment as any).replies.push(comment);
+                  console.log(`Added comment ${comment.id} as reply to parent ${comment.replyTo}`);
+                } else {
+                  console.log(`Parent ${comment.replyTo} not found for comment ${comment.id}, adding as top-level`);
+                  topLevelComments.push(comment);
                 }
               } else {
                 topLevelComments.push(comment);
               }
+            });
+
+            console.log('After organization - Top-level comments:', topLevelComments.length);
+            topLevelComments.forEach(c => {
+              console.log(`Comment ${c.id} has ${(c as any).replies?.length || 0} replies`);
             });
 
             setComments(topLevelComments);
@@ -1620,10 +1647,19 @@ function DiscussionPage() {
                 if (parentComment) {
                   (parentComment as any).replies = (parentComment as any).replies || [];
                   (parentComment as any).replies.push(comment);
+                  console.log(`Added comment ${comment.id} as reply to parent ${comment.replyTo}`);
+                } else {
+                  console.log(`Parent ${comment.replyTo} not found for comment ${comment.id}, adding as top-level`);
+                  topLevelComments.push(comment);
                 }
               } else {
                 topLevelComments.push(comment);
               }
+            });
+
+            console.log('After organization - Top-level comments:', topLevelComments.length);
+            topLevelComments.forEach(c => {
+              console.log(`Comment ${c.id} has ${(c as any).replies?.length || 0} replies`);
             });
 
             setComments(topLevelComments);
