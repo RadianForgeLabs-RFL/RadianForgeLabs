@@ -1645,30 +1645,42 @@ function DiscussionPage() {
     if (!discussion) return;
 
     try {
+      console.log('Toggling follow for discussion:', discussion.id, 'User:', user?.id);
+      
       // GitHub GraphQL API doesn't have follow/unfollow mutations for discussions
       // We'll track this locally in Supabase instead
-      const { data: existingFollow } = await (supabase as any)
+      const { data: existingFollow, error: checkError } = await (supabase as any)
         .from('discussion_follows')
         .select('*')
         .eq('discussion_id', discussion.id)
         .eq('user_id', user?.id)
         .single();
 
+      console.log('Existing follow check:', existingFollow, checkError);
+
       if (existingFollow) {
-        await (supabase as any)
+        const { error: deleteError } = await (supabase as any)
           .from('discussion_follows')
           .delete()
           .eq('discussion_id', discussion.id)
           .eq('user_id', user?.id);
-        setIsFollowing(false);
+        
+        console.log('Delete follow error:', deleteError);
+        if (!deleteError) {
+          setIsFollowing(false);
+        }
       } else {
-        await (supabase as any)
+        const { error: insertError } = await (supabase as any)
           .from('discussion_follows')
           .insert({
             discussion_id: discussion.id,
             user_id: user?.id,
           });
-        setIsFollowing(true);
+        
+        console.log('Insert follow error:', insertError);
+        if (!insertError) {
+          setIsFollowing(true);
+        }
       }
     } catch (err) {
       console.error('Error toggling follow:', err);
@@ -2044,7 +2056,10 @@ function DiscussionPage() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setShowDiscussionEmojiPicker(!showDiscussionEmojiPicker)}
+              onClick={() => {
+                console.log('React button clicked, current state:', showDiscussionEmojiPicker);
+                setShowDiscussionEmojiPicker(!showDiscussionEmojiPicker);
+              }}
               className="text-muted-foreground hover:text-foreground"
             >
               <Smile className="h-4 w-4 mr-1" />
