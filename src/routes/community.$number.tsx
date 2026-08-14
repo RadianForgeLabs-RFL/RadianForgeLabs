@@ -611,10 +611,15 @@ function DiscussionPage() {
         if (discussionData) {
           // Update discussion upvote count
           console.log('Updating discussion upvote count:', discussionData.reactions?.totalCount);
-          setDiscussion((prev) => prev ? {
-            ...prev,
-            upvoteCount: discussionData.reactions?.totalCount || 0,
-          } : prev);
+          setDiscussion((prev) => {
+            console.log('Previous discussion state:', prev);
+            const updated = prev ? {
+              ...prev,
+              upvoteCount: discussionData.reactions?.totalCount || 0,
+            } : prev;
+            console.log('Updated discussion state:', updated);
+            return updated;
+          });
 
           // Update comments
           if (discussionData.comments?.nodes) {
