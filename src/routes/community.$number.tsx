@@ -1992,56 +1992,52 @@ function DiscussionPage() {
                 </Card>
               )}
 
-              {/* Nested Replies */}
-              {(comment as any).replies && (comment as any).replies.length > 0 && (
-                <div className="ml-11 mt-4 space-y-3">
-                  {(comment as any).replies.map((reply: Comment) => (
-                    <Card key={reply.id} className={`border border-white/5 bg-white/5 p-3 ${reply.isAnswer ? 'border-green-500/30 bg-green-500/5' : ''}`}>
-                      <div className="flex items-start gap-2">
-                        <img
-                          src={reply.avatar}
-                          alt={reply.author}
-                          className="h-6 w-6 rounded-full"
-                        />
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-medium text-sm">{reply.author}</span>
-                            <span className="text-xs text-muted-foreground">
-                              {new Date(reply.createdAt).toLocaleDateString()}
-                            </span>
-                            {reply.isAnswer && (
-                              <span className="px-2 py-0.5 rounded-full text-xs bg-green-500/20 text-green-500">
-                                ✓ Answer
-                              </span>
-                            )}
-                          </div>
-                          <div className="prose prose-invert max-w-none text-xs">
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{reply.body}</ReactMarkdown>
-                          </div>
-                          <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                              <ThumbsUp className="h-3 w-3" />
-                              <span>{reply.upvoteCount}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              {emojis.slice(0, 3).map((emoji) => (
-                                <button
-                                  key={emoji}
-                                  onClick={() => handleAddReaction(reply.id, emoji)}
-                                  className="hover:scale-125 transition-transform"
-                                  title={`React with ${emoji}`}
-                                >
-                                  {emoji}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
+              {/* Nested Replies - Render all comments with indentation */}
+              {comments.filter((c: any) => (c as any).replyTo === comment.id).map((reply: Comment) => (
+                <Card key={reply.id} className={`border border-white/5 bg-white/5 p-3 ml-8 ${reply.isAnswer ? 'border-green-500/30 bg-green-500/5' : ''}`}>
+                  <div className="flex items-start gap-2">
+                    <img
+                      src={reply.avatar}
+                      alt={reply.author}
+                      className="h-6 w-6 rounded-full"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-medium text-sm">{reply.author}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(reply.createdAt).toLocaleDateString()}
+                        </span>
+                        {reply.isAnswer && (
+                          <span className="px-2 py-0.5 rounded-full text-xs bg-green-500/20 text-green-500">
+                            ✓ Answer
+                          </span>
+                        )}
+                      </div>
+                      <div className="prose prose-invert max-w-none text-xs">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{reply.body}</ReactMarkdown>
+                      </div>
+                      <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <ThumbsUp className="h-3 w-3" />
+                          <span>{reply.upvoteCount}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {emojis.slice(0, 3).map((emoji) => (
+                            <button
+                              key={emoji}
+                              onClick={() => handleAddReaction(reply.id, emoji)}
+                              className="hover:scale-125 transition-transform"
+                              title={`React with ${emoji}`}
+                            >
+                              {emoji}
+                            </button>
+                          ))}
                         </div>
                       </div>
-                    </Card>
-                  ))}
-                </div>
-              )}
+                    </div>
+                  </div>
+                </Card>
+              ))}
             </Card>
           ))}
           
