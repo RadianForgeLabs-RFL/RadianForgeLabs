@@ -371,16 +371,19 @@ function DiscussionPage() {
         setDiscussion(foundDiscussion);
         setComments(foundComments);
         
-        // Check follow status from Supabase
-        if (user?.id) {
+        // Check if user is following this discussion
+        if (user && foundDiscussion) {
           try {
-            const { data: followData, error: followError } = await (supabase as any)
+            console.log('Checking initial follow status for discussion:', foundDiscussion.id, 'user:', user.id);
+            const { data: followData } = await (supabase as any)
               .from('discussion_follows')
               .select('*')
               .eq('discussion_id', foundDiscussion.id)
               .eq('user_id', user.id)
               .maybeSingle();
+            console.log('Initial follow data:', followData);
             setIsFollowing(!!followData);
+            console.log('Set isFollowing to:', !!followData);
           } catch (followErr) {
             console.error('Error checking follow status:', followErr);
             setIsFollowing(false);
