@@ -1277,7 +1277,7 @@ function DiscussionPage() {
 
       const data = await response.json();
       
-      // Add new reply to local state
+      // Add new reply to local state (flat structure)
       if (data.data?.addDiscussionComment?.comment) {
         const newReply = data.data.addDiscussionComment.comment;
         const replyObj = {
@@ -1287,30 +1287,11 @@ function DiscussionPage() {
           body: newReply.body,
           createdAt: newReply.createdAt,
           upvoteCount: 0,
-          replyTo: newReply.replyTo?.id || null,
+          replyTo: newReply.replyTo?.id || replyingTo,
           replies: [],
         };
 
-        setComments(prevComments => {
-          const addReplyToComment = (comments: Comment[]): Comment[] => {
-            return comments.map(comment => {
-              if (comment.id === replyingTo) {
-                return {
-                  ...comment,
-                  replies: [...(comment.replies || []), replyObj]
-                };
-              }
-              if (comment.replies) {
-                return {
-                  ...comment,
-                  replies: addReplyToComment(comment.replies)
-                };
-              }
-              return comment;
-            });
-          };
-          return addReplyToComment(prevComments);
-        });
+        setComments(prevComments => [...prevComments, replyObj]);
       }
       
       setReplyToText('');
