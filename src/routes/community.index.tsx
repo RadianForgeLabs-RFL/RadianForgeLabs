@@ -1190,6 +1190,8 @@ function CommunityPage() {
               if (d.category && !categoryMap.has(d.category.id)) {
                 let displayEmoji = d.category.emoji || '💬';
                 
+                console.log(`Category: ${d.category.name}, Original emoji: ${displayEmoji}`);
+                
                 // GitHub returns emoji shortcodes like :video_game:, convert to actual emoji
                 // Extended emoji mapping for more categories - matching GitHub's emoji shortcodes
                 const emojiMap: Record<string, string> = {
@@ -1431,6 +1433,7 @@ function CommunityPage() {
                 
                 if (displayEmoji.startsWith(':') && displayEmoji.endsWith(':')) {
                   displayEmoji = emojiMap[displayEmoji] || displayEmoji;
+                  console.log(`After shortcode conversion: ${displayEmoji}`);
                 }
                 
                 // Fallback emoji based on category name if emoji is still generic or shortcode not found
@@ -1468,6 +1471,8 @@ function CommunityPage() {
                     displayEmoji = '📚';
                   }
                 }
+                
+                console.log(`Final emoji for ${d.category.name}: ${displayEmoji}`);
                 
                 categoryMap.set(d.category.id, {
                   id: d.category.id,
