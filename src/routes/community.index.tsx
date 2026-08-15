@@ -1599,19 +1599,12 @@ function CommunityPage() {
               </Button>
             </div>
             <div className="flex items-center gap-2">
-              {user ? (
-                <Button size="sm" onClick={() => setShowNewDiscussion(true)}>
+              <Button size="sm" asChild>
+                <a href="https://github.com/orgs/RadianForgeLabs/discussions/new" target="_blank" rel="noopener noreferrer">
                   <Plus className="mr-2 h-4 w-4" />
-                  New Discussion
-                </Button>
-              ) : (
-                <Button asChild size="sm">
-                  <a href="/auth">
-                    <MessageSquare className="mr-2 h-4 w-4" />
-                    Login
-                  </a>
-                </Button>
-              )}
+                  New Discussion <GitHubLogo />
+                </a>
+              </Button>
             </div>
           </div>
 
