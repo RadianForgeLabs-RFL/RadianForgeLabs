@@ -2637,6 +2637,15 @@ function DiscussionPage() {
                                       variant="ghost"
                                       size="sm"
                                       className="h-5 md:h-6 text-xs"
+                                      onClick={() => handleMarkAsAnswer(reply.id)}
+                                    >
+                                      <CheckCircle className="h-2.5 w-2.5 md:h-3 md:w-3 mr-1" />
+                                      Answered <GitHubLogo />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-5 md:h-6 text-xs"
                                       onClick={() => { setEditingCommentId(reply.id); setEditText(reply.body); }}
                                     >
                                       <Edit2 className="h-2.5 w-2.5 md:h-3 md:w-3 mr-1" />
