@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Github } from "lucide-react";
+import { Logo } from "@/components/site/Logo";
 
 const ADMIN_EMAILS = ['krishnaramalesh8838@gmail.com', 'radianforgelabs@gmail.com'];
 
@@ -62,7 +63,7 @@ function AuthPage() {
   return (
     <div className="mx-auto flex max-w-md flex-col items-center px-4 py-16">
       <Link to="/" className="mb-8 flex items-center gap-2.5">
-        <div className="grid h-12 w-12 place-items-center rounded-xl bg-gradient-brand font-bold text-brand-foreground shadow-glow text-lg">RFL</div>
+        <Logo className="h-12 w-12" />
         <div><div className="font-bold text-lg">RadianForgeLabs</div></div>
       </Link>
       <Card className="glass-strong w-full border-white/5 bg-transparent p-6">
