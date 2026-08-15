@@ -72,6 +72,7 @@ function CommunityPage() {
   const [userPermissions, setUserPermissions] = useState<string[]>([]);
   const [templates, setTemplates] = useState<any[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  const [showMobileCategories, setShowMobileCategories] = useState(false);
   const { user } = useAuth();
   const router = useRouter();
 
@@ -1518,8 +1519,8 @@ function CommunityPage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
-        {/* Sidebar - Categories */}
-        <aside className="glass lg:sticky lg:top-24 h-fit rounded-xl border border-white/5 p-4">
+        {/* Sidebar - Categories - Hidden on mobile */}
+        <aside className="hidden lg:block glass lg:sticky lg:top-24 h-fit rounded-xl border border-white/5 p-4">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold">Categories</h2>
             <Button
@@ -1577,9 +1578,19 @@ function CommunityPage() {
         </aside>
 
         {/* Main Content */}
-        <div>
+        <div className="flex-1">
           <div className="mb-4 flex items-center justify-between flex-wrap gap-4">
-            <h2 className="text-xl font-semibold">Recent Discussions</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl font-semibold">Recent Discussions</h2>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="md:hidden"
+                onClick={() => setShowMobileCategories(!showMobileCategories)}
+              >
+                {showMobileCategories ? <X className="h-4 w-4" /> : <MessageSquare className="h-4 w-4" />}
+              </Button>
+            </div>
             <div className="flex items-center gap-2">
               {user ? (
                 <Button size="sm" onClick={() => setShowNewDiscussion(true)}>
@@ -1597,8 +1608,41 @@ function CommunityPage() {
             </div>
           </div>
 
+          {/* Mobile Categories Dropdown */}
+          {showMobileCategories && (
+            <div className="mb-4 md:hidden">
+              <div className="grid grid-cols-2 gap-2">
+                <button 
+                  onClick={() => handleCategoryFilter(null)}
+                  className={`flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors ${
+                    selectedCategory === null 
+                      ? 'bg-purple-500/20 text-purple-400' 
+                      : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'
+                  }`}
+                >
+                  <span className="text-xl">💬</span>
+                  <span>All</span>
+                </button>
+                {categories.map((cat) => (
+                  <button 
+                    key={cat.id} 
+                    onClick={() => handleCategoryFilter(cat.id)}
+                    className={`flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors ${
+                      selectedCategory === cat.id 
+                        ? 'bg-purple-500/20 text-purple-400' 
+                        : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'
+                    }`}
+                  >
+                    <span className="text-xl">{cat.emoji}</span>
+                    <span className="truncate">{cat.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Search and Sort Bar */}
-          <div className="mb-4 flex items-center gap-4 flex-wrap">
+          <div className="mb-4 flex items-center gap-2 flex-wrap">
             <div className="flex-1 min-w-[200px]">
               <Input
                 placeholder="Search discussions..."
@@ -1608,13 +1652,13 @@ function CommunityPage() {
               />
             </div>
             <Select value={sortBy} onValueChange={(value: any) => handleSort(value)}>
-              <SelectTrigger className="w-[180px] border-white/10 bg-white/5">
+              <SelectTrigger className="w-[140px] md:w-[180px] border-white/10 bg-white/5">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="newest">Newest First</SelectItem>
-                <SelectItem value="oldest">Oldest First</SelectItem>
-                <SelectItem value="most_active">Most Active</SelectItem>
+                <SelectItem value="newest">Newest</SelectItem>
+                <SelectItem value="oldest">Oldest</SelectItem>
+                <SelectItem value="most_active">Active</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -1964,19 +2008,19 @@ function CommunityPage() {
             <div className="space-y-3">
               {paginatedDiscussions.map((disc) => (
                 <Card key={disc.id} className={`border border-white/5 bg-white/5 p-4 hover:bg-white/10 transition-colors ${disc.closed ? 'opacity-70' : ''}`}>
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-500/20 text-purple-500">
+                  <div className="flex items-start gap-3 md:gap-4">
+                    <div className="flex h-8 w-8 md:h-10 md:w-10 shrink-0 items-center justify-center rounded-full bg-purple-500/20 text-purple-500">
                       {disc.authorAvatar ? (
-                        <img src={disc.authorAvatar} alt={disc.author} className="h-10 w-10 rounded-full" />
+                        <img src={disc.authorAvatar} alt={disc.author} className="h-8 w-8 md:h-10 md:w-10 rounded-full" />
                       ) : (
-                        <MessageSquare className="h-5 w-5" />
+                        <MessageSquare className="h-4 w-4 md:h-5 md:w-5" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        {disc.pinned && <Pin className="h-4 w-4 text-purple-500" />}
+                      <div className="flex items-center gap-1 md:gap-2 mb-1 flex-wrap">
+                        {disc.pinned && <Pin className="h-3 w-3 md:h-4 md:w-4 text-purple-500" />}
                         {disc.categoryName && (
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-500">{disc.categoryName}</span>
+                          <span className="text-xs px-1.5 py-0.5 rounded-full bg-blue-500/20 text-blue-500">{disc.categoryName}</span>
                         )}
                         {/* Show answered status for Q&A/Bug categories */}
                         {(disc.categoryName?.toLowerCase().includes('q&a') || 
@@ -1985,19 +2029,19 @@ function CommunityPage() {
                           disc.categoryName?.toLowerCase().includes('help')) && (
                           <>
                             {disc.isAnswered ? (
-                              <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/20 text-green-500">Answered</span>
+                              <span className="text-xs px-1.5 py-0.5 rounded-full bg-green-500/20 text-green-500">Answered</span>
                             ) : (
-                              <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-500">Not Answered</span>
+                              <span className="text-xs px-1.5 py-0.5 rounded-full bg-yellow-500/20 text-yellow-500">Not Answered</span>
                             )}
                           </>
                         )}
-                        {disc.closed && <span className="text-xs px-2 py-0.5 rounded-full bg-red-500/20 text-red-500">Closed</span>}
-                        {disc.locked && <Lock className="h-4 w-4 text-yellow-500" />}
+                        {disc.closed && <span className="text-xs px-1.5 py-0.5 rounded-full bg-red-500/20 text-red-500">Closed</span>}
+                        {disc.locked && <Lock className="h-3 w-3 md:h-4 md:w-4 text-yellow-500" />}
                       </div>
                       <a href={`/community/${disc.number}`} className="block">
-                        <h3 className="font-semibold text-foreground mb-1 hover:text-purple-400 transition-colors">{disc.title}</h3>
+                        <h3 className="font-semibold text-foreground mb-1 hover:text-purple-400 transition-colors text-sm md:text-base line-clamp-2">{disc.title}</h3>
                       </a>
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-2 md:gap-4 text-xs text-muted-foreground flex-wrap">
                         <span className="flex items-center gap-1">
                           <Users className="h-3 w-3" />
                           {disc.author}
@@ -2008,15 +2052,15 @@ function CommunityPage() {
                         </span>
                         <span className="flex items-center gap-1">
                           <ThumbsUp className="h-3 w-3" />
-                          {disc.upvoteCount} reactions
+                          {disc.upvoteCount}
                         </span>
                         <span className="flex items-center gap-1">
                           <MessageSquare className="h-3 w-3" />
-                          {disc.commentCount} comments
+                          {disc.commentCount}
                         </span>
                       </div>
                       {hasGithubIdentity && isMaintainer && (
-                        <div className="flex items-center gap-2 mt-2">
+                        <div className="flex items-center gap-1 md:gap-2 mt-2 flex-wrap">
                           {disc.pinned ? (
                             <Button
                               variant="ghost"
@@ -2066,27 +2110,6 @@ function CommunityPage() {
                             >
                               <Archive className="h-3 w-3 mr-1" />
                               Close
-                            </Button>
-                          )}
-                          {disc.locked ? (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-6 text-xs text-green-600 hover:text-green-500"
-                              onClick={() => handleLockDiscussion(disc.id, false)}
-                            >
-                              <Unlock className="h-3 w-3 mr-1" />
-                              Unlock
-                            </Button>
-                          ) : (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-6 text-xs text-yellow-600 hover:text-yellow-500"
-                              onClick={() => handleLockDiscussion(disc.id, true)}
-                            >
-                              <Lock className="h-3 w-3 mr-1" />
-                              Lock
                             </Button>
                           )}
                           <Button
