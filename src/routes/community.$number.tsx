@@ -2387,72 +2387,70 @@ function DiscussionPage() {
                         </div>
                       ) : (
                         <>
-                          <div className="prose prose-invert prose-sm md:prose-base max-w-none text-xs md:text-sm mb-3">
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{comment.body}</ReactMarkdown>
-                          </div>
-                          <div className="flex items-center gap-2 md:gap-4 mt-2 text-xs md:text-sm text-muted-foreground flex-wrap">
-                            <div className="flex items-center gap-1">
-                              <ThumbsUp className="h-3 w-3" />
-                              <span>{comment.upvoteCount}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => window.open(`https://github.com/orgs/RadianForgeLabs/discussions/${discussion.number}`, '_blank')}
-                                className="h-6 text-xs"
-                              >
-                                <Smile className="h-3 w-3 mr-1" />
-                                React <GitHubLogo />
-                              </Button>
-                            </div>
-                            {/* Only show Reply button for bug reports/Q&A categories */}
-                            {(discussion.categoryName.toLowerCase().includes('bug') || 
-                              discussion.categoryName.toLowerCase().includes('q&a') ||
-                              discussion.categoryName.toLowerCase().includes('question') ||
-                              discussion.categoryName.toLowerCase().includes('help')) && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-6 text-xs"
-                                onClick={() => { setReplyingTo(comment.id); setShowReplyForm(true); }}
-                              >
-                                <MessageSquare className="h-3 w-3 mr-1" />
-                                Reply
-                              </Button>
-                            )}
-                            {hasGithubIdentity && isMaintainer && (
-                              <>
+                              <div className="prose prose-invert prose-sm md:prose-base max-w-none text-xs md:text-sm mb-3">
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>{comment.body}</ReactMarkdown>
+                              </div>
+                              <div className="flex items-center gap-2 md:gap-4 mt-2 text-xs md:text-sm text-muted-foreground flex-wrap">
+                                <div className="flex items-center gap-1">
+                                  <ThumbsUp className="h-3 w-3" />
+                                  <span>{comment.upvoteCount}</span>
+                                </div>
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="h-6 text-xs"
-                                  onClick={() => handleMarkAsAnswer(comment.id)}
-                                >
-                                  <CheckCircle className="h-3 w-3 mr-1" />
-                                  Answered <GitHubLogo />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-6 text-xs text-red-500 hover:text-red-400"
                                   onClick={() => window.open(`https://github.com/orgs/RadianForgeLabs/discussions/${discussion.number}`, '_blank')}
-                                >
-                                  <Trash2 className="h-3 w-3 mr-1" />
-                                  Delete <GitHubLogo />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
                                   className="h-6 text-xs"
-                                  onClick={() => window.open(`https://github.com/orgs/RadianForgeLabs/discussions/${discussion.number}`, '_blank')}
                                 >
-                                  <Eye className="h-3 w-3 mr-1" />
-                                  Hide <GitHubLogo />
+                                  <Smile className="h-3 w-3 mr-1" />
+                                  React <GitHubLogo />
                                 </Button>
-                              </>
-                            )}
-                          </div>
+                                {/* Only show Reply button for bug reports/Q&A categories */}
+                                {(discussion.categoryName.toLowerCase().includes('bug') || 
+                                  discussion.categoryName.toLowerCase().includes('q&a') ||
+                                  discussion.categoryName.toLowerCase().includes('question') ||
+                                  discussion.categoryName.toLowerCase().includes('help')) && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-6 text-xs"
+                                    onClick={() => { setReplyingTo(comment.id); setShowReplyForm(true); }}
+                                  >
+                                    <MessageSquare className="h-3 w-3 mr-1" />
+                                    Reply
+                                  </Button>
+                                )}
+                                {hasGithubIdentity && isMaintainer && (
+                                  <>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-6 text-xs"
+                                      onClick={() => handleMarkAsAnswer(comment.id)}
+                                    >
+                                      <CheckCircle className="h-3 w-3 mr-1" />
+                                      Answered <GitHubLogo />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-6 text-xs text-red-500 hover:text-red-400"
+                                      onClick={() => window.open(`https://github.com/orgs/RadianForgeLabs/discussions/${discussion.number}`, '_blank')}
+                                    >
+                                      <Trash2 className="h-3 w-3 mr-1" />
+                                      Delete <GitHubLogo />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-6 text-xs"
+                                      onClick={() => window.open(`https://github.com/orgs/RadianForgeLabs/discussions/${discussion.number}`, '_blank')}
+                                    >
+                                      <Eye className="h-3 w-3 mr-1" />
+                                      Hide <GitHubLogo />
+                                    </Button>
+                                  </>
+                                )}
+                              </div>
                         </>
                       )}
                     </>
@@ -2624,18 +2622,15 @@ function DiscussionPage() {
                                   <ThumbsUp className="h-3 w-3" />
                                   <span>{reply.upvoteCount}</span>
                                 </div>
-                                <div className="flex items-center gap-1">
-                                  {emojis.slice(0, 3).map((emoji) => (
-                                    <button
-                                      key={emoji}
-                                      onClick={() => handleAddReaction(reply.id, emoji)}
-                                      className="hover:scale-125 transition-transform text-lg md:text-xl"
-                                      title={`React with ${emoji}`}
-                                    >
-                                      {emoji}
-                                    </button>
-                                  ))}
-                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => window.open(`https://github.com/orgs/RadianForgeLabs/discussions/${discussion.number}`, '_blank')}
+                                  className="h-5 md:h-6 text-xs"
+                                >
+                                  <Smile className="h-2.5 w-2.5 md:h-3 md:w-3 mr-1" />
+                                  React <GitHubLogo />
+                                </Button>
                                 {hasGithubIdentity && isMaintainer && (
                                   <>
                                     <Button
@@ -2651,30 +2646,30 @@ function DiscussionPage() {
                                       variant="ghost"
                                       size="sm"
                                       className="h-5 md:h-6 text-xs text-red-500 hover:text-red-400"
-                                      onClick={() => handleDeleteComment(reply.id)}
+                                      onClick={() => window.open(`https://github.com/orgs/RadianForgeLabs/discussions/${discussion.number}`, '_blank')}
                                     >
                                       <Trash2 className="h-2.5 w-2.5 md:h-3 md:w-3 mr-1" />
-                                      Delete
+                                      Delete <GitHubLogo />
                                     </Button>
                                     {reply.isHidden ? (
                                       <Button
                                         variant="ghost"
                                         size="sm"
                                         className="h-5 md:h-6 text-xs text-green-600 hover:text-green-500"
-                                        onClick={() => handleUnhideComment(reply.id)}
+                                        onClick={() => window.open(`https://github.com/orgs/RadianForgeLabs/discussions/${discussion.number}`, '_blank')}
                                       >
                                         <Eye className="h-2.5 w-2.5 md:h-3 md:w-3 mr-1" />
-                                        Unhide
+                                        Unhide <GitHubLogo />
                                       </Button>
                                     ) : (
                                       <Button
                                         variant="ghost"
                                         size="sm"
                                         className="h-5 md:h-6 text-xs"
-                                        onClick={() => handleHideComment(reply.id)}
+                                        onClick={() => window.open(`https://github.com/orgs/RadianForgeLabs/discussions/${discussion.number}`, '_blank')}
                                       >
-                                        <EyeOff className="h-2.5 w-2.5 md:h-3 md:w-3 mr-1" />
-                                        Hide
+                                        <Eye className="h-2.5 w-2.5 md:h-3 md:w-3 mr-1" />
+                                        Hide <GitHubLogo />
                                       </Button>
                                     )}
                                   </>
