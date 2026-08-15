@@ -2098,7 +2098,7 @@ function DiscussionPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
-      <div className="mb-6">
+      <div className="mb-4 md:mb-6">
         <Link to="/community">
           <Button variant="ghost" size="sm">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -2108,16 +2108,16 @@ function DiscussionPage() {
       </div>
 
       {/* Discussion Header */}
-      <Card className="border border-white/5 bg-white/5 p-6 mb-6">
-        <div className="flex items-start gap-4 mb-4">
+      <Card className="border border-white/5 bg-white/5 p-4 md:p-6 mb-6">
+        <div className="flex items-start gap-3 md:gap-4 mb-4">
           <img
             src={discussion.avatar}
             alt={discussion.author}
-            className="h-12 w-12 rounded-full"
+            className="h-10 w-10 md:h-12 md:w-12 rounded-full shrink-0"
           />
-          <div className="flex-1">
-            <h1 className="text-2xl font-bold mb-2">{discussion.title}</h1>
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl md:text-2xl font-bold mb-2 line-clamp-2">{discussion.title}</h1>
+            <div className="flex items-center gap-2 md:gap-4 text-xs md:text-sm text-muted-foreground flex-wrap">
               <span className="font-medium text-foreground">{discussion.author}</span>
               <span>•</span>
               <span>{new Date(discussion.createdAt).toLocaleDateString()}</span>
@@ -2140,26 +2140,26 @@ function DiscussionPage() {
           </div>
         </div>
         
-        <div className="prose prose-invert max-w-none mb-4">
+        <div className="prose prose-invert prose-sm md:prose-base max-w-none mb-4">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{discussion.body}</ReactMarkdown>
         </div>
 
-        <div className="flex items-center gap-4 pt-4 border-t border-white/5">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <ThumbsUp className="h-4 w-4" />
-            <span>{discussion.upvoteCount} reactions</span>
+        <div className="flex items-center gap-2 md:gap-4 pt-4 border-t border-white/5 flex-wrap">
+          <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
+            <ThumbsUp className="h-3 w-3 md:h-4 md:w-4" />
+            <span>{discussion.upvoteCount}</span>
           </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <MessageSquare className="h-4 w-4" />
-            <span>{discussion.commentCount} comments</span>
+          <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
+            <MessageSquare className="h-3 w-3 md:h-4 md:w-4" />
+            <span>{discussion.commentCount}</span>
           </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Eye className="h-4 w-4" />
-            <span>{viewCount} views</span>
+          <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
+            <Eye className="h-3 w-3 md:h-4 md:w-4" />
+            <span>{viewCount}</span>
           </div>
           {discussion.isAnswered && (
-            <div className="flex items-center gap-2 text-sm text-green-500">
-              <CheckCircle className="h-4 w-4" />
+            <div className="flex items-center gap-2 text-xs md:text-sm text-green-500">
+              <CheckCircle className="h-3 w-3 md:h-4 md:w-4" />
               <span>Answered</span>
             </div>
           )}
@@ -2168,18 +2168,18 @@ function DiscussionPage() {
             variant="ghost"
             size="sm"
             onClick={() => window.open(`https://github.com/orgs/RadianForgeLabs/discussions/${discussion.number}`, '_blank')}
-            className="text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground h-7 md:h-8 text-xs"
           >
-            <Bell className="h-4 w-4 mr-1" />
+            <Bell className="h-3 w-3 md:h-4 md:w-4 mr-1" />
             Follow <GitHubLogo />
           </Button>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => window.open(`https://github.com/orgs/RadianForgeLabs/discussions/${discussion.number}`, '_blank')}
-            className="text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground h-7 md:h-8 text-xs"
           >
-            <Smile className="h-4 w-4 mr-1" />
+            <Smile className="h-3 w-3 md:h-4 md:w-4 mr-1" />
             React <GitHubLogo />
           </Button>
         </div>
@@ -2187,22 +2187,23 @@ function DiscussionPage() {
 
       {/* Comments Section */}
       <div className="mb-6">
-        <h2 className="text-xl font-semibold mb-4">Comments ({comments.length})</h2>
+        <h2 className="text-lg md:text-xl font-semibold mb-4">Comments ({comments.length})</h2>
         
         {/* Reply Form */}
-        <Card className="border border-white/5 bg-white/5 p-4 mb-6">
+        <Card className="border border-white/5 bg-white/5 p-3 md:p-4 mb-6">
           <form onSubmit={handleReply}>
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="reply">Your reply</Label>
-                <div className="flex items-center gap-2">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <Label htmlFor="reply" className="text-sm">Your reply</Label>
+                <div className="flex items-center gap-1 md:gap-2">
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowMarkdownPreview(!showMarkdownPreview)}
+                    className="h-7 md:h-8 text-xs"
                   >
-                    <Eye className="h-4 w-4 mr-1" />
+                    <Eye className="h-3 w-3 md:h-4 md:w-4 mr-1" />
                     Preview
                   </Button>
                   <Button
@@ -2210,8 +2211,9 @@ function DiscussionPage() {
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                    className="h-7 md:h-8 text-xs"
                   >
-                    <Smile className="h-4 w-4 mr-1" />
+                    <Smile className="h-3 w-3 md:h-4 md:w-4 mr-1" />
                     Emoji
                   </Button>
                   <div className="relative">
@@ -2229,16 +2231,17 @@ function DiscussionPage() {
                       size="sm"
                       onClick={() => document.getElementById('file-upload')?.click()}
                       disabled={uploadingFile}
+                      className="h-7 md:h-8 text-xs"
                     >
                       {uploadingFile ? (
                         <>
-                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          <Loader2 className="h-3 w-3 md:h-4 md:w-4 mr-1 animate-spin" />
                           Uploading...
                         </>
                       ) : (
                         <>
-                          <Paperclip className="h-4 w-4 mr-1" />
-                          Attach File
+                          <Paperclip className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                          Attach
                         </>
                       )}
                     </Button>
@@ -2262,7 +2265,7 @@ function DiscussionPage() {
               )}
 
               {showMarkdownPreview ? (
-                <div className="prose prose-invert max-w-none p-4 border border-white/10 rounded-lg bg-white/5 min-h-[100px]">
+                <div className="prose prose-invert prose-sm md:prose-base max-w-none p-3 md:p-4 border border-white/10 rounded-lg bg-white/5 min-h-[80px] md:min-h-[100px]">
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>{replyText || '*Preview will appear here*'}</ReactMarkdown>
                 </div>
               ) : (
@@ -2271,19 +2274,20 @@ function DiscussionPage() {
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
                   placeholder="Write your reply... (Markdown supported)"
-                  rows={4}
+                  rows={3}
+                  className="text-sm md:text-base"
                   required
                 />
               )}
               
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center flex-wrap gap-2">
                 <div className="text-xs text-muted-foreground">
-                  Supports: **bold**, *italic*, `code`, [links](url), and more
+                  Supports: **bold**, *italic*, `code`, [links](url)
                 </div>
-                <Button type="submit" disabled={isSubmitting || !replyText.trim()}>
+                <Button type="submit" disabled={isSubmitting || !replyText.trim()} className="text-sm">
                   {isSubmitting ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className="mr-2 h-3 w-3 md:h-4 md:w-4 animate-spin" />
                       Posting...
                     </>
                   ) : (
@@ -2325,16 +2329,16 @@ function DiscussionPage() {
         {/* Comments List - Only show top-level comments */}
         <div className="space-y-4">
           {comments.filter((c: any) => !(c as any).replyTo).map((comment) => (
-            <Card key={comment.id} className={`border border-white/5 bg-white/5 p-4 ${comment.isAnswer ? 'border-green-500/30 bg-green-500/5' : ''} ${comment.isHidden ? 'opacity-50' : ''}`}>
-              <div className="flex items-start gap-3">
+            <Card key={comment.id} className={`border border-white/5 bg-white/5 p-3 md:p-4 ${comment.isAnswer ? 'border-green-500/30 bg-green-500/5' : ''} ${comment.isHidden ? 'opacity-50' : ''}`}>
+              <div className="flex items-start gap-2 md:gap-3">
                 <img
                   src={comment.avatar}
                   alt={comment.author}
-                  className="h-8 w-8 rounded-full"
+                  className="h-8 w-8 md:h-10 md:w-10 rounded-full shrink-0"
                 />
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="font-medium">{comment.author}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1 md:gap-2 mb-2 flex-wrap">
+                    <span className="font-medium text-sm md:text-base">{comment.author}</span>
                     <span className="text-xs text-muted-foreground">
                       {new Date(comment.createdAt).toLocaleDateString()}
                     </span>
@@ -2351,12 +2355,12 @@ function DiscussionPage() {
                   </div>
                   
                   {comment.isHidden && !showHiddenContent ? (
-                    <div className="text-sm text-muted-foreground italic mb-3">
+                    <div className="text-xs md:text-sm text-muted-foreground italic mb-3">
                       This comment has been hidden. 
                       <Button 
                         variant="link" 
                         size="sm" 
-                        className="h-auto p-0 ml-2"
+                        className="h-auto p-0 ml-2 text-xs"
                         onClick={() => setShowHiddenContent(true)}
                       >
                         Show content
@@ -2369,24 +2373,24 @@ function DiscussionPage() {
                           <Textarea
                             value={editText}
                             onChange={(e) => setEditText(e.target.value)}
-                            rows={4}
-                            className="mb-2"
+                            rows={3}
+                            className="mb-2 text-sm"
                           />
                           <div className="flex gap-2">
-                            <Button size="sm" onClick={() => handleEditComment(comment.id)}>
+                            <Button size="sm" onClick={() => handleEditComment(comment.id)} className="text-sm">
                               Save
                             </Button>
-                            <Button size="sm" variant="outline" onClick={() => { setEditingCommentId(null); setEditText(''); }}>
+                            <Button size="sm" variant="outline" onClick={() => { setEditingCommentId(null); setEditText(''); }} className="text-sm">
                               Cancel
                             </Button>
                           </div>
                         </div>
                       ) : (
                         <>
-                          <div className="prose prose-invert max-w-none text-sm mb-3">
+                          <div className="prose prose-invert prose-sm md:prose-base max-w-none text-xs md:text-sm mb-3">
                             <ReactMarkdown remarkPlugins={[remarkGfm]}>{comment.body}</ReactMarkdown>
                           </div>
-                          <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-2 md:gap-4 mt-2 text-xs md:text-sm text-muted-foreground flex-wrap">
                             <div className="flex items-center gap-1">
                               <ThumbsUp className="h-3 w-3" />
                               <span>{comment.upvoteCount}</span>
@@ -2458,19 +2462,20 @@ function DiscussionPage() {
 
               {/* Reply Form */}
               {showReplyForm && replyingTo === comment.id && (
-                <Card className="border border-white/10 bg-white/5 p-4 ml-11 mt-3">
+                <Card className="border border-white/10 bg-white/5 p-3 md:p-4 ml-8 md:ml-11 mt-3">
                   <form onSubmit={handleReplyToComment}>
                     <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <Label htmlFor="reply-to">Your reply</Label>
-                        <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-between flex-wrap gap-2">
+                        <Label htmlFor="reply-to" className="text-sm">Your reply</Label>
+                        <div className="flex items-center gap-1 md:gap-2">
                           <Button
                             type="button"
                             variant="ghost"
                             size="sm"
                             onClick={() => setShowReplyMarkdownPreview(!showReplyMarkdownPreview)}
+                            className="h-7 md:h-8 text-xs"
                           >
-                            <Eye className="h-4 w-4 mr-1" />
+                            <Eye className="h-3 w-3 md:h-4 md:w-4 mr-1" />
                             Preview
                           </Button>
                           <Button
@@ -2478,8 +2483,9 @@ function DiscussionPage() {
                             variant="ghost"
                             size="sm"
                             onClick={() => setShowReplyEmojiPicker(!showReplyEmojiPicker)}
+                            className="h-7 md:h-8 text-xs"
                           >
-                            <Smile className="h-4 w-4 mr-1" />
+                            <Smile className="h-3 w-3 md:h-4 md:w-4 mr-1" />
                             Emoji
                           </Button>
                           <div className="relative">
@@ -2497,16 +2503,17 @@ function DiscussionPage() {
                               size="sm"
                               onClick={() => document.getElementById('reply-file-upload')?.click()}
                               disabled={uploadingReplyFile}
+                              className="h-7 md:h-8 text-xs"
                             >
                               {uploadingReplyFile ? (
                                 <>
-                                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                                  <Loader2 className="h-3 w-3 md:h-4 md:w-4 mr-1 animate-spin" />
                                   Uploading...
                                 </>
                               ) : (
                                 <>
-                                  <Paperclip className="h-4 w-4 mr-1" />
-                                  Attach File
+                                  <Paperclip className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                                  Attach
                                 </>
                               )}
                             </Button>
@@ -2530,7 +2537,7 @@ function DiscussionPage() {
                       )}
 
                       {showReplyMarkdownPreview ? (
-                        <div className="prose prose-invert max-w-none p-4 border border-white/10 rounded-lg bg-white/5 min-h-[100px]">
+                        <div className="prose prose-invert prose-sm md:prose-base max-w-none p-3 md:p-4 border border-white/10 rounded-lg bg-white/5 min-h-[80px] md:min-h-[100px]">
                           <ReactMarkdown remarkPlugins={[remarkGfm]}>{replyToText || '*Preview will appear here*'}</ReactMarkdown>
                         </div>
                       ) : (
@@ -2539,26 +2546,26 @@ function DiscussionPage() {
                           value={replyToText}
                           onChange={(e) => setReplyToText(e.target.value)}
                           placeholder="Write your reply... (Markdown supported)"
-                          rows={3}
-                          className="border-white/10 bg-white/5"
+                          rows={2}
+                          className="border-white/10 bg-white/5 text-sm"
                         />
                       )}
                       
                       <div className="flex gap-2">
-                        <Button type="submit" size="sm" disabled={isSubmittingReply || !replyToText.trim()}>
+                        <Button type="submit" size="sm" disabled={isSubmittingReply || !replyToText.trim()} className="text-sm">
                           {isSubmittingReply ? (
                             <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              <Loader2 className="mr-2 h-3 w-3 md:h-4 md:w-4 animate-spin" />
                               Posting...
                             </>
                           ) : (
                             <>
-                              <Send className="mr-2 h-4 w-4" />
+                              <Send className="mr-2 h-3 w-3 md:h-4 md:w-4" />
                               Reply
                             </>
                           )}
                         </Button>
-                        <Button type="button" size="sm" variant="outline" onClick={() => { setShowReplyForm(false); setReplyingTo(null); setReplyToText(''); setShowReplyMarkdownPreview(false); setShowReplyEmojiPicker(false); }}>
+                        <Button type="button" size="sm" variant="outline" onClick={() => { setShowReplyForm(false); setReplyingTo(null); setReplyToText(''); setShowReplyMarkdownPreview(false); setShowReplyEmojiPicker(false); }} className="text-sm">
                           Cancel
                         </Button>
                       </div>
@@ -2571,16 +2578,16 @@ function DiscussionPage() {
               {(comment as any).replies && (comment as any).replies.length > 0 && (
                 <>
                   {(comment as any).replies.map((reply: Comment) => (
-                    <Card key={reply.id} className={`border border-white/5 bg-white/5 p-3 ml-8 ${reply.isAnswer ? 'border-green-500/30 bg-green-500/5' : ''}`}>
+                    <Card key={reply.id} className={`border border-white/5 bg-white/5 p-2 md:p-3 ml-4 md:ml-8 ${reply.isAnswer ? 'border-green-500/30 bg-green-500/5' : ''}`}>
                       <div className="flex items-start gap-2">
                         <img
                           src={reply.avatar}
                           alt={reply.author}
-                          className="h-6 w-6 rounded-full"
+                          className="h-6 w-6 md:h-8 md:w-8 rounded-full shrink-0"
                         />
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-medium text-sm">{reply.author}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1 md:gap-2 mb-1 flex-wrap">
+                            <span className="font-medium text-xs md:text-sm">{reply.author}</span>
                             <span className="text-xs text-muted-foreground">
                               {new Date(reply.createdAt).toLocaleDateString()}
                             </span>
@@ -2595,24 +2602,24 @@ function DiscussionPage() {
                               <Textarea
                                 value={editText}
                                 onChange={(e) => setEditText(e.target.value)}
-                                rows={3}
-                                className="mb-2 text-sm"
+                                rows={2}
+                                className="mb-2 text-xs md:text-sm"
                               />
                               <div className="flex gap-2">
-                                <Button size="sm" onClick={() => handleEditComment(reply.id)}>
+                                <Button size="sm" onClick={() => handleEditComment(reply.id)} className="text-xs">
                                   Save
                                 </Button>
-                                <Button size="sm" variant="outline" onClick={() => { setEditingCommentId(null); setEditText(''); }}>
+                                <Button size="sm" variant="outline" onClick={() => { setEditingCommentId(null); setEditText(''); }} className="text-xs">
                                   Cancel
                                 </Button>
                               </div>
                             </div>
                           ) : (
                             <>
-                              <div className="prose prose-invert max-w-none text-xs mb-2">
+                              <div className="prose prose-invert prose-sm md:prose-base max-w-none text-xs md:text-sm mb-2">
                                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{reply.body}</ReactMarkdown>
                               </div>
-                              <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                              <div className="flex items-center gap-2 md:gap-3 mt-2 text-xs text-muted-foreground flex-wrap">
                                 <div className="flex items-center gap-1">
                                   <ThumbsUp className="h-3 w-3" />
                                   <span>{reply.upvoteCount}</span>
@@ -2622,7 +2629,7 @@ function DiscussionPage() {
                                     <button
                                       key={emoji}
                                       onClick={() => handleAddReaction(reply.id, emoji)}
-                                      className="hover:scale-125 transition-transform"
+                                      className="hover:scale-125 transition-transform text-lg md:text-xl"
                                       title={`React with ${emoji}`}
                                     >
                                       {emoji}
@@ -2634,39 +2641,39 @@ function DiscussionPage() {
                                     <Button
                                       variant="ghost"
                                       size="sm"
-                                      className="h-5 text-xs"
+                                      className="h-5 md:h-6 text-xs"
                                       onClick={() => { setEditingCommentId(reply.id); setEditText(reply.body); }}
                                     >
-                                      <Edit2 className="h-2.5 w-2.5 mr-1" />
+                                      <Edit2 className="h-2.5 w-2.5 md:h-3 md:w-3 mr-1" />
                                       Edit
                                     </Button>
                                     <Button
                                       variant="ghost"
                                       size="sm"
-                                      className="h-5 text-xs text-red-500 hover:text-red-400"
+                                      className="h-5 md:h-6 text-xs text-red-500 hover:text-red-400"
                                       onClick={() => handleDeleteComment(reply.id)}
                                     >
-                                      <Trash2 className="h-2.5 w-2.5 mr-1" />
+                                      <Trash2 className="h-2.5 w-2.5 md:h-3 md:w-3 mr-1" />
                                       Delete
                                     </Button>
                                     {reply.isHidden ? (
                                       <Button
                                         variant="ghost"
                                         size="sm"
-                                        className="h-5 text-xs text-green-600 hover:text-green-500"
+                                        className="h-5 md:h-6 text-xs text-green-600 hover:text-green-500"
                                         onClick={() => handleUnhideComment(reply.id)}
                                       >
-                                        <Eye className="h-2.5 w-2.5 mr-1" />
+                                        <Eye className="h-2.5 w-2.5 md:h-3 md:w-3 mr-1" />
                                         Unhide
                                       </Button>
                                     ) : (
                                       <Button
                                         variant="ghost"
                                         size="sm"
-                                        className="h-5 text-xs"
+                                        className="h-5 md:h-6 text-xs"
                                         onClick={() => handleHideComment(reply.id)}
                                       >
-                                        <EyeOff className="h-2.5 w-2.5 mr-1" />
+                                        <EyeOff className="h-2.5 w-2.5 md:h-3 md:w-3 mr-1" />
                                         Hide
                                       </Button>
                                     )}
