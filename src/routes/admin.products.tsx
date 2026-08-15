@@ -70,12 +70,15 @@ function AdminProducts() {
                 <div className="text-xs text-muted-foreground">{p.slug} · v{p.latest_version} · {p.status}</div>
               </div>
               <div className="flex gap-2">
-                <Link to="/products/$slug" params={{ slug: p.slug }}>
-                  <Button size="sm" variant="outline" className="border-white/10">
-                    <Pencil className="h-4 w-4 mr-2" />
-                    Edit
-                  </Button>
-                </Link>
+                <ProductDialog 
+                  product={p} 
+                  trigger={
+                    <Button size="sm" variant="outline" className="border-white/10">
+                      <Pencil className="h-4 w-4 mr-2" />
+                      Edit
+                    </Button>
+                  } 
+                />
                 <Button size="sm" variant="outline" className="border-white/10 text-destructive" onClick={() => { if (confirm("Delete?")) del.mutate(p.id); }}>
                   <Trash2 className="h-4 w-4" />
                 </Button>
