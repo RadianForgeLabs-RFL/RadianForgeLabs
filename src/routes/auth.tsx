@@ -27,7 +27,7 @@ function AuthPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: 'http://localhost:8080/auth/callback'
+          redirectTo: 'https://zndizxgtyigkjrqmpsqe.supabase.co/auth/v1/callback'
         }
       });
       if (error) {
@@ -45,7 +45,7 @@ function AuthPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'github',
         options: {
-          redirectTo: 'http://localhost:8080/auth/callback'
+          redirectTo: 'https://zndizxgtyigkjrqmpsqe.supabase.co/auth/v1/callback'
         }
       });
       if (error) {
