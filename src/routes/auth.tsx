@@ -27,7 +27,7 @@ function AuthPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin + '/auth/callback'
+          redirectTo: 'http://localhost:8080/auth/callback'
         }
       });
       if (error) {
@@ -45,7 +45,7 @@ function AuthPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'github',
         options: {
-          redirectTo: window.location.origin + '/auth/callback'
+          redirectTo: 'http://localhost:8080/auth/callback'
         }
       });
       if (error) {
