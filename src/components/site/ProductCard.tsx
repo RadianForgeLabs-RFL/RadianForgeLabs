@@ -51,7 +51,7 @@ export function ProductCard({ p }: { p: Product }) {
         <div className={`relative h-32 overflow-hidden bg-gradient-to-br ${KIND_GRADIENT[p.kind]}`}>
           {p.banner_url && (
             <img
-              src={p.banner_url}
+              src={`${p.banner_url}?width=600&quality=80&format=webp`}
               alt=""
               loading="lazy"
               className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 md:group-hover:scale-105"
@@ -62,7 +62,7 @@ export function ProductCard({ p }: { p: Product }) {
           <div className="absolute inset-0 flex items-center justify-center">
             {p.icon_url ? (
               <div className="h-16 w-16 overflow-hidden rounded-2xl border border-white/20 glass-strong">
-                <img src={p.icon_url} alt={p.name} loading="lazy" className="h-full w-full object-cover" />
+                <img src={`${p.icon_url}?width=128&quality=80&format=webp`} alt={p.name} loading="lazy" className="h-full w-full object-cover" />
               </div>
             ) : (
               <div className="grid h-16 w-16 place-items-center rounded-2xl glass-strong text-2xl font-bold text-foreground">
