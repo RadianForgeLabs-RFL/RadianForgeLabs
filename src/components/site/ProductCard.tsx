@@ -93,13 +93,13 @@ export function ProductCard({ p }: { p: Product }) {
             <div className="mt-3" onClick={(e) => e.stopPropagation()}>
               <PreorderButton productId={p.id} slug={p.slug} kind={p.kind} />
             </div>
-          ) : (p as any).downloads && (p as any).downloads.length > 0 ? (
+          ) : (
             <div className="mt-3" onClick={(e) => e.stopPropagation()}>
               <Button size="sm" className={`w-full bg-gradient-to-r ${KIND_BUTTON_GRADIENT[p.kind] ?? 'bg-primary'} text-white hover:opacity-90`} onClick={handleDownloadClick}>
                 <Download className="mr-2 h-3 w-3" /> Download
               </Button>
             </div>
-          ) : null}
+          )}
           {p.latest_version && !(p as any).coming_soon && (
             <div className="mt-2 text-xs text-muted-foreground">v{p.latest_version}</div>
           )}
