@@ -12,6 +12,11 @@ const KIND_GRADIENT: Record<string, string> = {
   game: "from-rose-500/30 to-rose-400/20",
   ai: "from-emerald-500/30 to-teal-400/20",
 };
+const KIND_BUTTON_GRADIENT: Record<string, string> = {
+  app: "from-blue-600 to-sky-500",
+  game: "from-rose-500 to-rose-400",
+  ai: "from-emerald-600 to-teal-500",
+};
 const KIND_HOVER_COLOR: Record<string, string> = {
   app: "group-hover:text-blue-500",
   game: "group-hover:text-rose-500",
@@ -84,7 +89,7 @@ export function ProductCard({ p }: { p: Product }) {
             </div>
           ) : (p as any).downloads && (p as any).downloads.length > 0 ? (
             <div className="mt-3" onClick={(e) => e.stopPropagation()}>
-              <Button asChild size="sm" className={`w-full bg-gradient-to-r ${KIND_GRADIENT[p.kind]?.replace('/30', '/90').replace('/20', '/80') ?? 'bg-primary'} text-white hover:opacity-90`}>
+              <Button asChild size="sm" className={`w-full bg-gradient-to-r ${KIND_BUTTON_GRADIENT[p.kind] ?? 'bg-primary'} text-white hover:opacity-90`}>
                 <Link to="/products/$slug" params={{ slug: p.slug }}>
                   <Download className="mr-2 h-3 w-3" /> Download
                 </Link>
