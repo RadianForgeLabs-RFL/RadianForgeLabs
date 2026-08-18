@@ -460,6 +460,13 @@ function ProductPage() {
                 ) : (
                   <Button size="lg" disabled className="min-w-40">No downloads yet</Button>
                 )}
+                {p.documentation_url && (
+                  <Button asChild size="lg" variant="outline" className="border-white/10 glass">
+                    <a href={p.documentation_url} target="_blank" rel="noreferrer">
+                      <FileCode className="mr-2 h-4 w-4" /> Docs
+                    </a>
+                  </Button>
+                )}
                 <Button
                   size="lg"
                   variant="outline"
