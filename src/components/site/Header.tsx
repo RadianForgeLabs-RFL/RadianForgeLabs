@@ -104,7 +104,7 @@ export function Header() {
             <SheetTrigger asChild>
               <Button variant="outline" size="icon" className="lg:hidden dark:border-primary/40 border-border dark:bg-primary/10 bg-background text-foreground dark:hover:bg-primary/20 hover:bg-muted"><Menu className="h-5 w-5" /></Button>
             </SheetTrigger>
-            <SheetContent side="right" className="glass-strong w-72 dark:bg-background/95 bg-background text-foreground">
+            <SheetContent side="right" className="w-72 dark:bg-background/95 bg-background text-foreground border-border dark:border-white/10">
               <nav className="mt-8 flex flex-col gap-1">
                 {NAV.map((n) => (
                   <Link key={n.to} to={n.to} onClick={() => setOpen(false)}
@@ -112,7 +112,7 @@ export function Header() {
                     {n.label}
                   </Link>
                 ))}
-                <div className="mt-4 border-t border-white/10 pt-4">
+                <div className="mt-4 border-t border-border dark:border-white/10 pt-4">
                   <SupportModal
                     title={getSupportTitle()}
                     trigger={
