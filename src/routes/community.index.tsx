@@ -2164,6 +2164,19 @@ function CommunityPage() {
           )}
         </div>
       </div>
+      
+      {/* View on GitHub Button */}
+      <div className="mt-8 flex justify-center">
+        <Button
+          variant="outline"
+          size="lg"
+          className="gap-2 border-purple-500/30 text-purple-400 hover:bg-purple-500/10"
+          onClick={() => window.open('https://github.com/orgs/RadianForgeLabs/discussions', '_blank')}
+        >
+          <Github className="h-5 w-5" />
+          View on GitHub
+        </Button>
+      </div>
     </div>
   );
 }

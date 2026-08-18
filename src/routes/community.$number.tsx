@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, MessageSquare, ExternalLink, Loader2, AlertCircle, Send, ThumbsUp, CheckCircle, Clock, User, Edit2, Eye, EyeOff, Smile, Paperclip, Upload, Trash2, Bell, BellOff, Plus, X } from "lucide-react";
+import { ArrowLeft, MessageSquare, ExternalLink, Loader2, AlertCircle, Send, ThumbsUp, CheckCircle, Clock, User, Edit2, Eye, EyeOff, Smile, Paperclip, Upload, Trash2, Bell, BellOff, Plus, X, Github } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -2425,7 +2425,7 @@ function DiscussionPage() {
                                       variant="ghost"
                                       size="sm"
                                       className="h-6 text-xs"
-                                      onClick={() => handleMarkAsAnswer(comment.id)}
+                                      onClick={() => window.open(`https://github.com/orgs/RadianForgeLabs/discussions/${discussion.number}`, '_blank')}
                                     >
                                       <CheckCircle className="h-3 w-3 mr-1" />
                                       Answered <GitHubLogo />
@@ -2637,7 +2637,7 @@ function DiscussionPage() {
                                       variant="ghost"
                                       size="sm"
                                       className="h-5 md:h-6 text-xs"
-                                      onClick={() => handleMarkAsAnswer(reply.id)}
+                                      onClick={() => window.open(`https://github.com/orgs/RadianForgeLabs/discussions/${discussion.number}`, '_blank')}
                                     >
                                       <CheckCircle className="h-2.5 w-2.5 md:h-3 md:w-3 mr-1" />
                                       Answered <GitHubLogo />
@@ -2702,6 +2702,19 @@ function DiscussionPage() {
             </Card>
           )}
         </div>
+      </div>
+      
+      {/* View on GitHub Button */}
+      <div className="mt-8 flex justify-center">
+        <Button
+          variant="outline"
+          size="lg"
+          className="gap-2 border-purple-500/30 text-purple-400 hover:bg-purple-500/10"
+          onClick={() => window.open(`https://github.com/orgs/RadianForgeLabs/discussions/${discussion.number}`, '_blank')}
+        >
+          <Github className="h-5 w-5" />
+          View on GitHub
+        </Button>
       </div>
     </div>
   );
