@@ -418,6 +418,26 @@ function ProductDialog({ product, trigger }: { product?: any; trigger: React.Rea
             </div>
             <div>
               <Label className="mb-2 block">Banner</Label>
+              <div className="mb-3">
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={banner_url === icon_url}
+                    onChange={async (e) => {
+                      if (e.target.checked && icon_url) {
+                        setBannerUrl(icon_url);
+                        if (productId) await supabase.from("products").update({ banner_url: icon_url }).eq("id", productId);
+                      } else {
+                        setBannerUrl(null);
+                        if (productId) await supabase.from("products").update({ banner_url: null }).eq("id", productId);
+                      }
+                      qc.invalidateQueries({ queryKey: ["products"] });
+                    }}
+                    disabled={!icon_url}
+                  />
+                  Use app icon as banner
+                </label>
+              </div>
               <ImageUpload value={banner_url} label="Banner" aspect="aspect-video" folder="banners" useCase="banner" onChange={async (url) => {
                 setBannerUrl(url);
                 if (productId) await supabase.from("products").update({ banner_url: url }).eq("id", productId);
