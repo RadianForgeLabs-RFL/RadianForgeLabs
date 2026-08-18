@@ -1,8 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { StatusBadge } from "./StatusBadges";
 import { PreorderButton } from "./PreorderButton";
 import type { Product } from "@/lib/data";
+import { Download } from "lucide-react";
 
 const KIND_LABEL: Record<string, string> = { app: "App", game: "Game", ai: "Tool" };
 const KIND_GRADIENT: Record<string, string> = {
@@ -76,13 +78,21 @@ export function ProductCard({ p }: { p: Product }) {
             <StatusBadge value={p.status} />
             <StatusBadge value={p.source_type} />
           </div>
-          {(p as any).coming_soon && (
+          {(p as any).coming_soon ? (
             <div className="mt-3" onClick={(e) => e.stopPropagation()}>
               <PreorderButton productId={p.id} slug={p.slug} kind={p.kind} />
             </div>
-          )}
+          ) : (p as any).downloads && (p as any).downloads.length > 0 ? (
+            <div className="mt-3" onClick={(e) => e.stopPropagation()}>
+              <Button asChild size="sm" className={`w-full bg-gradient-to-r ${KIND_GRADIENT[p.kind]?.replace('/30', '/90').replace('/20', '/80') ?? 'bg-primary'} text-white hover:opacity-90`}>
+                <a href={(p as any).downloads[0].url} target="_blank" rel="noreferrer">
+                  <Download className="mr-2 h-3 w-3" /> Download
+                </a>
+              </Button>
+            </div>
+          ) : null}
           {p.latest_version && !(p as any).coming_soon && (
-            <div className="mt-3 text-xs text-muted-foreground">v{p.latest_version}</div>
+            <div className="mt-2 text-xs text-muted-foreground">v{p.latest_version}</div>
           )}
         </div>
       </Card>

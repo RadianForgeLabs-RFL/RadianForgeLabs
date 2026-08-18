@@ -89,7 +89,7 @@ export const allProductsQuery = (kind?: ProductKind | "all") =>
     queryFn: async () => {
       let q = supabase
         .from("products")
-        .select("*")
+        .select("*, downloads(*)")
         .eq("published", true)
         .order("homepage_order");
       if (kind && kind !== "all") q = q.eq("kind", kind);
