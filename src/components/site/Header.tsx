@@ -102,13 +102,13 @@ export function Header() {
 
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="lg:hidden text-foreground hover:bg-muted"><Menu className="h-5 w-5" /></Button>
+              <Button variant="outline" size="icon" className="lg:hidden dark:border-primary/40 border-border dark:bg-primary/10 bg-background text-foreground dark:hover:bg-primary/20 hover:bg-muted"><Menu className="h-5 w-5" /></Button>
             </SheetTrigger>
-            <SheetContent side="right" className="glass-strong w-72 text-foreground">
+            <SheetContent side="right" className="glass-strong w-72 dark:bg-background/95 bg-background text-foreground">
               <nav className="mt-8 flex flex-col gap-1">
                 {NAV.map((n) => (
                   <Link key={n.to} to={n.to} onClick={() => setOpen(false)}
-                    className={`rounded-md px-3 py-2 text-sm text-foreground/80 hover:bg-white/10 hover:text-${n.color}-500`}>
+                    className={`rounded-md px-3 py-2 text-sm text-foreground/80 dark:hover:bg-white/10 hover:bg-muted hover:text-${n.color}-500`}>
                     {n.label}
                   </Link>
                 ))}
