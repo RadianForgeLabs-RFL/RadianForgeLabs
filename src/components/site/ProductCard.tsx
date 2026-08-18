@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "./StatusBadges";
@@ -34,7 +34,13 @@ const KIND_BADGE_COLOR: Record<string, string> = {
 };
 
 export function ProductCard({ p }: { p: Product }) {
+  const navigate = useNavigate();
   const bannerOpacity = (p as any).banner_opacity ?? 0.55;
+  
+  const handleDownloadClick = () => {
+    navigate({ to: "/products/$slug", params: { slug: p.slug } });
+  };
+  
   return (
     <Link
       to="/products/$slug"
@@ -89,10 +95,8 @@ export function ProductCard({ p }: { p: Product }) {
             </div>
           ) : (p as any).downloads && (p as any).downloads.length > 0 ? (
             <div className="mt-3" onClick={(e) => e.stopPropagation()}>
-              <Button asChild size="sm" className={`w-full bg-gradient-to-r ${KIND_BUTTON_GRADIENT[p.kind] ?? 'bg-primary'} text-white hover:opacity-90`}>
-                <Link to="/products/$slug" params={{ slug: p.slug }}>
-                  <Download className="mr-2 h-3 w-3" /> Download
-                </Link>
+              <Button size="sm" className={`w-full bg-gradient-to-r ${KIND_BUTTON_GRADIENT[p.kind] ?? 'bg-primary'} text-white hover:opacity-90`} onClick={handleDownloadClick}>
+                <Download className="mr-2 h-3 w-3" /> Download
               </Button>
             </div>
           ) : null}
