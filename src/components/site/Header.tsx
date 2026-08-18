@@ -102,7 +102,7 @@ export function Header() {
 
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="lg:hidden dark:border-primary/40 border-border dark:bg-primary/10 bg-background text-foreground dark:hover:bg-primary/20 hover:bg-muted"><Menu className="h-5 w-5" /></Button>
+              <Button variant="outline" size="icon" className="lg:hidden border-primary/40 bg-primary/10 text-foreground hover:bg-primary/20"><Menu className="h-5 w-5" /></Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-72 dark:bg-background/95 bg-white text-foreground border-border dark:border-white/10">
               <nav className="mt-8 flex flex-col gap-1">
