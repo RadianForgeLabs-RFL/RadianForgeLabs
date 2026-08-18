@@ -104,11 +104,11 @@ export function Header() {
             <SheetTrigger asChild>
               <Button variant="outline" size="icon" className="lg:hidden dark:border-primary/40 border-border dark:bg-primary/10 bg-background text-foreground dark:hover:bg-primary/20 hover:bg-muted"><Menu className="h-5 w-5" /></Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-72 dark:bg-background/95 bg-background text-foreground border-border dark:border-white/10">
+            <SheetContent side="right" className="w-72 dark:bg-background/95 bg-white text-foreground border-border dark:border-white/10">
               <nav className="mt-8 flex flex-col gap-1">
                 {NAV.map((n) => (
                   <Link key={n.to} to={n.to} onClick={() => setOpen(false)}
-                    className={`rounded-md px-3 py-2 text-sm text-foreground/80 dark:hover:bg-white/10 hover:bg-muted hover:text-${n.color}-500`}>
+                    className={`rounded-md px-3 py-2 text-sm text-foreground/80 dark:hover:bg-white/10 hover:bg-gray-100 hover:text-${n.color}-500`}>
                     {n.label}
                   </Link>
                 ))}
