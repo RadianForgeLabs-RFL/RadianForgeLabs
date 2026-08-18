@@ -85,9 +85,9 @@ export function ProductCard({ p }: { p: Product }) {
           ) : (p as any).downloads && (p as any).downloads.length > 0 ? (
             <div className="mt-3" onClick={(e) => e.stopPropagation()}>
               <Button asChild size="sm" className={`w-full bg-gradient-to-r ${KIND_GRADIENT[p.kind]?.replace('/30', '/90').replace('/20', '/80') ?? 'bg-primary'} text-white hover:opacity-90`}>
-                <a href={(p as any).downloads[0].url} target="_blank" rel="noreferrer">
+                <Link to="/products/$slug" params={{ slug: p.slug }}>
                   <Download className="mr-2 h-3 w-3" /> Download
-                </a>
+                </Link>
               </Button>
             </div>
           ) : null}
