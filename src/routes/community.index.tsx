@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { BackButton } from "@/components/ui/back-button";
 import { MessageSquare, ExternalLink, Loader2, AlertCircle, Users, Clock, CheckCircle, X, Plus, Github, Eye, Smile, RefreshCw, ThumbsUp, Lock, Unlock, Pin, Trash2, Edit2, Archive, ArchiveRestore } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/useAuth";
@@ -1520,6 +1521,7 @@ function CommunityPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
+      <BackButton to="/" label="Back to Home" />
       <div className="mb-8">
         <h1 className="text-4xl font-bold gradient-text mb-2">Community</h1>
         <p className="text-muted-foreground">Join discussions, share ideas, and connect with the community.</p>

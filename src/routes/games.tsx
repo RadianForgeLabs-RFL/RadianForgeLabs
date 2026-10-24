@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { lazy, Suspense, useState } from "react";
-import { allProductsQuery } from "@/lib/data";
+import { productListQuery } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { BackButton } from "@/components/ui/back-button";
 import { ArrowRight, Search } from "lucide-react";
 
 const ProductCard = lazy(() => import("@/components/site/ProductCard").then(m => ({ default: m.ProductCard })));
@@ -20,7 +21,7 @@ export const Route = createFileRoute("/games")({
 });
 
 function Games() {
-  const games = useQuery(allProductsQuery("game"));
+  const games = useQuery(productListQuery("game"));
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredGames = (games.data ?? []).filter((p) =>
@@ -33,6 +34,7 @@ function Games() {
       {/* HERO */}
       <section className="relative overflow-hidden border-b border-rose-500/10 bg-gradient-to-b from-rose-500/5 via-transparent to-transparent">
         <div className="mx-auto max-w-7xl px-4 py-20 md:py-32">
+          <BackButton to="/" label="Back to Home" />
           <div className="max-w-3xl">
             <h1 className="text-5xl font-bold leading-tight tracking-tight md:text-7xl">
               <span className="bg-gradient-to-r from-rose-500 to-rose-400 bg-clip-text text-transparent">All Games</span>

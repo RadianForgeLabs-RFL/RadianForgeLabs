@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Card } from "@/components/ui/card";
+import { BackButton } from "@/components/ui/back-button";
 
 export const Route = createFileRoute("/terms")({
   head: () => ({
@@ -14,6 +15,7 @@ export const Route = createFileRoute("/terms")({
 function Terms() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-16">
+      <BackButton to="/" label="Back to Home" />
       <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-rose-500 bg-clip-text text-transparent">Terms of Service</h1>
       <p className="mt-4 text-muted-foreground">Last updated: August 1, 2026</p>
       

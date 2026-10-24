@@ -1,10 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Card } from "@/components/ui/card";
+import { BackButton } from "@/components/ui/back-button";
 
 export const Route = createFileRoute("/about")({
   head: () => ({ meta: [{ title: "About — Radian Forge Labs" }, { name: "description", content: "About Radian Forge Labs and our divisions: RFL Studios and RFL Entertainment." }] }),
   component: () => (
     <div className="mx-auto max-w-4xl px-4 py-12">
+      <BackButton to="/" label="Back to Home" />
       <h1 className="text-4xl font-bold md:text-5xl bg-gradient-to-r from-blue-500 via-purple-500 to-rose-500 bg-clip-text text-transparent">About Radian Forge Labs</h1>
       <p className="mt-4 text-lg text-muted-foreground">
         <strong className="text-blue-500">Radian Forge Labs</strong> is a technology company building professional software through

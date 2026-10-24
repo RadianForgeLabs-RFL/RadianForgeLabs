@@ -4,6 +4,7 @@ import { lazy, Suspense } from "react";
 import { productListQuery, comingSoonQuery, homeCountsQuery } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { BackButton } from "@/components/ui/back-button";
 import { ArrowRight, Code, Smartphone, Download, Zap } from "lucide-react";
 
 const ProductCard = lazy(() => import("@/components/site/ProductCard").then(m => ({ default: m.ProductCard })));
@@ -39,6 +40,7 @@ function Studios() {
       {/* HERO */}
       <section className="relative overflow-hidden border-b border-blue-500/10 bg-gradient-to-b from-blue-500/5 via-transparent to-transparent">
         <div className="mx-auto max-w-7xl px-4 py-20 md:py-32">
+          <BackButton to="/" label="Back to Home" />
           <div className="grid gap-8 md:grid-cols-2 items-center">
             <div className="max-w-3xl">
               <h1 className="text-5xl font-bold leading-tight tracking-tight md:text-7xl">

@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { BackButton } from "@/components/ui/back-button";
 import { Mail, MessagesSquare, Heart, Coffee } from "lucide-react";
 import { SupportModal } from "@/components/site/SupportModal";
 
@@ -22,6 +23,7 @@ const CONTACTS = [
 function SupportPage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-14">
+      <BackButton to="/" label="Back to Home" />
       <div className="text-center">
         <h1 className="text-4xl font-bold md:text-5xl">
           Get in <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-rose-500 bg-clip-text text-transparent">touch</span>
