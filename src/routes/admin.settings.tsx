@@ -105,7 +105,7 @@ function AdminSettings() {
         <div className="mt-4 space-y-2">
           {(ann.data ?? []).map((a: any) => (
             <div key={a.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded border border-white/5 p-3 text-sm">
-              <span className="flex-1">{a.message}</span>
+              <span className="flex-1 break-all">{a.message}</span>
               <div className="flex items-center gap-3 justify-end">
                 <label className="flex items-center gap-2 text-xs">
                   <input type="checkbox" checked={a.active} onChange={(e) => toggleAnn.mutate({ id: a.id, active: e.target.checked })} />Active
@@ -148,23 +148,23 @@ function AdminSettings() {
             <Input value={downloadsCount} onChange={(e) => setDownloadsCount(e.target.value)} placeholder="50K+" />
           </div>
           <div>
-            <Label>RFL Studios Icon Image</Label>
+            <Label className="break-words">RFL Studios Icon Image</Label>
             <ImageUpload value={studiosIconUrl} onChange={setStudiosIconUrl} folder="icons" label="Studios Icon" useCase="icon" />
           </div>
           <div>
-            <Label>RFL Entertainment Icon Image</Label>
+            <Label className="break-words">RFL Entertainment Icon Image</Label>
             <ImageUpload value={entertainmentIconUrl} onChange={setEntertainmentIconUrl} folder="icons" label="Entertainment Icon" useCase="icon" />
           </div>
           <div>
-            <Label>Hero Banner (Right side of homepage)</Label>
+            <Label className="break-words">Hero Banner (Right side of homepage)</Label>
             <ImageUpload value={heroBannerUrl} onChange={setHeroBannerUrl} folder="banners" label="Hero Banner" aspect="aspect-video" useCase="banner" />
           </div>
           <div>
-            <Label>Studios Page Banner</Label>
+            <Label className="break-words">Studios Page Banner</Label>
             <ImageUpload value={studiosBannerUrl} onChange={setStudiosBannerUrl} folder="banners" label="Studios Banner" aspect="aspect-video" useCase="banner" />
           </div>
           <div>
-            <Label>Entertainment Page Banner</Label>
+            <Label className="break-words">Entertainment Page Banner</Label>
             <ImageUpload value={entertainmentBannerUrl} onChange={setEntertainmentBannerUrl} folder="banners" label="Entertainment Banner" aspect="aspect-video" useCase="banner" />
           </div>
           <Button onClick={() => updateStats.mutate()} className="bg-gradient-brand text-brand-foreground shadow-glow">Update Stats</Button>

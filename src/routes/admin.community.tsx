@@ -179,7 +179,7 @@ function CommunityAdmin() {
               href="https://github.com/orgs/RadianForgeLabs/discussions" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-sm text-purple-400 hover:text-purple-300"
+              className="text-sm text-purple-400 hover:text-purple-300 break-all"
             >
               https://github.com/orgs/RadianForgeLabs/discussions
             </a>
@@ -254,9 +254,9 @@ function CommunityAdmin() {
         <div className="space-y-4">
           <div>
             <p className="font-medium mb-2">Moderation Tools</p>
-            <p className="text-sm text-muted-foreground">
-              Community moderation is handled through GitHub Discussions. 
-              Use GitHub's built-in moderation tools to manage discussions, 
+            <p className="text-sm text-muted-foreground break-words">
+              Community moderation is handled through GitHub Discussions.
+              Use GitHub's built-in moderation tools to manage discussions,
               comments, and user interactions.
             </p>
           </div>

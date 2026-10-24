@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Trash2, Settings, Image as ImageIcon, Download, History } from "lucide-react";
 import { ImageUpload, MultiImageUpload } from "@/components/admin/MediaUpload";
 
 const PLAY_MODES = ["single_player", "multiplayer", "lan", "online", "offline", "cross_platform"];
@@ -50,18 +50,18 @@ function AdminProducts() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Products</h1>
+          <h1 className="text-2xl md:text-3xl font-bold">Products</h1>
           <p className="text-muted-foreground">Manage apps and games.</p>
         </div>
-        <ProductDialog trigger={<Button className="bg-gradient-brand text-brand-foreground shadow-glow"><Plus className="mr-2 h-4 w-4" />New product</Button>} />
+        <ProductDialog trigger={<Button className="bg-gradient-brand text-brand-foreground shadow-glow w-full sm:w-auto"><Plus className="mr-2 h-4 w-4" />New product</Button>} />
       </div>
 
       <div className="mt-6 space-y-3">
         {(data ?? []).map((p) => (
           <Card key={p.id} className="glass border-white/5 bg-transparent p-4">
-            <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
+            <div className="grid grid-cols-[auto_1fr] sm:grid-cols-[auto_minmax(0,1fr)_auto] items-start sm:items-center gap-3">
               <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-white/5">
                 {p.icon_url ? <img src={p.icon_url} alt="" className="h-full w-full object-cover" /> : null}
               </div>
@@ -69,15 +69,15 @@ function AdminProducts() {
                 <div className="truncate font-semibold">{p.name} <span className="text-xs uppercase text-muted-foreground">· {p.kind}</span></div>
                 <div className="text-xs text-muted-foreground">{p.slug} · v{p.latest_version} · {p.status}</div>
               </div>
-              <div className="flex gap-2">
-                <ProductDialog 
-                  product={p} 
+              <div className="flex gap-2 col-span-2 sm:col-span-1">
+                <ProductDialog
+                  product={p}
                   trigger={
-                    <Button size="sm" variant="outline" className="border-white/10">
+                    <Button size="sm" variant="outline" className="border-white/10 flex-1 sm:flex-none">
                       <Pencil className="h-4 w-4 mr-2" />
                       Edit
                     </Button>
-                  } 
+                  }
                 />
                 <Button size="sm" variant="outline" className="border-white/10 text-destructive" onClick={() => { if (confirm("Delete?")) del.mutate(p.id); }}>
                   <Trash2 className="h-4 w-4" />
@@ -93,6 +93,7 @@ function AdminProducts() {
 
 function ProductDialog({ product, trigger }: { product?: any; trigger: React.ReactNode }) {
   const [open, setOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("details");
   const [name, setName] = useState(product?.name ?? "");
   const [slug, setSlug] = useState(product?.slug ?? "");
   const [tagline, setTagline] = useState(product?.tagline ?? "");
@@ -131,6 +132,7 @@ function ProductDialog({ product, trigger }: { product?: any; trigger: React.Rea
 
   useEffect(() => {
     if (!open) return;
+    setActiveTab("details");
     setProductId(product?.id ?? null);
     setIconUrl(product?.icon_url ?? null);
     setBannerUrl(product?.banner_url ?? null);
@@ -198,19 +200,37 @@ function ProductDialog({ product, trigger }: { product?: any; trigger: React.Rea
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="glass-strong max-h-[90vh] max-w-3xl overflow-y-auto border-white/5 bg-background/95">
+      <DialogContent className="glass-strong max-h-[90vh] max-w-3xl w-[95vw] overflow-y-auto border-white/5 bg-background/95">
         <DialogHeader><DialogTitle>{product ? "Edit product" : "New product"}</DialogTitle></DialogHeader>
 
-        <Tabs defaultValue="details">
-          <TabsList className="grid w-full grid-cols-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} defaultValue="details">
+          <div className="sm:hidden mb-4">
+            <select
+              value={activeTab}
+              onChange={(e) => setActiveTab(e.target.value)}
+              className="w-full rounded-md border border-white/10 bg-transparent px-3 py-2 text-sm"
+            >
+              <option value="details">Details</option>
+              {productId ? (
+                <>
+                  <option value="media">Media</option>
+                  <option value="downloads">Downloads</option>
+                  <option value="versions">Versions</option>
+                </>
+              ) : (
+                <option disabled>Media (save first)</option>
+              )}
+            </select>
+          </div>
+          <TabsList className="hidden sm:grid w-full grid-cols-4">
             <TabsTrigger value="details">Details</TabsTrigger>
             <TabsTrigger value="media" disabled={!productId}>Media</TabsTrigger>
             <TabsTrigger value="downloads" disabled={!productId}>Downloads</TabsTrigger>
-            <TabsTrigger value="versions" disabled={!productId}>Old Versions</TabsTrigger>
+            <TabsTrigger value="versions" disabled={!productId}>Versions</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="details" className="mt-4">
-            <div className="grid gap-3 md:grid-cols-2">
+          <TabsContent value="details" className="mt-4 sm:mt-6">
+            <div className="grid gap-4 md:grid-cols-2">
               <F label="Name"><Input value={name} onChange={(e) => setName(e.target.value)} /></F>
               <F label="Slug"><Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder={slugify(name)} /></F>
               <F label="Kind">
@@ -252,9 +272,9 @@ function ProductDialog({ product, trigger }: { product?: any; trigger: React.Rea
               <F label="File Size"><Input value={fileSize} onChange={(e) => setFileSize(e.target.value)} placeholder="e.g. 120 MB" /></F>
               
               {/* URLs */}
-              <F label="Trailer URL" className="md:col-span-2"><Input value={trailerUrl} onChange={(e) => setTrailerUrl(e.target.value)} placeholder="YouTube or video URL" /></F>
-              <F label="Source URL"><Input value={sourceUrl} onChange={(e) => setSourceUrl(e.target.value)} placeholder="GitHub repository URL" /></F>
-              <F label="Documentation URL"><Input value={documentationUrl} onChange={(e) => setDocumentationUrl(e.target.value)} placeholder="Docs website URL" /></F>
+              <F label="Trailer URL" className="md:col-span-2"><Input value={trailerUrl} onChange={(e) => setTrailerUrl(e.target.value)} placeholder="YouTube or video URL" className="break-all" /></F>
+              <F label="Source URL"><Input value={sourceUrl} onChange={(e) => setSourceUrl(e.target.value)} placeholder="GitHub repository URL" className="break-all" /></F>
+              <F label="Documentation URL"><Input value={documentationUrl} onChange={(e) => setDocumentationUrl(e.target.value)} placeholder="Docs website URL" className="break-all" /></F>
               
               {/* Features & Requirements */}
               <F label="Features (comma-separated)" className="md:col-span-2">
@@ -372,42 +392,42 @@ function ProductDialog({ product, trigger }: { product?: any; trigger: React.Rea
               </F>
               
               <div className="md:col-span-2">
-                <Label className="mb-2 block">Release status</Label>
-                <div className="glass inline-flex items-center gap-1 rounded-full border border-white/10 p-1">
+                <Label className="mb-2 block break-words">Release status</Label>
+                <div className="glass inline-flex flex-wrap items-center gap-1 rounded-full border border-white/10 p-1">
                   <button
                     type="button"
                     onClick={() => { setComingSoon(false); setPublished(true); }}
-                    className={`rounded-full px-4 py-1.5 text-sm transition ${!coming_soon && published ? "bg-gradient-brand text-brand-foreground shadow-glow" : "text-muted-foreground hover:text-foreground"}`}
+                    className={`rounded-full px-3 py-1.5 text-sm transition ${!coming_soon && published ? "bg-gradient-brand text-brand-foreground shadow-glow" : "text-muted-foreground hover:text-foreground"}`}
                   >
                     Released
                   </button>
                   <button
                     type="button"
                     onClick={() => { setComingSoon(true); setPublished(true); }}
-                    className={`rounded-full px-4 py-1.5 text-sm transition ${coming_soon && published ? "bg-gradient-brand text-brand-foreground shadow-glow" : "text-muted-foreground hover:text-foreground"}`}
+                    className={`rounded-full px-3 py-1.5 text-sm transition ${coming_soon && published ? "bg-gradient-brand text-brand-foreground shadow-glow" : "text-muted-foreground hover:text-foreground"}`}
                   >
                     Coming Soon
                   </button>
                   <button
                     type="button"
                     onClick={() => { setPublished(false); }}
-                    className={`rounded-full px-4 py-1.5 text-sm transition ${!published ? "bg-white/15 text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                    className={`rounded-full px-3 py-1.5 text-sm transition ${!published ? "bg-white/15 text-foreground" : "text-muted-foreground hover:text-foreground"}`}
                   >
                     Draft
                   </button>
                 </div>
-                <p className="mt-2 text-xs text-muted-foreground">
+                <p className="mt-2 text-xs text-muted-foreground break-words">
                   Released shows in Apps/Games listings. Coming Soon shows only in the Coming Soon section with a pre-order button. Draft hides it from the public.
                 </p>
               </div>
             </div>
-            <Button onClick={() => save.mutate()} disabled={save.isPending} className="mt-4 bg-gradient-brand text-brand-foreground shadow-glow">
+            <Button onClick={() => save.mutate()} disabled={save.isPending} className="mt-4 bg-gradient-brand text-brand-foreground shadow-glow w-full sm:w-auto">
               {save.isPending ? "Saving…" : productId ? "Save changes" : "Create & continue"}
             </Button>
-            {!productId && <p className="mt-2 text-xs text-muted-foreground">Save first to unlock media, downloads, and version tabs.</p>}
+            {!productId && <p className="mt-2 text-xs text-muted-foreground text-center sm:text-left">Save first to unlock media, downloads, and version tabs.</p>}
           </TabsContent>
 
-          <TabsContent value="media" className="mt-4 space-y-6">
+          <TabsContent value="media" className="mt-4 sm:mt-6 space-y-6">
             <div>
               <Label className="mb-2 block">Icon</Label>
               <ImageUpload value={icon_url} label="Icon" folder="icons" useCase="icon" onChange={async (url) => {
@@ -465,11 +485,11 @@ function ProductDialog({ product, trigger }: { product?: any; trigger: React.Rea
             <ScreenshotsEditor productId={productId!} />
           </TabsContent>
 
-          <TabsContent value="downloads" className="mt-4">
+          <TabsContent value="downloads" className="mt-4 sm:mt-6">
             <DownloadsEditor productId={productId!} defaultVersion={latest_version} />
           </TabsContent>
 
-          <TabsContent value="versions" className="mt-4">
+          <TabsContent value="versions" className="mt-4 sm:mt-6">
             <VersionsEditor productId={productId!} />
           </TabsContent>
         </Tabs>
@@ -479,7 +499,7 @@ function ProductDialog({ product, trigger }: { product?: any; trigger: React.Rea
 }
 
 function F({ label, children, className = "" }: { label: string; children: React.ReactNode; className?: string }) {
-  return <div className={className}><Label className="mb-1 block">{label}</Label>{children}</div>;
+  return <div className={className}><Label className="mb-1 block break-words">{label}</Label>{children}</div>;
 }
 
 // ---------- Screenshots ----------
@@ -646,7 +666,7 @@ function DownloadsEditor({ productId, defaultVersion }: { productId: string; def
           <F label="Mirror name (optional)"><Input value={mirror} onChange={(e) => setMirror(e.target.value)} placeholder="e.g. GitHub, CDN" /></F>
           <F label="Size in bytes (optional)"><Input type="number" value={sizeBytes} onChange={(e) => setSizeBytes(e.target.value)} placeholder="e.g. 1048576" /></F>
           <F label="Download URL" className="sm:col-span-2">
-            <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://..." />
+            <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://..." className="break-all" />
           </F>
           <F label="" className="sm:col-span-2">
             <label className="flex items-center gap-2 text-sm">
@@ -662,9 +682,9 @@ function DownloadsEditor({ productId, defaultVersion }: { productId: string; def
 
       <div className="space-y-2">
         {(data ?? []).map((d: any) => (
-          <div key={d.id} className="glass flex items-start justify-between gap-3 rounded-md border border-white/5 p-3 text-sm">
+          <div key={d.id} className="glass flex flex-col sm:flex-row sm:items-start justify-between gap-3 rounded-md border border-white/5 p-3 text-sm">
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <span className="font-medium">{d.platform}</span>
                 <span className="text-muted-foreground">·</span>
                 <span>{d.format}</span>
@@ -672,7 +692,7 @@ function DownloadsEditor({ productId, defaultVersion }: { productId: string; def
                 {d.version && <><span className="text-muted-foreground">·</span><span className="text-xs">v{d.version}</span></>}
                 {d.is_primary && <span className="rounded bg-gradient-brand px-1.5 py-0.5 text-[10px] text-brand-foreground">PRIMARY</span>}
               </div>
-              <div className="mt-1 truncate text-xs text-muted-foreground">{d.url}</div>
+              <div className="mt-1 break-all text-xs text-muted-foreground">{d.url}</div>
               <div className="mt-1 flex flex-wrap gap-2 text-[10px] text-muted-foreground">
                 {d.mirror_name && <span>{d.mirror_name}</span>}
                 {d.size_bytes && <span>{(d.size_bytes / 1024 / 1024).toFixed(2)} MB</span>}
@@ -829,9 +849,9 @@ function VersionsEditor({ productId }: { productId: string }) {
 
       <div className="space-y-2">
         {(data ?? []).map((v: any) => (
-          <div key={v.id} className="glass flex items-start justify-between gap-3 rounded-md border border-white/5 p-3 text-sm">
+          <div key={v.id} className="glass flex flex-col sm:flex-row sm:items-start justify-between gap-3 rounded-md border border-white/5 p-3 text-sm">
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <span className="font-semibold">v{v.version}</span>
                 {v.is_latest && <span className="rounded bg-gradient-brand px-1.5 py-0.5 text-[10px] text-brand-foreground">LATEST</span>}
               </div>
