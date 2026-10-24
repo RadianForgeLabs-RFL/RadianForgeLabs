@@ -94,19 +94,19 @@ function AdminSettings() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold">Settings</h1>
+      <h1 className="text-2xl md:text-3xl font-bold">Settings</h1>
 
-      <Card className="glass mt-6 border-white/5 bg-transparent p-5">
+      <Card className="glass mt-4 md:mt-6 border-0 border-white/5 sm:border bg-transparent p-3 md:p-5">
         <h2 className="text-lg font-semibold">Site announcement</h2>
-        <div className="mt-3 flex gap-2">
+        <div className="mt-3 flex flex-col sm:flex-row gap-2">
           <Input value={message} onChange={(e) => setMessage(e.target.value)} placeholder="New announcement…" />
-          <Button onClick={() => addAnn.mutate()} className="bg-gradient-brand text-brand-foreground shadow-glow">Add</Button>
+          <Button onClick={() => addAnn.mutate()} className="bg-gradient-brand text-brand-foreground shadow-glow w-full sm:w-auto">Add</Button>
         </div>
         <div className="mt-4 space-y-2">
           {(ann.data ?? []).map((a: any) => (
-            <div key={a.id} className="flex items-center justify-between rounded border border-white/5 p-3 text-sm">
-              <span>{a.message}</span>
-              <div className="flex items-center gap-3">
+            <div key={a.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded border border-white/5 p-3 text-sm">
+              <span className="flex-1">{a.message}</span>
+              <div className="flex items-center gap-3 justify-end">
                 <label className="flex items-center gap-2 text-xs">
                   <input type="checkbox" checked={a.active} onChange={(e) => toggleAnn.mutate({ id: a.id, active: e.target.checked })} />Active
                 </label>
@@ -124,7 +124,7 @@ function AdminSettings() {
         </div>
       </Card>
 
-      <Card className="glass mt-6 border-white/5 bg-transparent p-5">
+      <Card className="glass mt-4 md:mt-6 border-0 border-white/5 sm:border bg-transparent p-3 md:p-5">
         <h2 className="text-lg font-semibold">Maintenance mode</h2>
         <label className="mt-3 flex items-center gap-2 text-sm">
           <input type="checkbox" checked={maintenance} onChange={(e) => { setMaintenance(e.target.checked); toggleMaintenance.mutate(e.target.checked); }} />
@@ -132,7 +132,7 @@ function AdminSettings() {
         </label>
       </Card>
 
-      <Card className="glass mt-6 border-white/5 bg-transparent p-5">
+      <Card className="glass mt-4 md:mt-6 border-0 border-white/5 sm:border bg-transparent p-3 md:p-5">
         <h2 className="text-lg font-semibold">Company Statistics</h2>
         <div className="mt-4 space-y-4">
           <div>

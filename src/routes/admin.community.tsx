@@ -156,14 +156,14 @@ function CommunityAdmin() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold gradient-text mb-2">Community Settings</h1>
-        <p className="text-muted-foreground">Configure your GitHub Discussions integration.</p>
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold gradient-text mb-2">Community Settings</h1>
+        <p className="text-sm md:text-base text-muted-foreground">Configure your GitHub Discussions integration.</p>
       </div>
 
-      <Card className="border border-white/5 bg-white/5 p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-          <MessageSquare className="h-5 w-5" />
+      <Card className="border-0 border-white/5 sm:border bg-white/5 p-3 md:p-6 mb-4 md:mb-6">
+        <h2 className="text-lg md:text-xl font-semibold mb-4 flex items-center gap-2">
+          <MessageSquare className="h-4 w-4 md:h-5 md:w-5" />
           GitHub Discussions Configuration
         </h2>
 
@@ -196,9 +196,9 @@ function CommunityAdmin() {
         </div>
       </Card>
 
-      <Card className="border border-white/5 bg-white/5 p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-          <Shield className="h-5 w-5" />
+      <Card className="border-0 border-white/5 sm:border bg-white/5 p-3 md:p-6 mb-4 md:mb-6">
+        <h2 className="text-lg md:text-xl font-semibold mb-4 flex items-center gap-2">
+          <Shield className="h-4 w-4 md:h-5 md:w-5" />
           Community Control
         </h2>
 
@@ -238,16 +238,16 @@ function CommunityAdmin() {
             <p className="text-xs text-muted-foreground mt-1">Automatically refresh discussions from GitHub</p>
           </div>
 
-          <Button onClick={() => updateCommunitySettings.mutate()} className="bg-gradient-brand text-brand-foreground shadow-glow">
+          <Button onClick={() => updateCommunitySettings.mutate()} className="bg-gradient-brand text-brand-foreground shadow-glow w-full sm:w-auto">
             <RefreshCw className="mr-2 h-4 w-4" />
             Update Settings
           </Button>
         </div>
       </Card>
 
-      <Card className="border border-white/5 bg-white/5 p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-          <Bell className="h-5 w-5" />
+      <Card className="border-0 border-white/5 sm:border bg-white/5 p-3 md:p-6 mb-4 md:mb-6">
+        <h2 className="text-lg md:text-xl font-semibold mb-4 flex items-center gap-2">
+          <Bell className="h-4 w-4 md:h-5 md:w-5" />
           Moderation Settings
         </h2>
 
@@ -272,7 +272,7 @@ function CommunityAdmin() {
         </div>
       </Card>
 
-      <Card className="border border-white/5 bg-white/5 p-6">
+      <Card className="border-0 border-white/5 sm:border bg-white/5 p-3 md:p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold">Categories</h3>
           <Button 
