@@ -110,21 +110,21 @@ export function ImageUpload({
     }
   };
   return (
-    <div className="flex items-start gap-3">
-      <div className={`${aspect} w-24 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-white/5`}>
+    <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+      <div className={`${aspect} w-20 sm:w-24 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-white/5`}>
         {value ? (
           <img src={value} alt={label} className="h-full w-full object-cover" />
         ) : (
           <div className="grid h-full w-full place-items-center text-[10px] text-muted-foreground">No {label}</div>
         )}
       </div>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 w-full sm:w-auto">
         <input ref={ref} type="file" accept="image/*" onChange={handle} className="hidden" />
-        <Button type="button" size="sm" variant="outline" className="border-white/10" disabled={busy} onClick={() => ref.current?.click()}>
+        <Button type="button" size="sm" variant="outline" className="border-white/10 w-full sm:w-auto" disabled={busy} onClick={() => ref.current?.click()}>
           <Upload className="mr-2 h-4 w-4" />{busy ? "Uploading…" : `Upload ${label}`}
         </Button>
         {value && (
-          <Button type="button" size="sm" variant="ghost" className="text-destructive" onClick={() => onChange(null)}>
+          <Button type="button" size="sm" variant="ghost" className="text-destructive w-full sm:w-auto" onClick={() => onChange(null)}>
             <X className="mr-2 h-4 w-4" />Remove
           </Button>
         )}

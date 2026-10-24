@@ -167,7 +167,7 @@ function AdminSettings() {
             <Label className="break-words">Entertainment Page Banner</Label>
             <ImageUpload value={entertainmentBannerUrl} onChange={setEntertainmentBannerUrl} folder="banners" label="Entertainment Banner" aspect="aspect-video" useCase="banner" />
           </div>
-          <Button onClick={() => updateStats.mutate()} className="bg-gradient-brand text-brand-foreground shadow-glow">Update Stats</Button>
+          <Button onClick={() => updateStats.mutate()} className="bg-gradient-brand text-brand-foreground shadow-glow w-full sm:w-auto">Update Stats</Button>
         </div>
       </Card>
     </div>
