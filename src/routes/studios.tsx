@@ -54,7 +54,7 @@ function Studios() {
                   <Link to="/apps">Browse Apps</Link>
                 </Button>
                 <Button asChild size="lg" variant="outline" className="border-blue-500/30 text-blue-400 hover:bg-blue-500/10">
-                  <Link to="/apps">Coming Soon</Link>
+                  <Link to="/apps" search={{ filter: "coming-soon" }}>Coming Soon</Link>
                 </Button>
               </div>
             </div>

@@ -54,7 +54,7 @@ function Entertainment() {
                   <Link to="/games">Browse Games</Link>
                 </Button>
                 <Button asChild size="lg" variant="outline" className="border-rose-500/30 text-rose-400 hover:bg-rose-500/10">
-                  <Link to="/games">Coming Soon</Link>
+                  <Link to="/games" search={{ filter: "coming-soon" }}>Coming Soon</Link>
                 </Button>
               </div>
             </div>

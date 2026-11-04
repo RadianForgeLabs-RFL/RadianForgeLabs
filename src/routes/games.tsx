@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { lazy, Suspense, useState } from "react";
-import { productListQuery } from "@/lib/data";
+import { productListQuery, comingSoonQuery } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -18,10 +18,14 @@ export const Route = createFileRoute("/games")({
     ],
   }),
   component: Games,
+  validateSearch: (search: Record<string, unknown>) => ({
+    filter: typeof search.filter === "string" ? search.filter : "released",
+  }),
 });
 
 function Games() {
-  const games = useQuery(productListQuery("game"));
+  const { filter } = Route.useSearch();
+  const games = useQuery(filter === "coming-soon" ? comingSoonQuery("game") : productListQuery("game"));
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredGames = (games.data ?? []).filter((p) =>
@@ -37,11 +41,39 @@ function Games() {
           <BackButton to="/" label="Back to Home" />
           <div className="max-w-3xl">
             <h1 className="text-5xl font-bold leading-tight tracking-tight md:text-7xl">
-              <span className="bg-gradient-to-r from-rose-500 to-rose-400 bg-clip-text text-transparent">All Games</span>
+              <span className="bg-gradient-to-r from-rose-500 to-rose-400 bg-clip-text text-transparent">
+                {filter === "coming-soon" ? "Coming Soon" : "All Games"}
+              </span>
             </h1>
             <p className="mt-6 max-w-2xl text-xl text-muted-foreground md:text-2xl">
-              Browse all games from RFL Entertainment, including released and coming soon projects.
+              {filter === "coming-soon"
+                ? "Games in development."
+                : "Browse all games from RFL Entertainment, including released projects."}
             </p>
+            <div className="mt-6 flex flex-wrap gap-2">
+              <Link
+                to="/games"
+                search={{ filter: "released" }}
+                className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+                  filter === "released"
+                    ? "bg-gradient-to-r from-rose-500 to-rose-400 text-white"
+                    : "border border-rose-500/30 text-rose-400 hover:bg-rose-500/10"
+                }`}
+              >
+                Released
+              </Link>
+              <Link
+                to="/games"
+                search={{ filter: "coming-soon" }}
+                className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+                  filter === "coming-soon"
+                    ? "bg-gradient-to-r from-rose-500 to-rose-400 text-white"
+                    : "border border-rose-500/30 text-rose-400 hover:bg-rose-500/10"
+                }`}
+              >
+                Coming Soon
+              </Link>
+            </div>
           </div>
         </div>
       </section>

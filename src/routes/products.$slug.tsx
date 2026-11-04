@@ -14,6 +14,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 import { Badge } from "@/components/ui/badge";
 
+import { BackButton } from "@/components/ui/back-button";
+
 import { Download, ExternalLink, Github, FileCode, Share2, Calendar, User, Building, Shield, Tag, HardDrive, Cpu, Heart } from "lucide-react";
 
 import { toast } from "sonner";
@@ -378,6 +380,7 @@ function ProductPage() {
         )}
 
         <div className="relative mx-auto max-w-7xl px-4 pb-16 pt-24 md:pt-32">
+          <BackButton to={p.kind === 'game' ? '/games' : '/apps'} label={`Back to ${p.kind === 'game' ? 'Games' : 'Apps'}`} />
 
           <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-start">
 
