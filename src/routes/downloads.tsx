@@ -6,7 +6,22 @@ import { Badge } from "@/components/ui/badge";
 import { Download } from "lucide-react";
 
 export const Route = createFileRoute("/downloads")({
-  head: () => ({ meta: [{ title: "Downloads — RFL Studios" }, { name: "description", content: "Download apps and games for Windows, Linux, Mac, and Android." }] }),
+  head: () => ({
+    meta: [
+      { title: "Downloads — Official Software & Game Releases | RFL Studios" },
+      { name: "description", content: "Direct downloads for official apps and games developed by Radian Forge Labs. Verified installers and APKs for Windows, Linux, Mac, and Android." },
+      { property: "og:title", content: "Downloads — Official Software & Game Releases | RFL Studios" },
+      { property: "og:description", content: "Direct downloads for official apps and games developed by Radian Forge Labs for Windows, Linux, Mac, and Android." },
+      { property: "og:url", content: "https://rfl-studios.com/downloads" },
+      { property: "og:image", content: "https://rfl-studios.com/og-image.png" },
+      { name: "twitter:title", content: "Downloads — Official Releases | RFL Studios" },
+      { name: "twitter:description", content: "Direct downloads for official apps and games developed by Radian Forge Labs for Windows, Linux, Mac, and Android." },
+      { name: "twitter:image", content: "https://rfl-studios.com/og-image.png" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://rfl-studios.com/downloads" },
+    ],
+  }),
   component: Downloads,
 });
 

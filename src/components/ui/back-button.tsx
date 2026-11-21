@@ -3,7 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "./button";
 
 interface BackButtonProps {
-  to?: string;
+  to?: string | number | any;
   label?: string;
 }
 

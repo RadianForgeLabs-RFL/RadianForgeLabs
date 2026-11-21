@@ -52,7 +52,7 @@ export function ProductCard({ p }: { p: Product }) {
           {p.banner_url && (
             <img
               src={`${p.banner_url}?width=600&quality=80&format=webp`}
-              alt=""
+              alt={`${p.name} banner`}
               loading="lazy"
               className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 md:group-hover:scale-105"
               style={{ opacity: bannerOpacity }}

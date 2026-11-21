@@ -3,7 +3,22 @@ import { Card } from "@/components/ui/card";
 import { BackButton } from "@/components/ui/back-button";
 
 export const Route = createFileRoute("/about")({
-  head: () => ({ meta: [{ title: "About — Radian Forge Labs" }, { name: "description", content: "About Radian Forge Labs and our divisions: RFL Studios and RFL Entertainment." }] }),
+  head: () => ({
+    meta: [
+      { title: "About Radian Forge Labs — RFL Studios & RFL Entertainment" },
+      { name: "description", content: "Learn about Radian Forge Labs, our mission, and our divisions: RFL Studios building software solutions and RFL Entertainment creating immersive games." },
+      { property: "og:title", content: "About Radian Forge Labs" },
+      { property: "og:description", content: "Learn about Radian Forge Labs, our mission, and our divisions: RFL Studios and RFL Entertainment." },
+      { property: "og:url", content: "https://rfl-studios.com/about" },
+      { property: "og:image", content: "https://rfl-studios.com/og-image.png" },
+      { name: "twitter:title", content: "About Radian Forge Labs" },
+      { name: "twitter:description", content: "Learn about Radian Forge Labs, our mission, and our divisions: RFL Studios and RFL Entertainment." },
+      { name: "twitter:image", content: "https://rfl-studios.com/og-image.png" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://rfl-studios.com/about" },
+    ],
+  }),
   component: () => (
     <div className="mx-auto max-w-4xl px-4 py-12">
       <BackButton to="/" label="Back to Home" />

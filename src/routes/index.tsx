@@ -12,8 +12,18 @@ const ProductCard = lazy(() => import("@/components/site/ProductCard").then(m =>
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Radian Forge Labs — Professional Software & Gaming" },
-      { name: "description", content: "Radian Forge Labs is a technology company building professional software through RFL Studios and immersive games through RFL Entertainment." },
+      { title: "Radian Forge Labs — Official Portal for RFL Studios & RFL Entertainment" },
+      { name: "description", content: "Explore cutting-edge Windows applications, Android tools, and indie games by Radian Forge Labs. Official downloads, updates, and community." },
+      { property: "og:title", content: "Radian Forge Labs — Official Portal for RFL Studios & RFL Entertainment" },
+      { property: "og:description", content: "Explore cutting-edge Windows applications, Android tools, and indie games by Radian Forge Labs. Official downloads, updates, and community." },
+      { property: "og:url", content: "https://rfl-studios.com/" },
+      { property: "og:image", content: "https://rfl-studios.com/og-image.png" },
+      { name: "twitter:title", content: "Radian Forge Labs — Official Portal for RFL Studios & RFL Entertainment" },
+      { name: "twitter:description", content: "Explore cutting-edge Windows applications, Android tools, and indie games by Radian Forge Labs." },
+      { name: "twitter:image", content: "https://rfl-studios.com/og-image.png" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://rfl-studios.com/" },
     ],
   }),
   component: Home,

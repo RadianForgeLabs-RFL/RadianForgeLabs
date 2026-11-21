@@ -8,8 +8,18 @@ import { SupportModal } from "@/components/site/SupportModal";
 export const Route = createFileRoute("/support")({
   head: () => ({
     meta: [
-      { title: "Support & Contact — Radian Forge Labs" },
-      { name: "description", content: "Contact Radian Forge Labs, get support, or support us with a coffee." },
+      { title: "Support & Contact — Radian Forge Labs | Help & Feedback" },
+      { name: "description", content: "Get official support for RFL Studios apps and RFL Entertainment games. Contact our development team, report issues, or provide feedback." },
+      { property: "og:title", content: "Support & Contact — Radian Forge Labs" },
+      { property: "og:description", content: "Get official support for RFL Studios apps and RFL Entertainment games. Contact our development team, report issues, or provide feedback." },
+      { property: "og:url", content: "https://rfl-studios.com/support" },
+      { property: "og:image", content: "https://rfl-studios.com/og-image.png" },
+      { name: "twitter:title", content: "Support & Contact — Radian Forge Labs" },
+      { name: "twitter:description", content: "Get official support for RFL Studios apps and RFL Entertainment games." },
+      { name: "twitter:image", content: "https://rfl-studios.com/og-image.png" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://rfl-studios.com/support" },
     ],
   }),
   component: SupportPage,

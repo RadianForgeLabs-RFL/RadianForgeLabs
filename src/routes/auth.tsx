@@ -12,7 +12,13 @@ const ADMIN_EMAILS = ['krishnaramalesh8838@gmail.com', 'radianforgelabs@gmail.co
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (s: Record<string, unknown>) => ({ redirect: typeof s.redirect === "string" ? s.redirect : undefined }),
-  head: () => ({ meta: [{ title: "Sign in — RFL Studios" }, { name: "description", content: "Sign in or create your RFL Studios account." }] }),
+  head: () => ({
+    meta: [
+      { title: "Sign in — RFL Studios" },
+      { name: "description", content: "Sign in or create your RFL Studios account." },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
   component: AuthPage,
 });
 

@@ -13,18 +13,28 @@ const ProductCard = lazy(() => import("@/components/site/ProductCard").then(m =>
 export const Route = createFileRoute("/games")({
   head: () => ({
     meta: [
-      { title: "All Games — RFL Entertainment" },
-      { name: "description", content: "Browse all games from RFL Entertainment, including released and coming soon games." },
+      { title: "All Games — PC & Android Video Games | RFL Entertainment" },
+      { name: "description", content: "Explore the game catalogue from RFL Entertainment. Action shooters, retro racers, and multiplayer games for PC, Linux, and Android." },
+      { property: "og:title", content: "All Games — PC & Android Video Games | RFL Entertainment" },
+      { property: "og:description", content: "Explore the game catalogue from RFL Entertainment. Action shooters, retro racers, and multiplayer games for PC, Linux, and Android." },
+      { property: "og:url", content: "https://rfl-studios.com/games" },
+      { property: "og:image", content: "https://rfl-studios.com/og-image.png" },
+      { name: "twitter:title", content: "All Games — RFL Entertainment" },
+      { name: "twitter:description", content: "Explore the game catalogue from RFL Entertainment. Action shooters, retro racers, and multiplayer games for PC, Linux, and Android." },
+      { name: "twitter:image", content: "https://rfl-studios.com/og-image.png" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://rfl-studios.com/games" },
     ],
   }),
   component: Games,
-  validateSearch: (search: Record<string, unknown>) => ({
-    filter: typeof search.filter === "string" ? search.filter : "released",
+  validateSearch: (search: Record<string, unknown>): { filter?: string } => ({
+    filter: typeof search.filter === "string" ? search.filter : undefined,
   }),
 });
 
 function Games() {
-  const { filter } = Route.useSearch();
+  const { filter = "released" } = Route.useSearch();
   const games = useQuery(filter === "coming-soon" ? comingSoonQuery("game") : productListQuery("game"));
   const [searchQuery, setSearchQuery] = useState("");
 

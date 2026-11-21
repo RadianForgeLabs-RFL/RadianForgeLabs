@@ -12,8 +12,18 @@ const ProductCard = lazy(() => import("@/components/site/ProductCard").then(m =>
 export const Route = createFileRoute("/studios")({
   head: () => ({
     meta: [
-      { title: "RFL Studios — Apps, Tools & Software by Radian Forge Labs" },
-      { name: "description", content: "Professional Windows and Android applications, utilities, and developer tools by RFL Studios." },
+      { title: "RFL Studios — Professional Windows & Android Software | Radian Forge Labs" },
+      { name: "description", content: "Discover professional applications, developer utilities, and high-performance tools built for Windows and Android by RFL Studios." },
+      { property: "og:title", content: "RFL Studios — Professional Windows & Android Software" },
+      { property: "og:description", content: "Discover professional applications, developer utilities, and high-performance tools built for Windows and Android by RFL Studios." },
+      { property: "og:url", content: "https://rfl-studios.com/studios" },
+      { property: "og:image", content: "https://rfl-studios.com/og-image.png" },
+      { name: "twitter:title", content: "RFL Studios — Professional Windows & Android Software" },
+      { name: "twitter:description", content: "Discover professional applications, developer utilities, and high-performance tools built for Windows and Android by RFL Studios." },
+      { name: "twitter:image", content: "https://rfl-studios.com/og-image.png" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://rfl-studios.com/studios" },
     ],
   }),
   component: Studios,

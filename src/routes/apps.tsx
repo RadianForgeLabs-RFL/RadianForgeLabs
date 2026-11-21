@@ -13,18 +13,28 @@ const ProductCard = lazy(() => import("@/components/site/ProductCard").then(m =>
 export const Route = createFileRoute("/apps")({
   head: () => ({
     meta: [
-      { title: "All Apps — RFL Studios" },
-      { name: "description", content: "Browse all applications from RFL Studios, including released and coming soon apps." },
+      { title: "All Apps & Software — Windows & Android Applications | RFL Studios" },
+      { name: "description", content: "Browse and download official applications developed by RFL Studios for Windows, Linux, and Android. Discover utilities, tools, and open source software." },
+      { property: "og:title", content: "All Apps & Software — RFL Studios" },
+      { property: "og:description", content: "Browse and download official applications developed by RFL Studios for Windows, Linux, and Android." },
+      { property: "og:url", content: "https://rfl-studios.com/apps" },
+      { property: "og:image", content: "https://rfl-studios.com/og-image.png" },
+      { name: "twitter:title", content: "All Apps & Software — RFL Studios" },
+      { name: "twitter:description", content: "Browse and download official applications developed by RFL Studios for Windows, Linux, and Android." },
+      { name: "twitter:image", content: "https://rfl-studios.com/og-image.png" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://rfl-studios.com/apps" },
     ],
   }),
   component: Apps,
-  validateSearch: (search: Record<string, unknown>) => ({
-    filter: typeof search.filter === "string" ? search.filter : "released",
+  validateSearch: (search: Record<string, unknown>): { filter?: string } => ({
+    filter: typeof search.filter === "string" ? search.filter : undefined,
   }),
 });
 
 function Apps() {
-  const { filter } = Route.useSearch();
+  const { filter = "released" } = Route.useSearch();
   const apps = useQuery(filter === "coming-soon" ? comingSoonQuery("app") : productListQuery("app"));
   const [searchQuery, setSearchQuery] = useState("");
 

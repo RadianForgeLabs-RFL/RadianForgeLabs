@@ -8,7 +8,7 @@ import { Heart, Github, CheckCircle, LogOut, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/account")({
-  head: () => ({ meta: [{ title: "Account — RFL Studios" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Account — RFL Studios" }, { name: "robots", content: "noindex, nofollow" }] }),
   component: Account,
 });
 

@@ -6,7 +6,17 @@ export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
       { title: "Privacy Policy — Radian Forge Labs" },
-      { name: "description", content: "Privacy policy for Radian Forge Labs, RFL Studios, and RFL Entertainment." },
+      { name: "description", content: "Privacy policy for Radian Forge Labs, RFL Studios, and RFL Entertainment. Learn how we handle and protect your data." },
+      { property: "og:title", content: "Privacy Policy — Radian Forge Labs" },
+      { property: "og:description", content: "Privacy policy for Radian Forge Labs, RFL Studios, and RFL Entertainment." },
+      { property: "og:url", content: "https://rfl-studios.com/privacy" },
+      { property: "og:image", content: "https://rfl-studios.com/og-image.png" },
+      { name: "twitter:title", content: "Privacy Policy — Radian Forge Labs" },
+      { name: "twitter:description", content: "Privacy policy for Radian Forge Labs, RFL Studios, and RFL Entertainment." },
+      { name: "twitter:image", content: "https://rfl-studios.com/og-image.png" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://rfl-studios.com/privacy" },
     ],
   }),
   component: Privacy,

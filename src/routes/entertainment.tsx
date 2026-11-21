@@ -12,8 +12,18 @@ const ProductCard = lazy(() => import("@/components/site/ProductCard").then(m =>
 export const Route = createFileRoute("/entertainment")({
   head: () => ({
     meta: [
-      { title: "RFL Entertainment — Games by Radian Forge Labs" },
-      { name: "description", content: "PC and Android games by RFL Entertainment. Experience immersive gaming with our latest releases." },
+      { title: "RFL Entertainment — PC & Android Games | Radian Forge Labs" },
+      { name: "description", content: "Experience immersive indie games with RFL Entertainment. Fast-paced tactical shooters, retro racers, and multiplayer action for PC and Android." },
+      { property: "og:title", content: "RFL Entertainment — PC & Android Games" },
+      { property: "og:description", content: "Experience immersive indie games with RFL Entertainment. Fast-paced tactical shooters, retro racers, and multiplayer action for PC and Android." },
+      { property: "og:url", content: "https://rfl-studios.com/entertainment" },
+      { property: "og:image", content: "https://rfl-studios.com/og-image.png" },
+      { name: "twitter:title", content: "RFL Entertainment — PC & Android Games" },
+      { name: "twitter:description", content: "Experience immersive indie games with RFL Entertainment for PC and Android." },
+      { name: "twitter:image", content: "https://rfl-studios.com/og-image.png" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://rfl-studios.com/entertainment" },
     ],
   }),
   component: Entertainment,

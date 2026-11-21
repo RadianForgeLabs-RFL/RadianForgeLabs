@@ -31,34 +31,89 @@ import { supabase } from "@/integrations/supabase/client";
 
 
 export const Route = createFileRoute("/products/$slug")({
-
   loader: async ({ context, params }) => {
-
     const data = await context.queryClient.ensureQueryData(productBySlugQuery(params.slug));
-
     if (!data) throw notFound();
-
-    return { name: data.name as string, tagline: data.tagline as string | null, banner: data.banner_url as string | null };
-
+    return {
+      name: data.name as string,
+      slug: params.slug,
+      tagline: data.tagline as string | null,
+      description: data.description as string | null,
+      banner: data.banner_url as string | null,
+      icon: data.icon_url as string | null,
+      kind: data.kind as string,
+      platforms: data.platforms as string[] | null,
+      version: data.latest_version as string | null,
+      publisher: data.publisher as string | null,
+      license: data.license as string | null,
+      updated_at: data.updated_at as string | null,
+    };
   },
 
-  head: ({ loaderData }) => ({
+  head: ({ loaderData }) => {
+    if (!loaderData) {
+      return {
+        meta: [
+          { title: "Product Not Found — RFL Studios" },
+          { name: "robots", content: "noindex, nofollow" },
+        ],
+      };
+    }
 
-    meta: loaderData ? [
+    const divisionName = loaderData.kind === "game" ? "RFL Entertainment" : "RFL Studios";
+    const title = `${loaderData.name} — Download for ${(loaderData.platforms || ["Windows", "Android"]).join(", ")} | ${divisionName}`;
+    const desc = loaderData.tagline || (loaderData.description ? loaderData.description.slice(0, 155) : "") || `Download official ${loaderData.name} by ${divisionName}. High performance and secure.`;
+    const canonicalUrl = `https://rfl-studios.com/products/${loaderData.slug}`;
+    const ogImage = loaderData.banner || "https://rfl-studios.com/og-image.png";
+    const schemaType = loaderData.kind === "game" ? "VideoGame" : "SoftwareApplication";
 
-      { title: `${loaderData.name} — RFL Studios` },
+    const jsonLd = {
+      "@context": "https://schema.org",
+      "@type": schemaType,
+      "name": loaderData.name,
+      "description": desc,
+      "applicationCategory": loaderData.kind === "game" ? "GameApplication" : "DeveloperApplication",
+      "operatingSystem": (loaderData.platforms || ["Windows", "Linux", "Android"]).join(", "),
+      "softwareVersion": loaderData.version || "1.0.0",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD",
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "Radian Forge Labs",
+        "url": "https://rfl-studios.com",
+      },
+      "image": ogImage,
+      "url": canonicalUrl,
+    };
 
-      { name: "description", content: loaderData.tagline ?? `${loaderData.name} on RFL Studios.` },
-
-      { property: "og:title", content: `${loaderData.name} — RFL Studios` },
-
-      { property: "og:description", content: loaderData.tagline ?? "" },
-
-      ...(loaderData.banner ? [{ property: "og:image", content: loaderData.banner }] : []),
-
-    ] : [{ title: "Not found" }, { name: "robots", content: "noindex" }],
-
-  }),
+    return {
+      meta: [
+        { title },
+        { name: "description", content: desc },
+        { property: "og:title", content: title },
+        { property: "og:description", content: desc },
+        { property: "og:url", content: canonicalUrl },
+        { property: "og:type", content: "website" },
+        { property: "og:image", content: ogImage },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: desc },
+        { name: "twitter:image", content: ogImage },
+      ],
+      links: [
+        { rel: "canonical", href: canonicalUrl },
+      ],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify(jsonLd),
+        },
+      ],
+    };
+  },
 
   component: ProductPage,
 

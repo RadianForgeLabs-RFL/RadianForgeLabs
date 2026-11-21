@@ -41,7 +41,7 @@ export function ScreenshotGallery({ screenshots }: { screenshots: { id?: string;
         <DialogContent className="max-w-6xl border-white/5 bg-background/95 p-2 sm:p-3">
           <DialogTitle className="sr-only">Screenshot Gallery</DialogTitle>
           <div className="relative">
-            <img src={screenshots[idx]?.url} alt="" className="max-h-[80vh] w-full rounded-md object-contain" />
+            <img src={screenshots[idx]?.url} alt={screenshots[idx]?.caption ?? `Screenshot ${idx + 1}`} className="max-h-[80vh] w-full rounded-md object-contain" />
             {screenshots.length > 1 && (
               <>
                 <button onClick={prev} className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/60 p-2 text-white hover:bg-black/80"><ChevronLeft className="h-5 w-5" /></button>

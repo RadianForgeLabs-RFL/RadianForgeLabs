@@ -27,7 +27,6 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CommunityIndexRouteImport } from './routes/community.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
-import { Route as SitemapXmlRouteImport } from './routes/sitemap.xml'
 import { Route as ProductsSlugRouteImport } from './routes/products.$slug'
 import { Route as CommunityNumberRouteImport } from './routes/community.$number'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
@@ -126,11 +125,6 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
-const SitemapXmlRoute = SitemapXmlRouteImport.update({
-  id: '/sitemap/xml',
-  path: '/sitemap/xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ProductsSlugRoute = ProductsSlugRouteImport.update({
   id: '/products/$slug',
   path: '/products/$slug',
@@ -196,7 +190,6 @@ export interface FileRoutesByFullPath {
   '/auth/callback': typeof AuthCallbackRoute
   '/community/$number': typeof CommunityNumberRoute
   '/products/$slug': typeof ProductsSlugRoute
-  '/sitemap/xml': typeof SitemapXmlRoute
   '/admin/': typeof AdminIndexRoute
   '/community/': typeof CommunityIndexRoute
 }
@@ -223,7 +216,6 @@ export interface FileRoutesByTo {
   '/auth/callback': typeof AuthCallbackRoute
   '/community/$number': typeof CommunityNumberRoute
   '/products/$slug': typeof ProductsSlugRoute
-  '/sitemap/xml': typeof SitemapXmlRoute
   '/admin': typeof AdminIndexRoute
   '/community': typeof CommunityIndexRoute
 }
@@ -253,7 +245,6 @@ export interface FileRoutesById {
   '/auth/callback': typeof AuthCallbackRoute
   '/community/$number': typeof CommunityNumberRoute
   '/products/$slug': typeof ProductsSlugRoute
-  '/sitemap/xml': typeof SitemapXmlRoute
   '/admin/': typeof AdminIndexRoute
   '/community/': typeof CommunityIndexRoute
 }
@@ -283,7 +274,6 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/community/$number'
     | '/products/$slug'
-    | '/sitemap/xml'
     | '/admin/'
     | '/community/'
   fileRoutesByTo: FileRoutesByTo
@@ -310,7 +300,6 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/community/$number'
     | '/products/$slug'
-    | '/sitemap/xml'
     | '/admin'
     | '/community'
   id:
@@ -339,7 +328,6 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/community/$number'
     | '/products/$slug'
-    | '/sitemap/xml'
     | '/admin/'
     | '/community/'
   fileRoutesById: FileRoutesById
@@ -363,7 +351,6 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   CommunityNumberRoute: typeof CommunityNumberRoute
   ProductsSlugRoute: typeof ProductsSlugRoute
-  SitemapXmlRoute: typeof SitemapXmlRoute
   CommunityIndexRoute: typeof CommunityIndexRoute
 }
 
@@ -495,13 +482,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/sitemap/xml': {
-      id: '/sitemap/xml'
-      path: '/sitemap/xml'
-      fullPath: '/sitemap/xml'
-      preLoaderRoute: typeof SitemapXmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/products/$slug': {
       id: '/products/$slug'
       path: '/products/$slug'
@@ -620,7 +600,6 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   CommunityNumberRoute: CommunityNumberRoute,
   ProductsSlugRoute: ProductsSlugRoute,
-  SitemapXmlRoute: SitemapXmlRoute,
   CommunityIndexRoute: CommunityIndexRoute,
 }
 export const routeTree = rootRouteImport

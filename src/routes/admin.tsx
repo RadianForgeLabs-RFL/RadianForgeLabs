@@ -4,7 +4,7 @@ import { useAuth, useIsAdmin } from "@/lib/useAuth";
 import { LayoutDashboard, Package, Newspaper, Settings, MessageSquare, Menu, X } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "Admin — RadianForgeLabs" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Admin — RadianForgeLabs" }, { name: "robots", content: "noindex, nofollow" }] }),
   component: AdminLayout,
 });
 

@@ -23,10 +23,18 @@ const GitHubLogo = () => (
 export const Route = createFileRoute("/community/")({
   head: () => ({
     meta: [
-      { title: "Community - Radian Forge Labs" },
-      { name: "description", content: "Join the Radian Forge Labs community discussions." },
-      { property: "og:title", content: "Community - Radian Forge Labs" },
-      { property: "og:description", content: "Join the Radian Forge Labs community discussions." },
+      { title: "Community Discussions, Feedback & Roadmap — Radian Forge Labs" },
+      { name: "description", content: "Join the official Radian Forge Labs community. Discuss feature requests, report bugs, share feedback, and connect with developers of RFL Studios and RFL Entertainment." },
+      { property: "og:title", content: "Community Discussions, Feedback & Roadmap — Radian Forge Labs" },
+      { property: "og:description", content: "Join the official Radian Forge Labs community. Discuss feature requests, report bugs, share feedback, and connect with developers." },
+      { property: "og:url", content: "https://rfl-studios.com/community" },
+      { property: "og:image", content: "https://rfl-studios.com/og-image.png" },
+      { name: "twitter:title", content: "Community Discussions — Radian Forge Labs" },
+      { name: "twitter:description", content: "Join the official Radian Forge Labs community discussions, feedback, and roadmap." },
+      { name: "twitter:image", content: "https://rfl-studios.com/og-image.png" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://rfl-studios.com/community" },
     ],
   }),
   component: CommunityPage,

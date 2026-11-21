@@ -73,8 +73,8 @@ export default defineConfig({
             });
             proxy.on('error', (err, req, res) => {
               console.error('Proxy error:', err);
-              if (!res.headersSent) {
-                res.writeHead(500, { 'Content-Type': 'application/json' });
+              if (res && 'headersSent' in res && !res.headersSent) {
+                (res as any).writeHead(500, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ error: 'Proxy error', message: err.message }));
               }
             });

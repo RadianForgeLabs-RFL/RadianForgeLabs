@@ -63,7 +63,7 @@ function AdminProducts() {
           <Card key={p.id} className="glass border-white/5 bg-transparent p-4">
             <div className="grid grid-cols-[auto_1fr] sm:grid-cols-[auto_minmax(0,1fr)_auto] items-start sm:items-center gap-3">
               <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-white/5">
-                {p.icon_url ? <img src={p.icon_url} alt="" className="h-full w-full object-cover" /> : null}
+                {p.icon_url ? <img src={p.icon_url} alt={p.name} className="h-full w-full object-cover" /> : null}
               </div>
               <div className="min-w-0">
                 <div className="truncate font-semibold">{p.name} <span className="text-xs uppercase text-muted-foreground">· {p.kind}</span></div>
@@ -478,7 +478,7 @@ function ProductDialog({ product, trigger }: { product?: any; trigger: React.Rea
               />
               {banner_url && (
                 <div className="relative mt-2 h-32 overflow-hidden rounded-lg border border-white/10 bg-black">
-                  <img src={banner_url} alt="" className="h-full w-full object-cover" style={{ opacity: banner_opacity }} />
+                  <img src={banner_url} alt="Banner preview" className="h-full w-full object-cover" style={{ opacity: banner_opacity }} />
                 </div>
               )}
             </div>

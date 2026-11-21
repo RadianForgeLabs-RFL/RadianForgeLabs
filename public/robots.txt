@@ -1,4 +1,10 @@
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /auth
+Disallow: /reset-password
+Disallow: /account
 
+Host: https://rfl-studios.com
 Sitemap: https://rfl-studios.com/sitemap.xml

@@ -6,7 +6,17 @@ export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
       { title: "Terms of Service — Radian Forge Labs" },
-      { name: "description", content: "Terms of service for Radian Forge Labs, RFL Studios, and RFL Entertainment." },
+      { name: "description", content: "Terms of service governing use of software, games, and web services provided by Radian Forge Labs, RFL Studios, and RFL Entertainment." },
+      { property: "og:title", content: "Terms of Service — Radian Forge Labs" },
+      { property: "og:description", content: "Terms of service governing use of software, games, and web services provided by Radian Forge Labs." },
+      { property: "og:url", content: "https://rfl-studios.com/terms" },
+      { property: "og:image", content: "https://rfl-studios.com/og-image.png" },
+      { name: "twitter:title", content: "Terms of Service — Radian Forge Labs" },
+      { name: "twitter:description", content: "Terms of service governing use of software, games, and web services provided by Radian Forge Labs." },
+      { name: "twitter:image", content: "https://rfl-studios.com/og-image.png" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://rfl-studios.com/terms" },
     ],
   }),
   component: Terms,

@@ -48,10 +48,19 @@ interface DiscussionDetail {
 export const Route = createFileRoute("/community/$number")({
   head: ({ params }) => ({
     meta: [
-      { title: `Discussion #${params.number} - Radian Forge Labs Community` },
-      { name: "description", content: "Read and join this Radian Forge Labs community discussion." },
-      { property: "og:title", content: `Discussion #${params.number} - RFL Community` },
-      { property: "og:description", content: "Read and join this Radian Forge Labs community discussion." },
+      { title: `Discussion #${params.number} — Radian Forge Labs Community` },
+      { name: "description", content: `Read and participate in discussion #${params.number} on the Radian Forge Labs community forum.` },
+      { property: "og:title", content: `Discussion #${params.number} — RFL Community` },
+      { property: "og:description", content: `Read and participate in discussion #${params.number} on the Radian Forge Labs community forum.` },
+      { property: "og:type", content: "article" },
+      { property: "og:url", content: `https://rfl-studios.com/community/${params.number}` },
+      { property: "og:image", content: "https://rfl-studios.com/og-image.png" },
+      { name: "twitter:title", content: `Discussion #${params.number} — RFL Community` },
+      { name: "twitter:description", content: `Read and participate in discussion #${params.number} on the Radian Forge Labs community forum.` },
+      { name: "twitter:image", content: "https://rfl-studios.com/og-image.png" },
+    ],
+    links: [
+      { rel: "canonical", href: `https://rfl-studios.com/community/${params.number}` },
     ],
   }),
   component: DiscussionPage,
